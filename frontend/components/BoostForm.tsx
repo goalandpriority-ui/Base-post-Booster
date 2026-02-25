@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ethers } from "ethers"
-import { useContractWrite, usePrepareContractWrite } from "wagmi"
-import { useNetwork as useWagmiNetwork, useSwitchNetwork as useWagmiSwitchNetwork } from "wagmi"
+import { useContractWrite, usePrepareContractWrite, useNetwork, useSwitchNetwork } from "wagmi"
 import BasePostBoosterABI from "../abi/BasePostBoosterABI.json"
 
 const tiers = [
@@ -43,9 +42,15 @@ export default function BoostForm() {
   const [tierIndex, setTierIndex] = useState(0)
   const [durationIndex, setDurationIndex] = useState(0)
 
-  // Wagmi v2 network hooks
-  const { chain } = useWagmiNetwork()
-  const { switchNetwork } = useWagmiSwitchNetwork()
+  const { chain } = useNetwork()
+  const { switchNetwork } = useSwitchNetwork()
+
+  useEffect(() => {
+    if (chain?.id !== BASE_CHAIN_ID && switchNetwork) {
+      alert("Switching wallet to Base Network for low fees")
+      switchNetwork(BASE_CHAIN_ID)
+    }
+  }, [chain, switchNetwork])
 
   const selectedTier = tiers[tierIndex]
   const selectedDuration = selectedTier.durations[durationIndex]
@@ -65,28 +70,19 @@ export default function BoostForm() {
 
   const handleBoost = async () => {
     if (!postUrl) return alert("Enter post URL")
-
-    if (chain?.id !== BASE_CHAIN_ID) {
-      if (switchNetwork) {
-        switchNetwork(BASE_CHAIN_ID)
-        return alert("Switching wallet to Base Network, try again")
-      } else {
-        return alert("Please connect wallet to Base Network")
-      }
-    }
-
+    if (chain?.id !== BASE_CHAIN_ID) return alert("Switch wallet to Base Network")
     try {
       await write?.()
-      const accounts = await (window as any).ethereum.request({ method: "eth_accounts" })
+      // Optional: Save to DB via API
       await fetch("/api/boost", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          wallet: accounts[0],
+          wallet: (await window.ethereum.request({ method: "eth_accounts" }))[0],
           postUrl,
           txHash: "pending",
-          amount: selectedDuration.price,
-        }),
+          amount: selectedDuration.price
+        })
       })
       alert("Boost sent 🚀")
       setPostUrl("")
@@ -111,25 +107,20 @@ export default function BoostForm() {
         {tiers.map((t, i) => (
           <div
             key={i}
-            onClick={() => {
-              setTierIndex(i)
-              setDurationIndex(0)
-            }}
+            onClick={() => { setTierIndex(i); setDurationIndex(0) }}
             style={{
               flex: 1,
               padding: "10px",
               border: tierIndex === i ? "2px solid #4f46e5" : "1px solid #ccc",
               borderRadius: "8px",
-              cursor: "pointer",
+              cursor: "pointer"
             }}
           >
             <h4>{t.name}</h4>
             <p style={{ fontSize: "12px" }}>{t.description}</p>
             <ul style={{ fontSize: "12px" }}>
               {t.durations.map((d, idx) => (
-                <li key={idx}>
-                  {d.label} – {d.price} ETH
-                </li>
+                <li key={idx}>{d.label} – {d.price} ETH</li>
               ))}
             </ul>
           </div>
@@ -142,9 +133,7 @@ export default function BoostForm() {
         style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
       >
         {selectedTier.durations.map((d, idx) => (
-          <option key={idx} value={idx}>
-            {d.label} – {d.price} ETH
-          </option>
+          <option key={idx} value={idx}>{d.label} – {d.price} ETH</option>
         ))}
       </select>
 
@@ -157,7 +146,7 @@ export default function BoostForm() {
           color: "#fff",
           borderRadius: "6px",
           fontWeight: "bold",
-          cursor: "pointer",
+          cursor: "pointer"
         }}
       >
         Boost Now 🚀
