@@ -57,7 +57,7 @@ export default function BoostForm() {
   const selectedDuration = selectedTier.durations[durationIndex];
 
   const { config } = usePrepareContractWrite({
-    address: "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2", // <-- Replace with deployed contract address
+    address: "0xYourContractAddressHere", // <-- Replace with deployed contract address
     abi: BasePostBoosterABI,
     functionName: "boostPost",
     args: [postUrl, category, durationIndex],
@@ -152,4 +152,4 @@ export default function BoostForm() {
       </button>
     </div>
   );
-}
+            }
