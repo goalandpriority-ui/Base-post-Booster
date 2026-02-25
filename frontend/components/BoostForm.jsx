@@ -3,17 +3,38 @@ import { ethers } from "ethers";
 import { useContractWrite, usePrepareContractWrite, useNetwork, useSwitchNetwork } from "wagmi";
 import BasePostBoosterABI from "../abi/BasePostBoosterABI.json";
 
-// Tier names
-const categoryNames = ["Basic", "Whale", "Pro"];
-
-// Duration + price per tier
+// Tier names & details
 const tierDetails = [
-  { name: "Basic", description: "Small boost", durations: [{ label: "1h", price: 0.001 }, { label: "6h", price: 0.002 }] },
-  { name: "Whale", description: "Medium boost", durations: [{ label: "1h", price: 0.002 }, { label: "6h", price: 0.004 }] },
-  { name: "Pro", description: "High boost", durations: [{ label: "1h", price: 0.003 }, { label: "6h", price: 0.006 }] },
+  {
+    name: "Basic",
+    description: "Small boost",
+    durations: [
+      { label: "1h", price: 0.001 },
+      { label: "6h", price: 0.002 },
+      { label: "24h", price: 0.003 },
+    ],
+  },
+  {
+    name: "Whale",
+    description: "Medium boost",
+    durations: [
+      { label: "1h", price: 0.002 },
+      { label: "6h", price: 0.004 },
+      { label: "24h", price: 0.006 },
+    ],
+  },
+  {
+    name: "Pro",
+    description: "High boost",
+    durations: [
+      { label: "1h", price: 0.003 },
+      { label: "6h", price: 0.006 },
+      { label: "24h", price: 0.009 },
+    ],
+  },
 ];
 
-const BASE_CHAIN_ID = 8453;
+const BASE_CHAIN_ID = 8453; // Base network
 
 export default function BoostForm() {
   const [postUrl, setPostUrl] = useState("");
@@ -23,7 +44,7 @@ export default function BoostForm() {
   const { chain } = useNetwork();
   const { switchNetwork } = useSwitchNetwork();
 
-  // Auto switch to Base network
+  // Auto switch wallet to Base network
   useEffect(() => {
     if (chain?.id !== BASE_CHAIN_ID && switchNetwork) {
       alert("Switching wallet to Base Network for low fees");
@@ -31,12 +52,12 @@ export default function BoostForm() {
     }
   }, [chain, switchNetwork]);
 
-  // Current tier & duration price
+  // Selected tier & duration
   const selectedTier = tierDetails[category];
   const selectedDuration = selectedTier.durations[durationIndex];
 
   const { config } = usePrepareContractWrite({
-    address: "0xYourContractAddressHere", // <-- replace with deployed contract
+    address: "0xYourContractAddressHere", // <-- Replace with deployed contract address
     abi: BasePostBoosterABI,
     functionName: "boostPost",
     args: [postUrl, category, durationIndex],
@@ -56,10 +77,10 @@ export default function BoostForm() {
         placeholder="Post URL"
         value={postUrl}
         onChange={(e) => setPostUrl(e.target.value)}
-        style={{ width: "100%", padding: "8px", marginBottom: "10px" }}
+        style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
       />
 
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px" }}>
         {tierDetails.map((tier, i) => (
           <div
             key={i}
@@ -89,7 +110,7 @@ export default function BoostForm() {
         ))}
       </div>
 
-      <div style={{ marginBottom: "10px" }}>
+      <div style={{ marginBottom: "15px" }}>
         <label>Duration:</label>
         <select
           value={durationIndex}
@@ -116,7 +137,16 @@ export default function BoostForm() {
           }
           write?.();
         }}
-        style={{ width: "100%", padding: "10px", background: "#4f46e5", color: "#fff", border: "none", cursor: "pointer" }}
+        style={{
+          width: "100%",
+          padding: "12px",
+          background: "#4f46e5",
+          color: "#fff",
+          border: "none",
+          borderRadius: "6px",
+          cursor: "pointer",
+          fontWeight: "bold",
+        }}
       >
         Boost Now 🚀
       </button>
