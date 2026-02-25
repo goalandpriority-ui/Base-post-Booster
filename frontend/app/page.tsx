@@ -1,38 +1,46 @@
-'use client'
-import { useState } from 'react';
-import { ethers } from 'ethers';
-import WalletProvider from '../components/WalletProvider';
+"use client"
 
-export default function Page() {
-  const [loading, setLoading] = useState(false);
+import { useState } from "react"
+import { useSendTransaction, useWaitForTransaction } from "wagmi"
+import { parseEther } from "viem"
+import { useWallet } from "../components/WalletProvider"
 
-  const sendTransaction = async () => {
+export default function HomePage() {
+  const [loading, setLoading] = useState(false)
+  const { account } = useWallet()
+
+  const { sendTransaction } = useSendTransaction({
+    request: {
+      to: "0xRecipientAddressHere", // change to your recipient
+      value: parseEther("0.01"),
+    },
+  })
+
+  const { isLoading: txLoading } = useWaitForTransaction({
+    hash: sendTransaction?.hash,
+  })
+
+  const handleSend = async () => {
     try {
-      setLoading(true);
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-
-      const tx = await signer.sendTransaction({
-        to: '0xRecipientAddressHere', // replace with actual recipient
-        value: ethers.parseEther('0.01')
-      });
-
-      await tx.wait(); // eth transaction confirmation
-      alert('Transaction sent 🚀');
+      setLoading(true)
+      const tx = await sendTransaction?.()
+      await tx?.wait?.()
+      alert("Transaction sent 🚀")
     } catch (e) {
-      console.error(e);
-      alert('Transaction failed');
+      console.error(e)
+      alert("Transaction failed ❌")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <WalletProvider>
-      <button onClick={sendTransaction} disabled={loading}>
-        {loading ? 'Sending...' : 'Send 0.01 ETH'}
+    <div className="p-4">
+      <h1>Base Post Booster</h1>
+      <button onClick={handleSend} disabled={loading || txLoading}>
+        {loading || txLoading ? "Sending..." : "Send Transaction"}
       </button>
-    </WalletProvider>
-  );
-    }
+      <p>Connected account: {account ?? "Not connected"}</p>
+    </div>
+  )
+}
