@@ -2,14 +2,42 @@
 
 import { useState, useEffect } from "react"
 import { ethers } from "ethers"
-import { useContractWrite } from "wagmi"
-import { useNetwork as useWagmiNetwork, useSwitchNetwork as useWagmiSwitchNetwork } from "wagmi"
+import {
+  useContractWrite,
+  useAccount,
+  useNetwork as useWagmiNetwork,
+  useSwitchNetwork as useWagmiSwitchNetwork
+} from "wagmi"
 import BasePostBoosterABI from "../abi/BasePostBoosterABI.json"
 
 const tiers = [
-  { name: "Basic", description: "Small boost", durations: [{ label: "1h", price: 0.001 }, { label: "6h", price: 0.002 }, { label: "24h", price: 0.003 }] },
-  { name: "Whale", description: "Medium boost", durations: [{ label: "1h", price: 0.002 }, { label: "6h", price: 0.004 }, { label: "24h", price: 0.006 }] },
-  { name: "Pro", description: "High boost", durations: [{ label: "1h", price: 0.003 }, { label: "6h", price: 0.006 }, { label: "24h", price: 0.009 }] },
+  {
+    name: "Basic",
+    description: "Small boost",
+    durations: [
+      { label: "1h", price: 0.001 },
+      { label: "6h", price: 0.002 },
+      { label: "24h", price: 0.003 }
+    ]
+  },
+  {
+    name: "Whale",
+    description: "Medium boost",
+    durations: [
+      { label: "1h", price: 0.002 },
+      { label: "6h", price: 0.004 },
+      { label: "24h", price: 0.006 }
+    ]
+  },
+  {
+    name: "Pro",
+    description: "High boost",
+    durations: [
+      { label: "1h", price: 0.003 },
+      { label: "6h", price: 0.006 },
+      { label: "24h", price: 0.009 }
+    ]
+  }
 ]
 
 const BASE_CHAIN_ID = 8453
@@ -21,6 +49,7 @@ export default function BoostForm() {
 
   const { chain } = useWagmiNetwork()
   const { switchNetwork } = useWagmiSwitchNetwork()
+  const { address } = useAccount()
 
   useEffect(() => {
     if (chain?.id !== BASE_CHAIN_ID && switchNetwork) {
@@ -32,7 +61,7 @@ export default function BoostForm() {
   const selectedTier = tiers[tierIndex]
   const selectedDuration = selectedTier.durations[durationIndex]
 
-  const { write } = useContractWrite({
+  const { writeAsync } = useContractWrite({
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
     abi: BasePostBoosterABI,
     functionName: "boostPost",
@@ -45,14 +74,16 @@ export default function BoostForm() {
     if (!postUrl) return alert("Enter post URL")
     if (chain?.id !== BASE_CHAIN_ID) return alert("Switch wallet to Base Network")
     try {
-      await write?.()
+      const tx = await writeAsync?.()
+      await tx.wait() // wait for transaction confirmation
+
       await fetch("/api/boost", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          wallet: (await window.ethereum.request({ method: "eth_accounts" }))[0],
+          wallet: address,
           postUrl,
-          txHash: "pending",
+          txHash: tx.hash,
           amount: selectedDuration.price
         })
       })
@@ -125,4 +156,4 @@ export default function BoostForm() {
       </button>
     </div>
   )
-            }
+}
