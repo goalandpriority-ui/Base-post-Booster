@@ -8,10 +8,10 @@ datasource db {
 }
 
 model Boost {
-  id        String   @id @default(uuid())
-  postUrl   String
-  user      String
-  amount    Float
-  txHash    String   @unique
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  wallet      String
+  postUrl     String
+  txHash      String
+  amount      Float
+  createdAt   DateTime @default(now())
 }
