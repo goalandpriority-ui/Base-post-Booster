@@ -1,20 +1,19 @@
-import { prisma } from "@/lib/db"
 import { NextResponse } from "next/server"
+import { PrismaClient } from "@prisma/client"
+
+const prisma = new PrismaClient()
 
 export async function POST(req: Request) {
   const body = await req.json()
 
   const boost = await prisma.boost.create({
-    data: body
+    data: {
+      wallet: body.wallet,
+      postUrl: body.postUrl,
+      txHash: body.txHash,
+      amount: body.amount
+    }
   })
 
   return NextResponse.json(boost)
-}
-
-export async function GET() {
-  const boosts = await prisma.boost.findMany({
-    orderBy: { amount: "desc" }
-  })
-
-  return NextResponse.json(boosts)
 }
