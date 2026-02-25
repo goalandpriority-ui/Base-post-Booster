@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
-import { ethers } from "ethers";
-import { useContractWrite, usePrepareContractWrite, useNetwork, useSwitchNetwork } from "wagmi";
-import BasePostBoosterABI from "../abi/BasePostBoosterABI.json";
+"use client"
 
-// Tier names & details
-const tierDetails = [
+import { useState, useEffect } from "react"
+import { ethers } from "ethers"
+import { useContractWrite, usePrepareContractWrite, useNetwork, useSwitchNetwork } from "wagmi"
+import BasePostBoosterABI from "../abi/BasePostBoosterABI.json"
+
+const tiers = [
   {
     name: "Basic",
     description: "Small boost",
@@ -32,42 +33,64 @@ const tierDetails = [
       { label: "24h", price: 0.009 },
     ],
   },
-];
+]
 
-const BASE_CHAIN_ID = 8453; // Base network
+const BASE_CHAIN_ID = 8453
 
 export default function BoostForm() {
-  const [postUrl, setPostUrl] = useState("");
-  const [category, setCategory] = useState(0);
-  const [durationIndex, setDurationIndex] = useState(0);
+  const [postUrl, setPostUrl] = useState("")
+  const [tierIndex, setTierIndex] = useState(0)
+  const [durationIndex, setDurationIndex] = useState(0)
 
-  const { chain } = useNetwork();
-  const { switchNetwork } = useSwitchNetwork();
+  const { chain } = useNetwork()
+  const { switchNetwork } = useSwitchNetwork()
 
-  // Auto switch wallet to Base network
   useEffect(() => {
     if (chain?.id !== BASE_CHAIN_ID && switchNetwork) {
-      alert("Switching wallet to Base Network for low fees");
-      switchNetwork(BASE_CHAIN_ID);
+      alert("Switching wallet to Base Network for low fees")
+      switchNetwork(BASE_CHAIN_ID)
     }
-  }, [chain, switchNetwork]);
+  }, [chain, switchNetwork])
 
-  // Selected tier & duration
-  const selectedTier = tierDetails[category];
-  const selectedDuration = selectedTier.durations[durationIndex];
+  const selectedTier = tiers[tierIndex]
+  const selectedDuration = selectedTier.durations[durationIndex]
 
   const { config } = usePrepareContractWrite({
-    address: "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2", // <-- Replace with deployed contract address
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
     abi: BasePostBoosterABI,
     functionName: "boostPost",
-    args: [postUrl, category, durationIndex],
+    args: [postUrl, tierIndex, durationIndex],
     overrides: {
       value: ethers.utils.parseEther(selectedDuration.price.toString()),
     },
     enabled: chain?.id === BASE_CHAIN_ID,
-  });
+  })
 
-  const { write } = useContractWrite(config);
+  const { write } = useContractWrite(config)
+
+  const handleBoost = async () => {
+    if (!postUrl) return alert("Enter post URL")
+    if (chain?.id !== BASE_CHAIN_ID) return alert("Switch wallet to Base Network")
+    try {
+      await write?.()
+      // Optional: Save to DB via API
+      await fetch("/api/boost", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wallet: (await window.ethereum.request({ method: "eth_accounts" }))[0],
+          postUrl,
+          txHash: "pending", // or capture actual tx hash from event
+          amount: selectedDuration.price
+        })
+      })
+      alert("Boost sent 🚀")
+      setPostUrl("")
+    } catch (e) {
+      console.error(e)
+      alert("Transaction failed")
+    }
+  }
 
   return (
     <div style={{ padding: "20px", maxWidth: "500px" }}>
@@ -80,76 +103,54 @@ export default function BoostForm() {
         style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
       />
 
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px" }}>
-        {tierDetails.map((tier, i) => (
+      <div style={{ display: "flex", gap: "5px", marginBottom: "15px" }}>
+        {tiers.map((t, i) => (
           <div
             key={i}
+            onClick={() => { setTierIndex(i); setDurationIndex(0) }}
             style={{
               flex: 1,
               padding: "10px",
-              border: category === i ? "2px solid #4f46e5" : "1px solid #ccc",
+              border: tierIndex === i ? "2px solid #4f46e5" : "1px solid #ccc",
               borderRadius: "8px",
-              marginRight: i < tierDetails.length - 1 ? "5px" : 0,
-              cursor: "pointer",
-            }}
-            onClick={() => {
-              setCategory(i);
-              setDurationIndex(0); // reset duration on tier change
+              cursor: "pointer"
             }}
           >
-            <h4 style={{ margin: 0 }}>{tier.name}</h4>
-            <p style={{ fontSize: "12px", marginTop: "5px" }}>{tier.description}</p>
-            <ul style={{ paddingLeft: "15px", fontSize: "12px", marginTop: "5px" }}>
-              {tier.durations.map((d, idx) => (
-                <li key={idx}>
-                  {d.label} – {d.price} ETH
-                </li>
+            <h4>{t.name}</h4>
+            <p style={{ fontSize: "12px" }}>{t.description}</p>
+            <ul style={{ fontSize: "12px" }}>
+              {t.durations.map((d, idx) => (
+                <li key={idx}>{d.label} – {d.price} ETH</li>
               ))}
             </ul>
           </div>
         ))}
       </div>
 
-      <div style={{ marginBottom: "15px" }}>
-        <label>Duration:</label>
-        <select
-          value={durationIndex}
-          onChange={(e) => setDurationIndex(Number(e.target.value))}
-          style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-        >
-          {selectedTier.durations.map((d, idx) => (
-            <option key={idx} value={idx}>
-              {d.label} – {d.price} ETH
-            </option>
-          ))}
-        </select>
-      </div>
+      <select
+        value={durationIndex}
+        onChange={(e) => setDurationIndex(Number(e.target.value))}
+        style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
+      >
+        {selectedTier.durations.map((d, idx) => (
+          <option key={idx} value={idx}>{d.label} – {d.price} ETH</option>
+        ))}
+      </select>
 
       <button
-        onClick={() => {
-          if (!postUrl) {
-            alert("Please enter Post URL");
-            return;
-          }
-          if (chain?.id !== BASE_CHAIN_ID) {
-            alert("Please switch wallet to Base Network");
-            return;
-          }
-          write?.();
-        }}
+        onClick={handleBoost}
         style={{
           width: "100%",
           padding: "12px",
           background: "#4f46e5",
           color: "#fff",
-          border: "none",
           borderRadius: "6px",
-          cursor: "pointer",
           fontWeight: "bold",
+          cursor: "pointer"
         }}
       >
         Boost Now 🚀
       </button>
     </div>
-  );
-            }
+  )
+}
