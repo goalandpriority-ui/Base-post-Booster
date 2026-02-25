@@ -3,15 +3,15 @@ import { ethers } from "ethers";
 import { useContractWrite, usePrepareContractWrite, useNetwork, useSwitchNetwork } from "wagmi";
 import BasePostBoosterABI from "../abi/BasePostBoosterABI.json";
 
-const categoryNames = ["Trending", "Meme", "Alpha", "NFT", "General"];
+// Updated category names
+const categoryNames = ["Basic", "Whale", "Pro"];
 const durationOptions = [
   { label: "1 Hour", price: "0.001" },
   { label: "6 Hours", price: "0.002" },
   { label: "24 Hours", price: "0.003" },
 ];
 
-// Base network chain ID
-const BASE_CHAIN_ID = 8453; 
+const BASE_CHAIN_ID = 8453; // Base network
 
 export default function BoostForm() {
   const [postUrl, setPostUrl] = useState("");
@@ -21,7 +21,7 @@ export default function BoostForm() {
   const { chain } = useNetwork();
   const { switchNetwork } = useSwitchNetwork();
 
-  // Auto switch to Base chain if not
+  // Auto switch to Base chain
   useEffect(() => {
     if (chain?.id !== BASE_CHAIN_ID && switchNetwork) {
       alert("Switching wallet to Base Network for low fees");
@@ -37,7 +37,7 @@ export default function BoostForm() {
     overrides: {
       value: ethers.utils.parseEther(durationOptions[durationIndex].price),
     },
-    enabled: chain?.id === BASE_CHAIN_ID, // Only prepare if on Base
+    enabled: chain?.id === BASE_CHAIN_ID,
   });
 
   const { write } = useContractWrite(config);
