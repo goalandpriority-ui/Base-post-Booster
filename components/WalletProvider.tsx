@@ -12,7 +12,7 @@ export default function Home() {
 
   async function handleBoost() {
     const tx = await sendTransactionAsync({
-      to: "YOUR_WALLET_ADDRESS",
+      to: "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2",
       value: parseEther("0.001")
     })
 
