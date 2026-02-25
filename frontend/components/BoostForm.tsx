@@ -7,33 +7,9 @@ import { useNetwork as useWagmiNetwork, useSwitchNetwork as useWagmiSwitchNetwor
 import BasePostBoosterABI from "../abi/BasePostBoosterABI.json"
 
 const tiers = [
-  {
-    name: "Basic",
-    description: "Small boost",
-    durations: [
-      { label: "1h", price: 0.001 },
-      { label: "6h", price: 0.002 },
-      { label: "24h", price: 0.003 },
-    ],
-  },
-  {
-    name: "Whale",
-    description: "Medium boost",
-    durations: [
-      { label: "1h", price: 0.002 },
-      { label: "6h", price: 0.004 },
-      { label: "24h", price: 0.006 },
-    ],
-  },
-  {
-    name: "Pro",
-    description: "High boost",
-    durations: [
-      { label: "1h", price: 0.003 },
-      { label: "6h", price: 0.006 },
-      { label: "24h", price: 0.009 },
-    ],
-  },
+  { name: "Basic", description: "Small boost", durations: [{ label: "1h", price: 0.001 }, { label: "6h", price: 0.002 }, { label: "24h", price: 0.003 }] },
+  { name: "Whale", description: "Medium boost", durations: [{ label: "1h", price: 0.002 }, { label: "6h", price: 0.004 }, { label: "24h", price: 0.006 }] },
+  { name: "Pro", description: "High boost", durations: [{ label: "1h", price: 0.003 }, { label: "6h", price: 0.006 }, { label: "24h", price: 0.009 }] },
 ]
 
 const BASE_CHAIN_ID = 8453
@@ -61,10 +37,8 @@ export default function BoostForm() {
     abi: BasePostBoosterABI,
     functionName: "boostPost",
     args: [postUrl, tierIndex, durationIndex],
-    overrides: {
-      value: ethers.utils.parseEther(selectedDuration.price.toString()),
-    },
-    mode: "recklesslyUnprepared",
+    overrides: { value: ethers.utils.parseEther(selectedDuration.price.toString()) },
+    enabled: chain?.id === BASE_CHAIN_ID
   })
 
   const handleBoost = async () => {
@@ -151,4 +125,4 @@ export default function BoostForm() {
       </button>
     </div>
   )
-}
+            }
