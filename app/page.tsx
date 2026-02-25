@@ -1,40 +1,37 @@
 "use client"
+import { useState } from 'react'
+import { useSendTransaction } from 'wagmi'
+import { ethers } from 'ethers'
 
-import { useState } from "react"
-import { useAccount, useSendTransaction } from "wagmi"
-
-export default function Home() {
-  const { address, isConnected } = useAccount()
-  const [url, setUrl] = useState("")
+export default function Page() {
   const [loading, setLoading] = useState(false)
-
-  const { sendTransactionAsync, status } = useSendTransaction({
-    // Example: replace with your actual tx args
+  const { sendTransactionAsync } = useSendTransaction({
     request: {
-      to: "0x0000000000000000000000000000000000000000",
-      value: 0
+      to: '0xRecipientAddressHere', // change to your recipient
+      value: ethers.parseEther('0.01')
     }
   })
 
   const handleSend = async () => {
     try {
       setLoading(true)
-      const tx = await sendTransactionAsync?.()
-      await tx.wait()
-      alert("Transaction sent 🚀")
+      const txHash = await sendTransactionAsync?.()
+      // If you want confirmation
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      await provider.waitForTransaction(txHash!)
+      alert(`Transaction sent 🚀 Hash: ${txHash}`)
     } catch (e) {
       console.error(e)
-      alert("Transaction failed")
+      alert('Transaction failed 😞')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="URL" />
-      <button onClick={handleSend} disabled={status === "loading" || loading}>
-        Send 🚀
+    <div>
+      <button onClick={handleSend} disabled={loading}>
+        {loading ? 'Sending...' : 'Send Transaction'}
       </button>
     </div>
   )
