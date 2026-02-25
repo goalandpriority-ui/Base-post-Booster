@@ -1,14 +1,24 @@
-'use client'
-import { FC, ReactNode } from 'react';
-import { WagmiConfig } from 'wagmi';
-import { wagmiConfig } from '../wagmiConfig';
+"use client"
 
-interface Props {
-  children: ReactNode;
+import { ReactNode, createContext, useContext } from "react"
+import { WagmiConfig, useAccount } from "wagmi"
+import { wagmiClient, chains } from "../wagmiConfig"
+
+type WalletContextType = {
+  account?: ReturnType<typeof useAccount>["address"]
 }
 
-const WalletProvider: FC<Props> = ({ children }) => {
-  return <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>;
-};
+const WalletContext = createContext<WalletContextType>({})
 
-export default WalletProvider;
+export const WalletProvider = ({ children }: { children: ReactNode }) => {
+  const { address } = useAccount()
+  return (
+    <WagmiConfig client={wagmiClient}>
+      <WalletContext.Provider value={{ account: address }}>
+        {children}
+      </WalletContext.Provider>
+    </WagmiConfig>
+  )
+}
+
+export const useWallet = () => useContext(WalletContext)
