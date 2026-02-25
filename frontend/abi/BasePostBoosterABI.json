@@ -1,0 +1,13 @@
+[
+  {
+    "inputs":[
+      {"internalType":"string","name":"postUrl","type":"string"},
+      {"internalType":"uint8","name":"category","type":"uint8"},
+      {"internalType":"uint8","name":"durationIndex","type":"uint8"}
+    ],
+    "name":"boostPost",
+    "outputs":[],
+    "stateMutability":"payable",
+    "type":"function"
+  }
+]
