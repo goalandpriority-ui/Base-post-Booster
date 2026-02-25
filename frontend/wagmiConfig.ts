@@ -1,15 +1,13 @@
-// wagmiConfig.ts
-import { configureChains, createConfig } from 'wagmi'
-import { base, localhost } from 'wagmi/chains'
-import { publicProvider } from 'wagmi/providers/public'
+import { configureChains, createConfig, WagmiConfig } from 'wagmi';
+import { mainnet, goerli } from 'wagmi/chains';
+import { publicProvider } from 'wagmi/providers/public';
 
-// Base chain only
-const { chains, publicClient } = configureChains(
-  [base],
+export const { chains, publicClient } = configureChains(
+  [mainnet, goerli],
   [publicProvider()]
-)
+);
 
 export const wagmiConfig = createConfig({
   autoConnect: true,
   publicClient
-})
+});
