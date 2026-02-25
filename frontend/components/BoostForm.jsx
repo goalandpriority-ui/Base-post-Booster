@@ -3,15 +3,17 @@ import { ethers } from "ethers";
 import { useContractWrite, usePrepareContractWrite, useNetwork, useSwitchNetwork } from "wagmi";
 import BasePostBoosterABI from "../abi/BasePostBoosterABI.json";
 
-// Category names
+// Tier names
 const categoryNames = ["Basic", "Whale", "Pro"];
-const durationOptions = [
-  { label: "1 Hour", price: "0.001" },
-  { label: "6 Hours", price: "0.002" },
-  { label: "24 Hours", price: "0.003" },
+
+// Duration + price per tier
+const tierDetails = [
+  { name: "Basic", description: "Small boost", durations: [{ label: "1h", price: 0.001 }, { label: "6h", price: 0.002 }] },
+  { name: "Whale", description: "Medium boost", durations: [{ label: "1h", price: 0.002 }, { label: "6h", price: 0.004 }] },
+  { name: "Pro", description: "High boost", durations: [{ label: "1h", price: 0.003 }, { label: "6h", price: 0.006 }] },
 ];
 
-const BASE_CHAIN_ID = 8453; // Base network
+const BASE_CHAIN_ID = 8453;
 
 export default function BoostForm() {
   const [postUrl, setPostUrl] = useState("");
@@ -21,7 +23,7 @@ export default function BoostForm() {
   const { chain } = useNetwork();
   const { switchNetwork } = useSwitchNetwork();
 
-  // Auto switch to Base chain
+  // Auto switch to Base network
   useEffect(() => {
     if (chain?.id !== BASE_CHAIN_ID && switchNetwork) {
       alert("Switching wallet to Base Network for low fees");
@@ -29,13 +31,17 @@ export default function BoostForm() {
     }
   }, [chain, switchNetwork]);
 
+  // Current tier & duration price
+  const selectedTier = tierDetails[category];
+  const selectedDuration = selectedTier.durations[durationIndex];
+
   const { config } = usePrepareContractWrite({
     address: "0xYourContractAddressHere", // <-- replace with deployed contract
     abi: BasePostBoosterABI,
     functionName: "boostPost",
     args: [postUrl, category, durationIndex],
     overrides: {
-      value: ethers.utils.parseEther(durationOptions[durationIndex].price),
+      value: ethers.utils.parseEther(selectedDuration.price.toString()),
     },
     enabled: chain?.id === BASE_CHAIN_ID,
   });
@@ -43,7 +49,7 @@ export default function BoostForm() {
   const { write } = useContractWrite(config);
 
   return (
-    <div style={{ padding: "20px", maxWidth: "400px" }}>
+    <div style={{ padding: "20px", maxWidth: "500px" }}>
       <h2>Base Post Booster 🚀</h2>
 
       <input
@@ -53,28 +59,50 @@ export default function BoostForm() {
         style={{ width: "100%", padding: "8px", marginBottom: "10px" }}
       />
 
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
+        {tierDetails.map((tier, i) => (
+          <div
+            key={i}
+            style={{
+              flex: 1,
+              padding: "10px",
+              border: category === i ? "2px solid #4f46e5" : "1px solid #ccc",
+              borderRadius: "8px",
+              marginRight: i < tierDetails.length - 1 ? "5px" : 0,
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setCategory(i);
+              setDurationIndex(0); // reset duration on tier change
+            }}
+          >
+            <h4 style={{ margin: 0 }}>{tier.name}</h4>
+            <p style={{ fontSize: "12px", marginTop: "5px" }}>{tier.description}</p>
+            <ul style={{ paddingLeft: "15px", fontSize: "12px", marginTop: "5px" }}>
+              {tier.durations.map((d, idx) => (
+                <li key={idx}>
+                  {d.label} – {d.price} ETH
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
       <div style={{ marginBottom: "10px" }}>
-        <label>Choose Tier:</label>
+        <label>Duration:</label>
         <select
-          value={category}
-          onChange={(e) => setCategory(Number(e.target.value))}
+          value={durationIndex}
+          onChange={(e) => setDurationIndex(Number(e.target.value))}
           style={{ width: "100%", padding: "8px", marginTop: "5px" }}
         >
-          {categoryNames.map((c, i) => (
-            <option key={i} value={i}>{c}</option>
+          {selectedTier.durations.map((d, idx) => (
+            <option key={idx} value={idx}>
+              {d.label} – {d.price} ETH
+            </option>
           ))}
         </select>
       </div>
-
-      <select
-        value={durationIndex}
-        onChange={(e) => setDurationIndex(Number(e.target.value))}
-        style={{ width: "100%", padding: "8px", marginBottom: "10px" }}
-      >
-        {durationOptions.map((d, i) => (
-          <option key={i} value={i}>{d.label} – {d.price} ETH</option>
-        ))}
-      </select>
 
       <button
         onClick={() => {
