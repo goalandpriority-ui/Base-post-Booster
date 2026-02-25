@@ -1,15 +1,15 @@
-// wagmiConfig.ts
-import { configureChains, createClient } from "wagmi"
-import { mainnet, goerli } from "wagmi/chains"
-import { publicProvider } from "wagmi/providers/public"
+'use client'
 
-export const { chains, provider, webSocketProvider } = configureChains(
+import { configureChains, createConfig } from 'wagmi'
+import { mainnet, goerli } from 'wagmi/chains'
+import { publicProvider } from 'wagmi/providers/public'
+
+export const { publicClient } = configureChains(
   [mainnet, goerli],
   [publicProvider()]
 )
 
-export const wagmiClient = createClient({
+export const wagmiConfig = createConfig({
   autoConnect: true,
-  provider,
-  webSocketProvider,
+  publicClient,
 })
