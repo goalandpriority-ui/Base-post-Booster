@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Boost {
+  id        String   @id @default(uuid())
+  postUrl   String
+  user      String
+  amount    Float
+  txHash    String   @unique
+  createdAt DateTime @default(now())
+}
