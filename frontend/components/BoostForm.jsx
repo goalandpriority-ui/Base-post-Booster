@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import { useContractWrite, usePrepareContractWrite, useNetwork, useSwitchNetwork } from "wagmi";
 import BasePostBoosterABI from "../abi/BasePostBoosterABI.json";
 
-// Updated category names
+// Category names
 const categoryNames = ["Basic", "Whale", "Pro"];
 const durationOptions = [
   { label: "1 Hour", price: "0.001" },
@@ -53,15 +53,18 @@ export default function BoostForm() {
         style={{ width: "100%", padding: "8px", marginBottom: "10px" }}
       />
 
-      <select
-        value={category}
-        onChange={(e) => setCategory(Number(e.target.value))}
-        style={{ width: "100%", padding: "8px", marginBottom: "10px" }}
-      >
-        {categoryNames.map((c, i) => (
-          <option key={i} value={i}>{c}</option>
-        ))}
-      </select>
+      <div style={{ marginBottom: "10px" }}>
+        <label>Choose Tier:</label>
+        <select
+          value={category}
+          onChange={(e) => setCategory(Number(e.target.value))}
+          style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+        >
+          {categoryNames.map((c, i) => (
+            <option key={i} value={i}>{c}</option>
+          ))}
+        </select>
+      </div>
 
       <select
         value={durationIndex}
@@ -75,6 +78,10 @@ export default function BoostForm() {
 
       <button
         onClick={() => {
+          if (!postUrl) {
+            alert("Please enter Post URL");
+            return;
+          }
           if (chain?.id !== BASE_CHAIN_ID) {
             alert("Please switch wallet to Base Network");
             return;
