@@ -1,43 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useNetwork, useSwitchNetwork, useSendTransaction } from "wagmi"
 import { ethers } from "ethers"
-import {
-  useContractWrite,
-  useAccount,
-  useNetwork as useWagmiNetwork,
-  useSwitchNetwork as useWagmiSwitchNetwork,
-} from "wagmi"
-import BasePostBoosterABI from "../abi/BasePostBoosterABI.json"
 
 const tiers = [
-  {
-    name: "Basic",
-    description: "Small boost",
-    durations: [
-      { label: "1h", price: 0.001 },
-      { label: "6h", price: 0.002 },
-      { label: "24h", price: 0.003 },
-    ],
-  },
-  {
-    name: "Whale",
-    description: "Medium boost",
-    durations: [
-      { label: "1h", price: 0.002 },
-      { label: "6h", price: 0.004 },
-      { label: "24h", price: 0.006 },
-    ],
-  },
-  {
-    name: "Pro",
-    description: "High boost",
-    durations: [
-      { label: "1h", price: 0.003 },
-      { label: "6h", price: 0.006 },
-      { label: "24h", price: 0.009 },
-    ],
-  },
+  { name: "Basic", description: "Small boost", durations: [{ label: "1h", price: 0.001 }, { label: "6h", price: 0.002 }, { label: "24h", price: 0.003 }] },
+  { name: "Whale", description: "Medium boost", durations: [{ label: "1h", price: 0.002 }, { label: "6h", price: 0.004 }, { label: "24h", price: 0.006 }] },
+  { name: "Pro", description: "High boost", durations: [{ label: "1h", price: 0.003 }, { label: "6h", price: 0.006 }, { label: "24h", price: 0.009 }] },
 ]
 
 const BASE_CHAIN_ID = 8453
@@ -48,13 +18,13 @@ export default function BoostForm() {
   const [durationIndex, setDurationIndex] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  const { chain } = useWagmiNetwork()
-  const { switchNetwork } = useWagmiSwitchNetwork()
-  const { address } = useAccount()
+  const { chain } = useNetwork()
+  const { switchNetwork } = useSwitchNetwork()
+  const { sendTransactionAsync } = useSendTransaction()
 
   useEffect(() => {
     if (chain?.id !== BASE_CHAIN_ID && switchNetwork) {
-      alert("Switch wallet to Base Network")
+      alert("Switching wallet to Base Network for low fees")
       switchNetwork(BASE_CHAIN_ID)
     }
   }, [chain, switchNetwork])
@@ -62,42 +32,37 @@ export default function BoostForm() {
   const selectedTier = tiers[tierIndex]
   const selectedDuration = selectedTier.durations[durationIndex]
 
-  const { writeAsync } = useContractWrite({
-    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!,
-    abi: BasePostBoosterABI,
-    functionName: "boostPost",
-    args: [postUrl, tierIndex, durationIndex],
-    overrides: {
-      value: ethers.utils.parseEther(selectedDuration.price.toString()),
-    },
-    enabled: chain?.id === BASE_CHAIN_ID,
-  })
-
   const handleBoost = async () => {
     if (!postUrl) return alert("Enter post URL")
-    if (!address) return alert("Connect wallet")
-    if (chain?.id !== BASE_CHAIN_ID)
-      return alert("Switch to Base Network")
+    if (chain?.id !== BASE_CHAIN_ID) return alert("Switch wallet to Base Network")
 
-    setLoading(true)
     try {
-      const tx = await writeAsync?.()
+      setLoading(true)
+
+      const txHash = await sendTransactionAsync?.({
+        request: {
+          to: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+          value: ethers.utils.parseEther(selectedDuration.price.toString()),
+        }
+      })
+
       await fetch("/api/boost", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          wallet: address,
+          wallet: (await window.ethereum.request({ method: "eth_accounts" }))[0],
           postUrl,
-          txHash: tx?.hash ?? "",
-          amount: selectedDuration.price,
-        }),
+          txHash,
+          amount: selectedDuration.price
+        })
       })
-      alert("Boost sent!")
+
+      alert("Boost sent 🚀")
       setPostUrl("")
-    } catch (err) {
-      console.error(err)
-      alert("Boost failed")
-    } finally {
+      setLoading(false)
+    } catch (e) {
+      console.error(e)
+      alert("Transaction failed")
       setLoading(false)
     }
   }
@@ -116,26 +81,20 @@ export default function BoostForm() {
         {tiers.map((t, i) => (
           <div
             key={i}
-            onClick={() => {
-              setTierIndex(i)
-              setDurationIndex(0)
-            }}
+            onClick={() => { setTierIndex(i); setDurationIndex(0) }}
             style={{
               flex: 1,
               padding: "10px",
-              border:
-                tierIndex === i ? "2px solid #4f46e5" : "1px solid #ccc",
+              border: tierIndex === i ? "2px solid #4f46e5" : "1px solid #ccc",
               borderRadius: "8px",
-              cursor: "pointer",
+              cursor: "pointer"
             }}
           >
             <h4>{t.name}</h4>
             <p style={{ fontSize: "12px" }}>{t.description}</p>
             <ul style={{ fontSize: "12px" }}>
               {t.durations.map((d, idx) => (
-                <li key={idx}>
-                  {d.label} – {d.price} ETH
-                </li>
+                <li key={idx}>{d.label} – {d.price} ETH</li>
               ))}
             </ul>
           </div>
@@ -148,9 +107,7 @@ export default function BoostForm() {
         style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
       >
         {selectedTier.durations.map((d, idx) => (
-          <option key={idx} value={idx}>
-            {d.label} – {d.price} ETH
-          </option>
+          <option key={idx} value={idx}>{d.label} – {d.price} ETH</option>
         ))}
       </select>
 
@@ -163,10 +120,11 @@ export default function BoostForm() {
           background: "#4f46e5",
           color: "#fff",
           borderRadius: "6px",
-          cursor: "pointer",
+          fontWeight: "bold",
+          cursor: loading ? "not-allowed" : "pointer"
         }}
       >
-        {loading ? "Sending..." : "Boost Now 🚀"}
+        {loading ? "Boosting..." : "Boost Now 🚀"}
       </button>
     </div>
   )
