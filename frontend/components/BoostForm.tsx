@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { ethers } from "ethers"
-import { useContractWrite, usePrepareContractWrite, useNetwork, useSwitchNetwork } from "wagmi"
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useNetwork,
+  useSwitchNetwork
+} from "wagmi"
 import BasePostBoosterABI from "../abi/BasePostBoosterABI.json"
 
 const tiers = [
@@ -47,7 +52,7 @@ export default function BoostForm() {
 
   useEffect(() => {
     if (chain?.id !== BASE_CHAIN_ID && switchNetwork) {
-      alert("Switching wallet to Base Network for low fees")
+      alert("Switching wallet to Base Network")
       switchNetwork(BASE_CHAIN_ID)
     }
   }, [chain, switchNetwork])
@@ -56,7 +61,7 @@ export default function BoostForm() {
   const selectedDuration = selectedTier.durations[durationIndex]
 
   const { config } = usePrepareContractWrite({
-    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS, // deploy contract address
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
     abi: BasePostBoosterABI,
     functionName: "boostPost",
     args: [postUrl, tierIndex, durationIndex],
@@ -69,20 +74,19 @@ export default function BoostForm() {
   const { write } = useContractWrite(config)
 
   const handleBoost = async () => {
-    if (!postUrl) return alert("Enter post URL")
+    if (!postUrl) return alert("Enter Post URL")
     if (chain?.id !== BASE_CHAIN_ID) return alert("Switch wallet to Base Network")
+
     try {
-      const tx = await write?.()
-      // Save to DB via API
+      await write?.()
       await fetch("/api/boost", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           wallet: (await window.ethereum.request({ method: "eth_accounts" }))[0],
           postUrl,
-          txHash: tx?.hash || "pending",
-          amount: selectedDuration.price,
-          tier: selectedTier.name
+          txHash: "pending",
+          amount: selectedDuration.price
         })
       })
       alert("Boost sent 🚀")
