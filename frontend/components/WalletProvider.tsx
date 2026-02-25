@@ -1,9 +1,14 @@
-// WalletProvider.tsx
-"use client"
-import { ReactNode } from 'react'
-import { WagmiConfig } from 'wagmi'
-import { wagmiConfig } from '../wagmiConfig'
+'use client'
+import { FC, ReactNode } from 'react';
+import { WagmiConfig } from 'wagmi';
+import { wagmiConfig } from '../wagmiConfig';
 
-export default function WalletProvider({ children }: { children: ReactNode }) {
-  return <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>
+interface Props {
+  children: ReactNode;
 }
+
+const WalletProvider: FC<Props> = ({ children }) => {
+  return <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>;
+};
+
+export default WalletProvider;
