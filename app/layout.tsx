@@ -1,8 +1,12 @@
-import { WalletProvider } from "@/components/WalletProvider"
+import WalletProvider from "@/components/WalletProvider"
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html>
+    <html lang="en">
       <body>
         <WalletProvider>
           {children}
