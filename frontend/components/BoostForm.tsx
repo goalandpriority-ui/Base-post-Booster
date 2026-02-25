@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { ethers } from "ethers"
-import { useContractWrite, usePrepareContractWrite, useNetwork, useSwitchNetwork } from "wagmi"
+import { useContractWrite } from "wagmi"
+import { useNetwork as useWagmiNetwork, useSwitchNetwork as useWagmiSwitchNetwork } from "wagmi"
 import BasePostBoosterABI from "../abi/BasePostBoosterABI.json"
 
 const tiers = [
@@ -42,8 +43,8 @@ export default function BoostForm() {
   const [tierIndex, setTierIndex] = useState(0)
   const [durationIndex, setDurationIndex] = useState(0)
 
-  const { chain } = useNetwork()
-  const { switchNetwork } = useSwitchNetwork()
+  const { chain } = useWagmiNetwork()
+  const { switchNetwork } = useWagmiSwitchNetwork()
 
   useEffect(() => {
     if (chain?.id !== BASE_CHAIN_ID && switchNetwork) {
@@ -55,7 +56,7 @@ export default function BoostForm() {
   const selectedTier = tiers[tierIndex]
   const selectedDuration = selectedTier.durations[durationIndex]
 
-  const { config } = usePrepareContractWrite({
+  const { write } = useContractWrite({
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
     abi: BasePostBoosterABI,
     functionName: "boostPost",
@@ -63,17 +64,14 @@ export default function BoostForm() {
     overrides: {
       value: ethers.utils.parseEther(selectedDuration.price.toString()),
     },
-    enabled: chain?.id === BASE_CHAIN_ID,
+    mode: "recklesslyUnprepared",
   })
-
-  const { write } = useContractWrite(config)
 
   const handleBoost = async () => {
     if (!postUrl) return alert("Enter post URL")
     if (chain?.id !== BASE_CHAIN_ID) return alert("Switch wallet to Base Network")
     try {
       await write?.()
-      // Optional: Save to DB via API
       await fetch("/api/boost", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
