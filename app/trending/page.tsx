@@ -9,15 +9,21 @@ export default function Trending() {
     const stored =
       JSON.parse(localStorage.getItem("boostedPosts") || "[]")
 
-    // sort by boost count (highest first)
     stored.sort((a: any, b: any) => b.boostCount - a.boostCount)
 
     setPosts(stored)
   }, [])
 
   return (
-    <main style={{ padding: 40, textAlign: "center" }}>
-      <h1 style={{ fontSize: 28, marginBottom: 20 }}>
+    <main
+      style={{
+        padding: 20,
+        textAlign: "center",
+        maxWidth: 900,
+        margin: "0 auto",
+      }}
+    >
+      <h1 style={{ fontSize: 26, marginBottom: 20 }}>
         Trending Boosted Posts
       </h1>
 
@@ -36,8 +42,6 @@ export default function Trending() {
             border: "1px solid #ccc",
             padding: 20,
             marginTop: 20,
-            maxWidth: 700,
-            marginInline: "auto",
           }}
         >
           <h3>#{index + 1}</h3>
@@ -57,20 +61,19 @@ export default function Trending() {
           <div style={{ marginTop: 10 }}>
             <button
               onClick={() => window.open(post.link, "_blank")}
-              style={{ marginRight: 10 }}
+              style={{ padding: "8px 15px", cursor: "pointer" }}
             >
               View Post
             </button>
           </div>
 
-          {/* Show chart only if contract exists */}
           {post.contract && (
             <div style={{ marginTop: 20 }}>
               <iframe
                 src={`https://dexscreener.com/base/${post.contract}`}
                 width="100%"
                 height="500"
-                frameBorder="0"
+                style={{ border: "none" }}
               ></iframe>
             </div>
           )}
