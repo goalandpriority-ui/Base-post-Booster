@@ -27,31 +27,34 @@ export default function Home() {
   ]
 
   async function handleBoost() {
-    if (!postLink) return alert("Paste post link")
-    if (!window.ethereum) return alert("Install MetaMask")
+    if (!postLink) {
+      alert("Paste post link")
+      return
+    }
+    if (!window.ethereum) {
+      alert("Install MetaMask")
+      return
+    }
 
     try {
       setLoading(true)
-
-      // --- ETH Transaction ---
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
+
       await window.ethereum.request({
         method: "eth_sendTransaction",
-        params: [{ from: accounts[0], to: "0xYOUR_WALLET_ADDRESS_HERE", value: tiers[selectedTier].value }],
+        params: [
+          {
+            from: accounts[0],
+            to: "0xYOUR_WALLET_ADDRESS_HERE",
+            value: tiers[selectedTier].value,
+          },
+        ],
       })
 
-      // --- Supabase Insert / Update ---
-      const { data, error } = await supabase
+      // --- Supabase Insert / Upsert ---
+      const { data, error }: { data: any[] | null; error: any } = await supabase
         .from("boosted_posts")
-        .upsert(
-          {
-            post_link: postLink,
-            contract: contract || null,
-            tier: tiers[selectedTier].name,
-            boost_count: 1,
-          },
-          { onConflict: "post_link" }
-        )
+        .upsert({ link: postLink, tier: tiers[selectedTier].name }, { onConflict: "link" })
 
       if (error) console.error("Supabase upsert error:", error)
       else if (data && data.length) {
@@ -59,7 +62,7 @@ export default function Home() {
         if (rpcResult.error) console.error("RPC increment error:", rpcResult.error)
       }
 
-      // --- LocalStorage backup for trending page ---
+      // --- LocalStorage backup ---
       let existing = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
       const index = existing.findIndex((item: any) => item.link === postLink)
       if (index !== -1) existing[index].boostCount += 1
@@ -71,23 +74,19 @@ export default function Home() {
           boostCount: 1,
           time: new Date().toLocaleString(),
         })
+
       localStorage.setItem("boostedPosts", JSON.stringify(existing))
 
-      alert("Boost successful ✅")
-
-      // --- Auto share with mini app link ---
-      const shareText = `I just boosted a post! Check it out on Base Post Booster Mini App: ${window.location.origin}`
-      if (navigator.share) {
-        await navigator.share({ text: shareText })
-      } else {
-        console.log("Share text:", shareText)
-      }
-
+      alert("Boost successful")
       setPostLink("")
       setContract("")
+
+      // --- Optional: auto-share MiniApp link ---
+      // window.open(`https://your-miniapp-link.com/share?post=${encodeURIComponent(postLink)}`, "_blank")
+
     } catch (err) {
       console.error(err)
-      alert("Transaction failed ❌")
+      alert("Transaction failed")
     } finally {
       setLoading(false)
     }
@@ -133,7 +132,11 @@ export default function Home() {
       />
 
       <div style={{ marginTop: 20 }}>
-        <button onClick={handleBoost} disabled={loading} style={{ padding: "10px 20px", cursor: "pointer" }}>
+        <button
+          onClick={handleBoost}
+          disabled={loading}
+          style={{ padding: "10px 20px", cursor: "pointer" }}
+        >
           {loading ? "Processing..." : "Boost Now"}
         </button>
       </div>
