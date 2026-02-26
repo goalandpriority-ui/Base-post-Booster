@@ -44,37 +44,35 @@ export default function Home() {
         params: [{ from: accounts[0], to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2, value: tiers[selectedTier].value }],
       })
 
-      // Supabase upsert fix
-      const postsToUpsert = [{
-        post: postLink,
-        contract: contract || null,
-        tier: tiers[selectedTier].name,
-        boost_count: 1,
-        updated_at: new Date().toISOString(),
-      }]
+      // Supabase upsert
+      const postsToUpsert = [
+        {
+          post: postLink, // must be string, not string[]
+          contract: contract || null,
+          tier: tiers[selectedTier].name,
+          boost_count: 1,
+          updated_at: new Date().toISOString(),
+        }
+      ]
 
       const { data, error } = await supabase
         .from("boosted_posts")
-        .upsert(postsToUpsert, { onConflict: "post" }) // <-- FIXED
+        .upsert(postsToUpsert, { onConflict: "post" })
 
       if (error) console.error("Supabase upsert error:", error)
       else console.log("Supabase upsert success:", data)
 
-      // LocalStorage update for Trending page
+      // LocalStorage update
       let existing: any[] = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
       const index = existing.findIndex(item => item.link === postLink)
       if (index !== -1) existing[index].boostCount += 1
       else existing.push({ link: postLink, contract, tier: tiers[selectedTier].name, boostCount: 1, time: new Date().toLocaleString() })
       localStorage.setItem("boostedPosts", JSON.stringify(existing))
 
-      // Auto share
-      try {
-        const shareText = `I just boosted a post! Check it here: ${postLink} via ${MINI_APP_LINK}`
-        if (navigator.share) await navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
-        else console.log("Share API not supported:", shareText)
-      } catch (shareError) {
-        console.error("Share failed:", shareError)
-      }
+      // Share
+      const shareText = `I just boosted a post! Check it here: ${postLink} via ${MINI_APP_LINK}`
+      if (navigator.share) await navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
+      else console.log("Share API not supported:", shareText)
 
       alert("Boost successful")
       setPostLink(""); setContract("")
