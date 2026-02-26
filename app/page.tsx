@@ -59,7 +59,7 @@ export default function Home() {
         params: [
           {
             from: accounts[0],
-            to: "0xYOUR_WALLET_ADDRESS_HERE", // 🔥 replace with your wallet
+            to: "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2", // 🔥 replace with your wallet
             value: selected.value,
           },
         ],
