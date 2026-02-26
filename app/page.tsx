@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -44,22 +43,15 @@ export default function Home() {
         params: [{ from: accounts[0], to: YOUR_WALLET_ADDRESS, value: tiers[selectedTier].value }],
       });
 
-      // Supabase upsert - FIXED
-      const postsToUpsert = Array.isArray(postLink)
-        ? postLink.map(post => ({
-            post,
-            contract: contract || null,
-            tier: tiers[selectedTier].name,
-            boost_count: 1,
-            updated_at: new Date().toISOString(),
-          }))
-        : [{
-            post: postLink,
-            contract: contract || null,
-            tier: tiers[selectedTier].name,
-            boost_count: 1,
-            updated_at: new Date().toISOString(),
-          }];
+      // --- Safe Supabase upsert ---
+      const postsArray = Array.isArray(postLink) ? postLink : [postLink];
+      const postsToUpsert = postsArray.map(post => ({
+        post,                         // always string
+        contract: contract || null,
+        tier: tiers[selectedTier].name,
+        boost_count: 1,
+        updated_at: new Date().toISOString(),
+      }));
 
       const { data, error } = await supabase
         .from("boosted_posts")
@@ -70,8 +62,7 @@ export default function Home() {
 
       // LocalStorage update for Trending page
       let existing: any[] = JSON.parse(localStorage.getItem("boostedPosts") || "[]");
-      const postArray = Array.isArray(postLink) ? postLink : [postLink];
-      postArray.forEach(pl => {
+      postsArray.forEach(pl => {
         const index = existing.findIndex(item => item.link === pl);
         if (index !== -1) existing[index].boostCount += 1;
         else existing.push({ link: pl, contract, tier: tiers[selectedTier].name, boostCount: 1, time: new Date().toLocaleString() });
@@ -80,7 +71,7 @@ export default function Home() {
 
       // Auto share to Farcaster / Mini app
       try {
-        const shareText = `I just boosted a post! Check it here: ${Array.isArray(postLink) ? postLink.join(", ") : postLink} via ${MINI_APP_LINK}`;
+        const shareText = `I just boosted a post! Check it here: ${postsArray.join(", ")} via ${MINI_APP_LINK}`;
         if (navigator.share) {
           await navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" });
         } else {
