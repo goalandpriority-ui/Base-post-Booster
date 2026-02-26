@@ -1,5 +1,3 @@
-import WalletProvider from "@/components/WalletProvider"
-
 export default function RootLayout({
   children,
 }: {
@@ -8,7 +6,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <WalletProvider>{children}</WalletProvider>
+        {children}
       </body>
     </html>
   )
