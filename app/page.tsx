@@ -14,9 +14,24 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
 
   const tiers = [
-    { name: "Basic", value: "0x38D7EA4C68000" },
-    { name: "Pro", value: "0xAA87BEE538000" },
-    { name: "Elite", value: "0x11C37937E08000" },
+    {
+      name: "Basic",
+      price: "0.001 ETH",
+      duration: "24 Hours Boost",
+      value: "0x38D7EA4C68000",
+    },
+    {
+      name: "Pro",
+      price: "0.003 ETH",
+      duration: "48 Hours Boost",
+      value: "0xAA87BEE538000",
+    },
+    {
+      name: "Elite",
+      price: "0.005 ETH",
+      duration: "72 Hours Boost",
+      value: "0x11C37937E08000",
+    },
   ]
 
   async function handleBoost() {
@@ -48,7 +63,6 @@ export default function Home() {
         ],
       })
 
-      // Save to localStorage
       const existing =
         JSON.parse(localStorage.getItem("boostedPosts") || "[]")
 
@@ -63,20 +77,17 @@ export default function Home() {
         JSON.stringify([newPost, ...existing])
       )
 
-      alert("Boost successful 🚀")
+      alert("Boost successful")
 
-      // Share
       const shareText = encodeURIComponent(
-        `🚀 Boosted this post with Base Post Booster!
+        `Boosted this post with Base Post Booster
 
 👉 ${postLink}
 
-Built on Base ⚡
+Built on Base
 
 Boost yours:
-https://yourappurl.com
-
-#Base #Farcaster`
+https://yourappurl.com`
       )
 
       window.open(
@@ -94,24 +105,33 @@ https://yourappurl.com
 
   return (
     <main style={{ padding: 40, textAlign: "center" }}>
-      <h1>🚀 Base Post Booster</h1>
+      <h1 style={{ fontSize: 32, marginBottom: 30 }}>
+        Base Post Booster
+      </h1>
 
-      <div style={{ margin: "20px 0" }}>
+      <div style={{ marginBottom: 30 }}>
         {tiers.map((tier, i) => (
-          <button
+          <div
             key={i}
             onClick={() => setSelectedTier(i)}
             style={{
-              margin: 10,
-              padding: 10,
               border:
                 selectedTier === i
                   ? "2px solid black"
                   : "1px solid gray",
+              padding: 15,
+              marginBottom: 15,
+              cursor: "pointer",
+              maxWidth: 350,
+              marginInline: "auto",
             }}
           >
-            {tier.name}
-          </button>
+            <h3>{tier.name}</h3>
+            <p>{tier.price}</p>
+            <p style={{ fontSize: 14, color: "gray" }}>
+              {tier.duration}
+            </p>
+          </div>
         ))}
       </div>
 
@@ -130,7 +150,7 @@ https://yourappurl.com
       </div>
 
       <div style={{ marginTop: 40 }}>
-        <a href="/trending">🔥 View Trending Posts</a>
+        <a href="/trending">View Trending Posts</a>
       </div>
     </main>
   )
