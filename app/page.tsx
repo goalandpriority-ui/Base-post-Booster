@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client"
 
 import { useState } from "react"
@@ -43,22 +44,22 @@ export default function Home() {
         params: [{ from: accounts[0], to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2, value: tiers[selectedTier].value }],
       })
 
-      // Supabase upsert
+      // Supabase upsert fix for TypeScript
+      const postsArray = Array.isArray(postLink) ? postLink : [postLink as string]
+      const postsToUpsert = postsArray.map(post => ({
+        post,
+        contract: contract || null,
+        tier: tiers[selectedTier].name,
+        boost_count: 1,
+        updated_at: new Date().toISOString(),
+      }))
+
       const { data, error } = await supabase
         .from("boosted_posts")
-        .upsert(
-          {
-            post: postLink,
-            contract: contract || null,
-            tier: tiers[selectedTier].name,
-            boost_count: 1,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: ["post"] }
-        )
+        .upsert(postsToUpsert, { onConflict: ["post"] })
 
       if (error) console.error("Supabase upsert error:", error)
-      else if (data && data.length > 0) console.log("Supabase upsert success:", data)
+      else console.log("Supabase upsert success:", data)
 
       // LocalStorage update for Trending page
       let existing: any[] = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
