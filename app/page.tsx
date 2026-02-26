@@ -74,15 +74,22 @@ export default function Home() {
           boostCount: 1,
           time: new Date().toLocaleString(),
         })
-
       localStorage.setItem("boostedPosts", JSON.stringify(existing))
 
-      alert("Boost successful")
+      // --- Auto-share Farcaster ---
+      const farcasterShareUrl = `https://www.farcaster.xyz/share?text=${encodeURIComponent(
+        `I just boosted a post on Base Post Booster! Check it out: ${postLink}`
+      )}`
+      window.open(farcasterShareUrl, "_blank")
+
+      // --- Optional: MiniApp auto-open link ---
+      const miniAppLink = `https://your-miniapp-link.com/?post=${encodeURIComponent(postLink)}`
+      window.open(miniAppLink, "_blank")
+
+      alert("Boost successful & shared!")
+
       setPostLink("")
       setContract("")
-
-      // --- Optional: auto-share MiniApp link ---
-      // window.open(`https://your-miniapp-link.com/share?post=${encodeURIComponent(postLink)}`, "_blank")
 
     } catch (err) {
       console.error(err)
