@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { supabase } from "../lib/supabaseClient"
 
 declare global {
   interface Window {
@@ -26,40 +27,31 @@ export default function Home() {
 
     try {
       setLoading(true)
-
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
+
       await window.ethereum.request({
         method: "eth_sendTransaction",
-        params: [{ from: accounts[0], to: "0xYOUR_WALLET_ADDRESS_HERE", value: tiers[selectedTier].value }],
+        params: [{ from: accounts[0], to: "0xYOUR_WALLET_ADDRESS_HERE", value: tiers[selectedTier].value }]
       })
 
-      let existing = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
-      const index = existing.findIndex((item: any) => item.link === postLink)
+      // ✅ Save to Supabase
+      await supabase.from("boostedPosts").insert([{
+        link: postLink,
+        contract: contract || null,
+        tier: tiers[selectedTier].name,
+        boostCount: 1,
+        time: new Date().toISOString()
+      }])
 
-      if (index !== -1) { existing[index].boostCount += 1 }
-      else {
-        existing.push({
-          link: postLink,
-          contract: contract || null,
-          tier: tiers[selectedTier].name,
-          boostCount: 1,
-          time: new Date().toLocaleString(),
-        })
-      }
+      // ✅ Auto-share on Farcaster
+      const shareText = `I just boosted a post on Base Post Booster! Check it out: ${postLink} | Mini App: https://your-miniapp-link.vercel.app`
+      window.open(`https://www.farcaster.xyz/share?text=${encodeURIComponent(shareText)}`, "_blank")
 
-      localStorage.setItem("boostedPosts", JSON.stringify(existing))
-      alert("Boost successful")
-
-      // Auto-share to Farcaster with mini app link
-      const appLink = "https://your-miniapp.vercel.app"
-      const text = `🚀 Boosted this post: ${postLink} using Base Post Booster! App: ${appLink}`
-      const farcasterShareUrl = `https://farcaster.com/share?text=${encodeURIComponent(text)}`
-      window.open(farcasterShareUrl, "_blank")
-
+      alert("Boost successful and shared!")
       setPostLink("")
       setContract("")
     } catch {
-      alert("Transaction failed")
+      alert("Transaction or share failed")
     } finally {
       setLoading(false)
     }
@@ -71,14 +63,8 @@ export default function Home() {
 
       <div style={{ marginBottom: 30 }}>
         {tiers.map((tier, i) => (
-          <div
-            key={i}
-            onClick={() => setSelectedTier(i)}
-            style={{
-              border: selectedTier === i ? "2px solid black" : "1px solid gray",
-              padding: 15, marginBottom: 15, cursor: "pointer",
-            }}
-          >
+          <div key={i} onClick={() => setSelectedTier(i)}
+            style={{ border: selectedTier === i ? "2px solid black" : "1px solid gray", padding: 15, marginBottom: 15, cursor: "pointer" }}>
             <h3>{tier.name}</h3>
             <p>{tier.price}</p>
             <p style={{ fontSize: 14, color: "gray" }}>{tier.duration}</p>
@@ -86,21 +72,11 @@ export default function Home() {
         ))}
       </div>
 
-      <input
-        type="text"
-        placeholder="Paste Base post link"
-        value={postLink}
-        onChange={(e) => setPostLink(e.target.value)}
-        style={{ padding: 12, width: "100%", boxSizing: "border-box", marginBottom: 10 }}
-      />
+      <input type="text" placeholder="Paste Base post link" value={postLink} onChange={(e) => setPostLink(e.target.value)}
+        style={{ padding: 12, width: "100%", boxSizing: "border-box", marginBottom: 10 }} />
 
-      <input
-        type="text"
-        placeholder="Coin Contract Address"
-        value={contract}
-        onChange={(e) => setContract(e.target.value)}
-        style={{ padding: 12, width: "100%", boxSizing: "border-box" }}
-      />
+      <input type="text" placeholder="Coin Contract Address" value={contract} onChange={(e) => setContract(e.target.value)}
+        style={{ padding: 12, width: "100%", boxSizing: "border-box" }} />
 
       <div style={{ marginTop: 20 }}>
         <button onClick={handleBoost} disabled={loading} style={{ padding: "10px 20px", cursor: "pointer" }}>
@@ -108,9 +84,7 @@ export default function Home() {
         </button>
       </div>
 
-      <div style={{ marginTop: 40 }}>
-        <a href="/trending">View Trending Posts</a>
-      </div>
+      <div style={{ marginTop: 40 }}><a href="/trending">View Trending Posts</a></div>
     </main>
   )
-        }
+}
