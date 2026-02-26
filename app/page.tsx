@@ -11,6 +11,7 @@ declare global {
 export default function Home() {
   const [selectedTier, setSelectedTier] = useState(0)
   const [postLink, setPostLink] = useState("")
+  const [contract, setContract] = useState("")
   const [loading, setLoading] = useState(false)
 
   const tiers = [
@@ -63,39 +64,34 @@ export default function Home() {
         ],
       })
 
-      const existing =
+      let existing =
         JSON.parse(localStorage.getItem("boostedPosts") || "[]")
 
-      const newPost = {
-        link: postLink,
-        tier: tiers[selectedTier].name,
-        time: new Date().toLocaleString(),
+      const index = existing.findIndex(
+        (item: any) => item.link === postLink
+      )
+
+      if (index !== -1) {
+        existing[index].boostCount += 1
+      } else {
+        existing.push({
+          link: postLink,
+          contract: contract || null,
+          tier: tiers[selectedTier].name,
+          boostCount: 1,
+          time: new Date().toLocaleString(),
+        })
       }
 
       localStorage.setItem(
         "boostedPosts",
-        JSON.stringify([newPost, ...existing])
+        JSON.stringify(existing)
       )
 
       alert("Boost successful")
 
-      const shareText = encodeURIComponent(
-        `Boosted this post with Base Post Booster
-
-👉 ${postLink}
-
-Built on Base
-
-Boost yours:
-https://yourappurl.com`
-      )
-
-      window.open(
-        `https://warpcast.com/~/compose?text=${shareText}`,
-        "_blank"
-      )
-
       setPostLink("")
+      setContract("")
     } catch (err) {
       alert("Transaction failed")
     } finally {
@@ -105,7 +101,7 @@ https://yourappurl.com`
 
   return (
     <main style={{ padding: 40, textAlign: "center" }}>
-      <h1 style={{ fontSize: 32, marginBottom: 30 }}>
+      <h1 style={{ fontSize: 30, marginBottom: 30 }}>
         Base Post Booster
       </h1>
 
@@ -140,6 +136,16 @@ https://yourappurl.com`
         placeholder="Paste Base post link"
         value={postLink}
         onChange={(e) => setPostLink(e.target.value)}
+        style={{ padding: 10, width: 300, marginBottom: 10 }}
+      />
+
+      <br />
+
+      <input
+        type="text"
+        placeholder="Coin Contract Address"
+        value={contract}
+        onChange={(e) => setContract(e.target.value)}
         style={{ padding: 10, width: 300 }}
       />
 
