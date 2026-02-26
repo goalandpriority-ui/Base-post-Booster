@@ -1,116 +1,61 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
-declare global {
-  interface Window {
-    ethereum?: any
-  }
-}
+export default function Trending() {
+  const [posts, setPosts] = useState<any[]>([])
 
-export default function Home() {
-  const [selectedTier, setSelectedTier] = useState(0)
-  const [postLink, setPostLink] = useState("")
-  const [contract, setContract] = useState("")
-  const [loading, setLoading] = useState(false)
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
+    stored.sort((a: any, b: any) => b.boostCount - a.boostCount)
+    setPosts(stored)
+  }, [])
 
-  const tiers = [
-    { name: "Basic", price: "0.001 ETH", duration: "24 Hours Boost", value: "0x38D7EA4C68000" },
-    { name: "Pro", price: "0.003 ETH", duration: "48 Hours Boost", value: "0xAA87BEE538000" },
-    { name: "Elite", price: "0.005 ETH", duration: "72 Hours Boost", value: "0x11C37937E08000" },
-  ]
-
-  async function handleBoost() {
-    if (!postLink) { alert("Paste post link"); return }
-    if (!window.ethereum) { alert("Install MetaMask"); return }
-
-    try {
-      setLoading(true)
-
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
-      await window.ethereum.request({
-        method: "eth_sendTransaction",
-        params: [{ from: accounts[0], to: "0xYOUR_WALLET_ADDRESS_HERE", value: tiers[selectedTier].value }],
-      })
-
-      let existing = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
-      const index = existing.findIndex((item: any) => item.link === postLink)
-
-      if (index !== -1) { existing[index].boostCount += 1 }
-      else {
-        existing.push({
-          link: postLink,
-          contract: contract || null,
-          tier: tiers[selectedTier].name,
-          boostCount: 1,
-          time: new Date().toLocaleString(),
-        })
-      }
-
-      localStorage.setItem("boostedPosts", JSON.stringify(existing))
-      alert("Boost successful")
-
-      // Auto-share to Farcaster with mini app link
-      const appLink = "https://your-miniapp.vercel.app"
-      const text = `🚀 Boosted this post: ${postLink} using Base Post Booster! App: ${appLink}`
-      const farcasterShareUrl = `https://farcaster.com/share?text=${encodeURIComponent(text)}`
-      window.open(farcasterShareUrl, "_blank")
-
-      setPostLink("")
-      setContract("")
-    } catch {
-      alert("Transaction failed")
-    } finally {
-      setLoading(false)
-    }
+  function shareToFarcaster(postLink: string) {
+    const appLink = "https://your-miniapp.vercel.app"
+    const text = `🚀 Boosted this post: ${postLink} using Base Post Booster! App: ${appLink}`
+    const farcasterShareUrl = `https://farcaster.com/share?text=${encodeURIComponent(text)}`
+    window.open(farcasterShareUrl, "_blank")
   }
 
   return (
-    <main style={{ padding: 20, textAlign: "center", maxWidth: 500, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 28, marginBottom: 30 }}>Base Post Booster</h1>
+    <main style={{ padding: 20, textAlign: "center", maxWidth: 900, margin: "0 auto" }}>
+      <h1 style={{ fontSize: 26, marginBottom: 20 }}>Trending Boosted Posts</h1>
 
-      <div style={{ marginBottom: 30 }}>
-        {tiers.map((tier, i) => (
-          <div
-            key={i}
-            onClick={() => setSelectedTier(i)}
-            style={{
-              border: selectedTier === i ? "2px solid black" : "1px solid gray",
-              padding: 15, marginBottom: 15, cursor: "pointer",
-            }}
-          >
-            <h3>{tier.name}</h3>
-            <p>{tier.price}</p>
-            <p style={{ fontSize: 14, color: "gray" }}>{tier.duration}</p>
+      <div style={{ marginBottom: 20 }}>
+        <a href="/">Back to Boost</a>
+      </div>
+
+      {posts.length === 0 && <p>No boosted posts yet.</p>}
+
+      {posts.map((post, index) => (
+        <div key={index} style={{ border: "1px solid #ccc", padding: 20, marginTop: 20 }}>
+          <h3>#{index + 1}</h3>
+          <p><strong>Boost Count:</strong> {post.boostCount}</p>
+          <p><strong>Tier:</strong> {post.tier}</p>
+          <p><strong>Time:</strong> {post.time}</p>
+
+          <div style={{ marginTop: 10 }}>
+            <button onClick={() => window.open(post.link, "_blank")} style={{ padding: "8px 15px", cursor: "pointer", marginRight: 10 }}>
+              View Post
+            </button>
+            <button onClick={() => shareToFarcaster(post.link)} style={{ padding: "8px 15px", cursor: "pointer" }}>
+              Share to Farcaster
+            </button>
           </div>
-        ))}
-      </div>
 
-      <input
-        type="text"
-        placeholder="Paste Base post link"
-        value={postLink}
-        onChange={(e) => setPostLink(e.target.value)}
-        style={{ padding: 12, width: "100%", boxSizing: "border-box", marginBottom: 10 }}
-      />
-
-      <input
-        type="text"
-        placeholder="Coin Contract Address"
-        value={contract}
-        onChange={(e) => setContract(e.target.value)}
-        style={{ padding: 12, width: "100%", boxSizing: "border-box" }}
-      />
-
-      <div style={{ marginTop: 20 }}>
-        <button onClick={handleBoost} disabled={loading} style={{ padding: "10px 20px", cursor: "pointer" }}>
-          {loading ? "Processing..." : "Boost Now"}
-        </button>
-      </div>
-
-      <div style={{ marginTop: 40 }}>
-        <a href="/trending">View Trending Posts</a>
-      </div>
+          {post.contract && (
+            <div style={{ marginTop: 20 }}>
+              <iframe
+                src={`https://dexscreener.com/base/${post.contract}`}
+                width="100%"
+                height="500"
+                style={{ border: "none" }}
+              ></iframe>
+            </div>
+          )}
+        </div>
+      ))}
     </main>
   )
 }
