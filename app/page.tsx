@@ -92,7 +92,7 @@ export default function Home() {
 
       setPostLink("")
       setContract("")
-    } catch (err) {
+    } catch {
       alert("Transaction failed")
     } finally {
       setLoading(false)
@@ -100,8 +100,15 @@ export default function Home() {
   }
 
   return (
-    <main style={{ padding: 40, textAlign: "center" }}>
-      <h1 style={{ fontSize: 30, marginBottom: 30 }}>
+    <main
+      style={{
+        padding: 20,
+        textAlign: "center",
+        maxWidth: 500,
+        margin: "0 auto",
+      }}
+    >
+      <h1 style={{ fontSize: 28, marginBottom: 30 }}>
         Base Post Booster
       </h1>
 
@@ -118,8 +125,6 @@ export default function Home() {
               padding: 15,
               marginBottom: 15,
               cursor: "pointer",
-              maxWidth: 350,
-              marginInline: "auto",
             }}
           >
             <h3>{tier.name}</h3>
@@ -136,21 +141,35 @@ export default function Home() {
         placeholder="Paste Base post link"
         value={postLink}
         onChange={(e) => setPostLink(e.target.value)}
-        style={{ padding: 10, width: 300, marginBottom: 10 }}
+        style={{
+          padding: 12,
+          width: "100%",
+          boxSizing: "border-box",
+          marginBottom: 10,
+        }}
       />
-
-      <br />
 
       <input
         type="text"
         placeholder="Coin Contract Address"
         value={contract}
         onChange={(e) => setContract(e.target.value)}
-        style={{ padding: 10, width: 300 }}
+        style={{
+          padding: 12,
+          width: "100%",
+          boxSizing: "border-box",
+        }}
       />
 
       <div style={{ marginTop: 20 }}>
-        <button onClick={handleBoost} disabled={loading}>
+        <button
+          onClick={handleBoost}
+          disabled={loading}
+          style={{
+            padding: "10px 20px",
+            cursor: "pointer",
+          }}
+        >
           {loading ? "Processing..." : "Boost Now"}
         </button>
       </div>
