@@ -35,6 +35,15 @@ export default function Home() {
     },
   ]
 
+  // Auto-share function
+  const sharePost = (link: string) => {
+    const text = encodeURIComponent(
+      `Boosted this post using Base Post Booster!\n👉 ${link}\n\nBuilt on Base ⚡\nCheck the app: https://yourappdomain.com\n#Base #Farcaster`
+    )
+    const url = `https://farcaster.com/share?text=${text}`
+    window.open(url, "_blank")
+  }
+
   async function handleBoost() {
     if (!postLink) {
       alert("Paste post link")
@@ -90,9 +99,13 @@ export default function Home() {
 
       alert("Boost successful")
 
+      // ✅ Auto-share after successful boost
+      sharePost(postLink)
+
       setPostLink("")
       setContract("")
-    } catch {
+    } catch (err) {
+      console.error(err)
       alert("Transaction failed")
     } finally {
       setLoading(false)
@@ -151,13 +164,14 @@ export default function Home() {
 
       <input
         type="text"
-        placeholder="Coin Contract Address"
+        placeholder="Coin Contract Address (optional)"
         value={contract}
         onChange={(e) => setContract(e.target.value)}
         style={{
           padding: 12,
           width: "100%",
           boxSizing: "border-box",
+          marginBottom: 10,
         }}
       />
 
