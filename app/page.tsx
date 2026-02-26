@@ -12,28 +12,26 @@ export default function Home() {
   const [selectedTier, setSelectedTier] = useState(0)
   const [postLink, setPostLink] = useState("")
   const [loading, setLoading] = useState(false)
+  const [trending, setTrending] = useState<any[]>([])
 
   const tiers = [
     {
       name: "Basic",
       eth: "0.001",
-      value: "0x38D7EA4C68000", // 0.001 ETH
-      duration: "24 Hours Boost",
-      desc: "Starter visibility push",
+      value: "0x38D7EA4C68000",
+      duration: "24 Hours",
     },
     {
       name: "Pro",
       eth: "0.003",
-      value: "0xAA87BEE538000", // 0.003 ETH
-      duration: "48 Hours Boost",
-      desc: "High reach promotion",
+      value: "0xAA87BEE538000",
+      duration: "48 Hours",
     },
     {
       name: "Elite",
       eth: "0.005",
-      value: "0x11C37937E08000", // 0.005 ETH
-      duration: "72 Hours Boost",
-      desc: "Maximum exposure",
+      value: "0x11C37937E08000",
+      duration: "72 Hours",
     },
   ]
 
@@ -62,13 +60,23 @@ export default function Home() {
         params: [
           {
             from: accounts[0],
-            to: "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2", // 🔥 REPLACE THIS
+            to: "0xYOUR_WALLET_ADDRESS_HERE", // replace
             value: selected.value,
           },
         ],
       })
 
-      // ✅ Share Content
+      // ✅ Add to Trending List
+      const newBoost = {
+        link: postLink,
+        tier: selected.name,
+        duration: selected.duration,
+        time: new Date().toLocaleString(),
+      }
+
+      setTrending([newBoost, ...trending])
+
+      // Share
       const shareText = encodeURIComponent(
         `🚀 Boosted this post with Base Post Booster!
 
@@ -109,19 +117,16 @@ https://yourappurl.com
         textAlign: "center",
       }}
     >
-      <h1 style={{ marginBottom: 10 }}>🚀 Base Post Booster</h1>
-      <p style={{ marginBottom: 40, color: "gray" }}>
-        Boost your Farcaster post visibility on Base
-      </p>
+      <h1>🚀 Base Post Booster</h1>
 
-      {/* Tier Cards */}
+      {/* Tier Selection */}
       <div
         style={{
           display: "flex",
           gap: 20,
           flexWrap: "wrap",
           justifyContent: "center",
-          marginBottom: 40,
+          margin: "30px 0",
         }}
       >
         {tiers.map((tier, index) => (
@@ -133,53 +138,37 @@ https://yourappurl.com
                 selectedTier === index
                   ? "3px solid black"
                   : "1px solid #ccc",
-              borderRadius: 12,
               padding: 20,
-              width: 200,
+              borderRadius: 12,
+              width: 180,
               cursor: "pointer",
-              transition: "0.2s",
-              background:
-                selectedTier === index ? "#f5f5f5" : "white",
             }}
           >
-            <h3 style={{ marginBottom: 6 }}>{tier.name}</h3>
-
-            <p style={{ fontWeight: "bold", marginBottom: 6 }}>
-              {tier.eth} ETH
-            </p>
-
-            <p style={{ fontSize: 13, color: "gray", marginBottom: 4 }}>
+            <h3>{tier.name}</h3>
+            <p>{tier.eth} ETH</p>
+            <p style={{ fontSize: 12, color: "gray" }}>
               {tier.duration}
-            </p>
-
-            <p style={{ fontSize: 12, opacity: 0.8 }}>
-              {tier.desc}
             </p>
           </div>
         ))}
       </div>
 
-      {/* Post URL */}
-      <p style={{ fontWeight: "bold", marginBottom: 8 }}>
-        Post URL
-      </p>
-
+      {/* Post Input */}
       <input
         type="text"
-        placeholder="Paste your Farcaster post link..."
+        placeholder="Paste Farcaster post link..."
         value={postLink}
         onChange={(e) => setPostLink(e.target.value)}
         style={{
           padding: 12,
           width: "100%",
-          maxWidth: 420,
-          marginBottom: 30,
+          maxWidth: 400,
+          marginBottom: 20,
           borderRadius: 8,
           border: "1px solid #ccc",
         }}
       />
 
-      {/* Boost Button */}
       <button
         onClick={handleBoost}
         disabled={loading}
@@ -188,12 +177,49 @@ https://yourappurl.com
           borderRadius: 8,
           border: "2px solid black",
           background: loading ? "#eee" : "white",
-          cursor: loading ? "not-allowed" : "pointer",
+          cursor: "pointer",
           fontWeight: "bold",
         }}
       >
         {loading ? "Processing..." : "Boost Now"}
       </button>
+
+      {/* 🔥 Trending Section */}
+      {trending.length > 0 && (
+        <div style={{ marginTop: 60, width: "100%", maxWidth: 600 }}>
+          <h2>🔥 Trending Boosted Posts</h2>
+
+          {trending.map((item, index) => (
+            <div
+              key={index}
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: 10,
+                padding: 15,
+                marginTop: 15,
+                textAlign: "left",
+              }}
+            >
+              <p>
+                <strong>Tier:</strong> {item.tier}
+              </p>
+              <p>
+                <strong>Duration:</strong> {item.duration}
+              </p>
+              <p>
+                <strong>Time:</strong> {item.time}
+              </p>
+              <a
+                href={item.link}
+                target="_blank"
+                style={{ color: "blue" }}
+              >
+                View Post →
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
     </main>
   )
 }
