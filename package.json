@@ -15,7 +15,8 @@
     "@supabase/supabase-js": "^2.29.0",
     "typescript": "^5.2.2",
     "@types/react": "^18.2.21",
-    "@types/node": "^20.7.3"
+    "@types/node": "^20.7.3",
+    "wagmi": "^2.15.1"
   },
   "devDependencies": {
     "prisma": "^5.5.0"
