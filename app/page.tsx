@@ -45,7 +45,7 @@ export default function Home() {
         params: [
           {
             from: accounts[0],
-            to: "0xYOUR_WALLET_ADDRESS_HERE",
+            to: "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2",
             value: tiers[selectedTier].value,
           },
         ],
@@ -83,7 +83,7 @@ export default function Home() {
       window.open(farcasterShareUrl, "_blank")
 
       // --- Optional: MiniApp auto-open link ---
-      const miniAppLink = `https://your-miniapp-link.com/?post=${encodeURIComponent(postLink)}`
+      const miniAppLink = `https://base-post-booster.vercel.app/?post=${encodeURIComponent(postLink)}`
       window.open(miniAppLink, "_blank")
 
       alert("Boost successful & shared!")
