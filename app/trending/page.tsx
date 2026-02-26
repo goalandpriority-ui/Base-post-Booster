@@ -8,6 +8,10 @@ export default function Trending() {
   useEffect(() => {
     const stored =
       JSON.parse(localStorage.getItem("boostedPosts") || "[]")
+
+    // sort by boost count (highest first)
+    stored.sort((a: any, b: any) => b.boostCount - a.boostCount)
+
     setPosts(stored)
   }, [])
 
@@ -21,7 +25,9 @@ export default function Trending() {
         <a href="/">Back to Boost</a>
       </div>
 
-      {posts.length === 0 && <p>No boosted posts yet.</p>}
+      {posts.length === 0 && (
+        <p>No boosted posts yet.</p>
+      )}
 
       {posts.map((post, index) => (
         <div
@@ -30,12 +36,23 @@ export default function Trending() {
             border: "1px solid #ccc",
             padding: 20,
             marginTop: 20,
-            maxWidth: 500,
+            maxWidth: 700,
             marginInline: "auto",
           }}
         >
-          <p><strong>Tier:</strong> {post.tier}</p>
-          <p><strong>Time:</strong> {post.time}</p>
+          <h3>#{index + 1}</h3>
+
+          <p>
+            <strong>Boost Count:</strong> {post.boostCount}
+          </p>
+
+          <p>
+            <strong>Tier:</strong> {post.tier}
+          </p>
+
+          <p>
+            <strong>Time:</strong> {post.time}
+          </p>
 
           <div style={{ marginTop: 10 }}>
             <button
@@ -44,13 +61,19 @@ export default function Trending() {
             >
               View Post
             </button>
-
-            <button
-              onClick={() => window.open(post.link, "_blank")}
-            >
-              View Chart
-            </button>
           </div>
+
+          {/* Show chart only if contract exists */}
+          {post.contract && (
+            <div style={{ marginTop: 20 }}>
+              <iframe
+                src={`https://dexscreener.com/base/${post.contract}`}
+                width="100%"
+                height="500"
+                frameBorder="0"
+              ></iframe>
+            </div>
+          )}
         </div>
       ))}
     </main>
