@@ -1,40 +1,56 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { ethers } from 'ethers'
+import { useState } from "react"
 
-export default function Home() {
+declare global {
+  interface Window {
+    ethereum?: any
+  }
+}
+
+export default function Page() {
   const [loading, setLoading] = useState(false)
 
   const sendTransaction = async () => {
     try {
-      if (!window.ethereum) return alert('Please install MetaMask!')
+      if (!window.ethereum) {
+        alert("Please install MetaMask!")
+        return
+      }
 
       setLoading(true)
 
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      await provider.send('eth_requestAccounts', [])
-      const signer = await provider.getSigner()
-
-      const tx = await signer.sendTransaction({
-        to: '0xRecipientAddressHere', // change to your recipient
-        value: ethers.parseEther('0.01'),
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
       })
 
-      await tx.wait()
-      alert('Transaction sent successfully!')
-    } catch (err: any) {
+      const from = accounts[0]
+
+      await window.ethereum.request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            from,
+            to: "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2", // replace with your Base wallet
+            value: "0x2386F26FC10000", // 0.01 ETH in hex
+          },
+        ],
+      })
+
+      alert("Transaction sent successfully!")
+    } catch (err) {
       console.error(err)
-      alert('Transaction failed: ' + err.message)
+      alert("Transaction failed")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 40 }}>
+      <h1>Base Post Booster</h1>
       <button onClick={sendTransaction} disabled={loading}>
-        {loading ? 'Sending...' : 'Send 0.01 ETH'}
+        {loading ? "Processing..." : "Send 0.01 ETH Boost"}
       </button>
     </div>
   )
