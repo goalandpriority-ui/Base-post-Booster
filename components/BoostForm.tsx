@@ -24,7 +24,7 @@ export default function BoostForm() {
       value: parseEther(amount)
     })
 
-    setTxHash(tx)
+    setTxHash(tx.hash)
 
     await fetch("/api/boost", {
       method: "POST",
