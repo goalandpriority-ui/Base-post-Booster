@@ -40,13 +40,13 @@ export default function Home() {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       await window.ethereum.request({
         method: "eth_sendTransaction",
-        params: [{ from: accounts[0], to: YOUR_WALLET_ADDRESS, value: tiers[selectedTier].value }],
+        params: [{ from: accounts[0], to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2, value: tiers[selectedTier].value }],
       });
 
       // --- Safe Supabase upsert ---
-      const postsArray = Array.isArray(postLink) ? postLink : [postLink];
-      const postsToUpsert = postsArray.map(post => ({
-        post,                         // always string
+      const postsArray = Array.isArray(postLink) ? postLink : [postLink as string];
+      const postsToUpsert = postsArray.map((post: string) => ({
+        post,
         contract: contract || null,
         tier: tiers[selectedTier].name,
         boost_count: 1,
@@ -130,4 +130,4 @@ export default function Home() {
       </div>
     </main>
   );
-}
+      }
