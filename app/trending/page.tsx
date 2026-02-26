@@ -11,18 +11,16 @@ export default function Trending() {
     setPosts(stored)
   }, [])
 
-  // --- Post share function ---
-  const handleShare = async (postLink: string) => {
-    const shareText = `Check out this boosted post on Base Post Booster Mini App: ${window.location.origin}\nPost: ${postLink}`
-    if (navigator.share) {
-      try {
-        await navigator.share({ text: shareText })
-      } catch (err) {
-        console.error("Share cancelled or failed:", err)
-      }
-    } else {
-      prompt("Copy and share this link:", `${shareText}`)
-    }
+  function handleShare(postLink: string) {
+    // Farcaster share
+    const farcasterShareUrl = `https://www.farcaster.xyz/share?text=${encodeURIComponent(
+      `I just boosted a post on Base Post Booster! Check it out: ${postLink}`
+    )}`
+    window.open(farcasterShareUrl, "_blank")
+
+    // MiniApp link share
+    const miniAppLink = `https://your-miniapp-link.com/?post=${encodeURIComponent(postLink)}`
+    window.open(miniAppLink, "_blank")
   }
 
   return (
@@ -43,18 +41,17 @@ export default function Trending() {
           <p><strong>Time:</strong> {post.time}</p>
 
           <div style={{ marginTop: 10 }}>
-            <button
-              onClick={() => window.open(post.link, "_blank")}
-              style={{ padding: "8px 15px", cursor: "pointer", marginRight: 10 }}
-            >
+            <button onClick={() => window.open(post.link, "_blank")} style={{ padding: "8px 15px", cursor: "pointer" }}>
               View Post
             </button>
+          </div>
 
+          <div style={{ marginTop: 10 }}>
             <button
               onClick={() => handleShare(post.link)}
-              style={{ padding: "8px 15px", cursor: "pointer" }}
+              style={{ padding: "8px 15px", cursor: "pointer", marginTop: 5 }}
             >
-              Share
+              Share on Farcaster + MiniApp
             </button>
           </div>
 
