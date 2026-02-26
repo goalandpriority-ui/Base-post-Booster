@@ -8,125 +8,162 @@ declare global {
   }
 }
 
-const tiers = [
-  { name: "Basic", value: "0x38D7EA4C68000", eth: "0.001" },   // 0.001 ETH
-  { name: "Pro", value: "0xAA87BEE538000", eth: "0.003" },    // 0.003 ETH
-  { name: "Elite", value: "0x11C37937E08000", eth: "0.005" }, // 0.005 ETH
-]
+export default function Home() {
+  const [selectedTier, setSelectedTier] = useState(0)
+  const [postLink, setPostLink] = useState("")
 
-export default function Page() {
-  const [account, setAccount] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [selectedTier, setSelectedTier] = useState(tiers[0])
+  const tiers = [
+    {
+      name: "Basic",
+      value: "0x38D7EA4C68000", // 0.001 ETH
+      eth: "0.001",
+      duration: "24 Hours Boost",
+      desc: "Starter visibility push",
+    },
+    {
+      name: "Pro",
+      value: "0xAA87BEE538000", // 0.003 ETH
+      eth: "0.003",
+      duration: "48 Hours Boost",
+      desc: "High reach promotion",
+    },
+    {
+      name: "Elite",
+      value: "0x11C37937E08000", // 0.005 ETH
+      eth: "0.005",
+      duration: "72 Hours Boost",
+      desc: "Maximum exposure",
+    },
+  ]
 
-  const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert("Install MetaMask")
+  async function handleBoost() {
+    if (!postLink) {
+      alert("Please paste your post link")
       return
     }
 
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    })
+    if (!window.ethereum) {
+      alert("Please install MetaMask")
+      return
+    }
 
-    setAccount(accounts[0])
-  }
-
-  const switchToBase = async () => {
-    await window.ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: "0x2105" }], // Base Mainnet (8453)
-    })
-  }
-
-  const sendBoost = async () => {
     try {
-      if (!window.ethereum) return alert("Install MetaMask")
-      if (!account) return alert("Connect wallet first")
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      })
 
-      setLoading(true)
-
-      await switchToBase()
+      const selected = tiers[selectedTier]
 
       await window.ethereum.request({
         method: "eth_sendTransaction",
         params: [
           {
-            from: account,
-            to: "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2", // 👈 CHANGE THIS
-            value: selectedTier.value,
+            from: accounts[0],
+            to: "0xYOUR_WALLET_ADDRESS_HERE", // 🔥 replace with your wallet
+            value: selected.value,
           },
         ],
       })
 
-      alert(`${selectedTier.name} Boost Sent on Base 🔵`)
+      alert("Boost payment sent successfully 🚀")
     } catch (err) {
       console.error(err)
       alert("Transaction failed")
-    } finally {
-      setLoading(false)
     }
   }
 
   return (
-    <div
+    <main
       style={{
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "Arial",
+        padding: 40,
+        fontFamily: "sans-serif",
       }}
     >
-      <h1 style={{ marginBottom: 10 }}>🚀 Base Post Booster</h1>
-      <p style={{ marginBottom: 30, color: "gray" }}>
-        Boost your post visibility on Base
-      </p>
+      <h1 style={{ marginBottom: 30 }}>🚀 Boost Your Post</h1>
 
-      {!account && (
-        <button
-          onClick={connectWallet}
-          style={{ padding: "10px 20px", marginBottom: 30 }}
-        >
-          Connect Wallet
-        </button>
-      )}
-
-      <div style={{ display: "flex", gap: 20 }}>
-        {tiers.map((tier) => (
+      {/* Tier Cards */}
+      <div
+        style={{
+          display: "flex",
+          gap: 20,
+          marginBottom: 40,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        {tiers.map((tier, index) => (
           <div
-            key={tier.name}
-            onClick={() => setSelectedTier(tier)}
+            key={index}
+            onClick={() => setSelectedTier(index)}
             style={{
-              padding: 25,
-              borderRadius: 14,
-              cursor: "pointer",
               border:
-                selectedTier.name === tier.name
-                  ? "2px solid #0052FF"
-                  : "1px solid #ddd",
-              minWidth: 120,
+                selectedTier === index
+                  ? "3px solid black"
+                  : "1px solid #ccc",
+              padding: 20,
+              borderRadius: 12,
+              width: 200,
+              cursor: "pointer",
               textAlign: "center",
+              background:
+                selectedTier === index ? "#f5f5f5" : "white",
             }}
           >
-            <h3>{tier.name}</h3>
-            <p>{tier.eth} ETH</p>
+            <h3 style={{ marginBottom: 6 }}>{tier.name}</h3>
+
+            <p style={{ fontWeight: "bold", marginBottom: 6 }}>
+              {tier.eth} ETH
+            </p>
+
+            <p style={{ fontSize: 13, color: "gray", marginBottom: 4 }}>
+              {tier.duration}
+            </p>
+
+            <p style={{ fontSize: 12, opacity: 0.8 }}>
+              {tier.desc}
+            </p>
           </div>
         ))}
       </div>
 
-      <button
-        onClick={sendBoost}
-        disabled={!account || loading}
+      {/* Post Link Input */}
+      <p style={{ fontWeight: "bold", marginBottom: 8 }}>
+        Post URL
+      </p>
+
+      <input
+        type="text"
+        placeholder="Paste your post link here..."
+        value={postLink}
+        onChange={(e) => setPostLink(e.target.value)}
         style={{
-          marginTop: 30,
+          padding: "12px",
+          width: "100%",
+          maxWidth: 400,
+          marginBottom: 30,
+          borderRadius: 8,
+          border: "1px solid #ccc",
+        }}
+      />
+
+      {/* Boost Button */}
+      <button
+        onClick={handleBoost}
+        style={{
           padding: "12px 30px",
           borderRadius: 8,
+          border: "2px solid black",
+          background: "white",
+          cursor: "pointer",
+          fontWeight: "bold",
         }}
       >
-        {loading ? "Processing..." : "Boost Now"}
+        Boost Now
       </button>
-    </div>
+    </main>
   )
 }
