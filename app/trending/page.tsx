@@ -1,122 +1,75 @@
-// app/page.tsx
+// app/trending/page.tsx
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
-
-declare global {
-  interface Window {
-    ethereum?: any
-  }
-}
 
 // Supabase setup
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
-const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
-const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
+export default function Trending() {
+  const [boostedPosts, setBoostedPosts] = useState<any[]>([])
 
-export default function Home() {
-  const [selectedTier, setSelectedTier] = useState(0)
-  const [postLink, setPostLink] = useState("")
-  const [contract, setContract] = useState("")
-  const [loading, setLoading] = useState(false)
+  // Fetch boosted posts from Supabase on load
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        const { data, error } = await supabase
+          .from("boosted_posts")
+          .select("*")
+          .order("updated_at", { ascending: false })
 
-  const tiers = [
-    { name: "Basic", price: "0.001 ETH", duration: "24 Hours Boost", value: "0x38D7EA4C68000" },
-    { name: "Pro", price: "0.003 ETH", duration: "48 Hours Boost", value: "0xAA87BEE538000" },
-    { name: "Elite", price: "0.005 ETH", duration: "72 Hours Boost", value: "0x11C37937E08000" },
-  ]
-
-  async function handleBoost() {
-    if (!postLink) { alert("Paste post link"); return }
-    if (!window.ethereum) { alert("Install MetaMask"); return }
-
-    try {
-      setLoading(true)
-
-      // Ethereum payment
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
-      await window.ethereum.request({
-        method: "eth_sendTransaction",
-        params: [{ from: accounts[0], to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2, value: tiers[selectedTier].value }],
-      })
-
-      // Supabase upsert
-      const postsToUpsert = [
-        {
-          post: postLink, // must be string, not string[]
-          contract: contract || null,
-          tier: tiers[selectedTier].name,
-          boost_count: 1,
-          updated_at: new Date().toISOString(),
+        if (error) {
+          console.error("Supabase fetch error:", error)
+          // fallback to localStorage
+          const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
+          setBoostedPosts(stored)
+        } else {
+          setBoostedPosts(data || [])
         }
-      ]
+      } catch (err) {
+        console.error("Fetch failed:", err)
+        const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
+        setBoostedPosts(stored)
+      }
+    }
 
-      const { data, error } = await supabase
-        .from("boosted_posts")
-        .upsert(postsToUpsert, { onConflict: "post" })
+    fetchPosts()
+  }, [])
 
-      if (error) console.error("Supabase upsert error:", error)
-      else console.log("Supabase upsert success:", data)
-
-      // LocalStorage update
-      let existing: any[] = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
-      const index = existing.findIndex(item => item.link === postLink)
-      if (index !== -1) existing[index].boostCount += 1
-      else existing.push({ link: postLink, contract, tier: tiers[selectedTier].name, boostCount: 1, time: new Date().toLocaleString() })
-      localStorage.setItem("boostedPosts", JSON.stringify(existing))
-
-      // Share
-      const shareText = `I just boosted a post! Check it here: ${postLink} via ${MINI_APP_LINK}`
-      if (navigator.share) await navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
-      else console.log("Share API not supported:", shareText)
-
-      alert("Boost successful")
-      setPostLink(""); setContract("")
-    } catch (err) {
-      console.error(err)
-      alert("Transaction failed")
-    } finally {
-      setLoading(false)
+  // Share function for each post
+  function handleShare(postLink: string) {
+    const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
+    const shareText = `Check this boosted post: ${postLink} via ${MINI_APP_LINK}`
+    if (navigator.share) {
+      navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
+    } else {
+      alert("Share fallback: " + shareText)
     }
   }
 
   return (
-    <main style={{ padding: 20, textAlign: "center", maxWidth: 500, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 28, marginBottom: 30 }}>Base Post Booster</h1>
+    <main style={{ padding: 20, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
+      <h1 style={{ fontSize: 28, marginBottom: 30 }}>Trending Boosted Posts</h1>
 
-      <div style={{ marginBottom: 30 }}>
-        {tiers.map((tier, i) => (
-          <div
-            key={i}
-            onClick={() => setSelectedTier(i)}
-            style={{
-              border: selectedTier === i ? "2px solid black" : "1px solid gray",
-              padding: 15, marginBottom: 15, cursor: "pointer"
-            }}
-          >
-            <h3>{tier.name}</h3>
-            <p>{tier.price}</p>
-            <p style={{ fontSize: 14, color: "gray" }}>{tier.duration}</p>
+      {boostedPosts.length === 0 ? (
+        <p>No boosted posts yet</p>
+      ) : (
+        boostedPosts.map((post, i) => (
+          <div key={i} style={{ border: "1px solid gray", padding: 15, marginBottom: 15 }}>
+            <p><strong>Post:</strong> {post.post}</p>
+            <p><strong>Contract:</strong> {post.contract || "-"}</p>
+            <p><strong>Tier:</strong> {post.tier}</p>
+            <p><strong>Boost Count:</strong> {post.boost_count}</p>
+            <p><strong>Time:</strong> {new Date(post.updated_at).toLocaleString()}</p>
+            <button onClick={() => handleShare(post.post)} style={{ marginTop: 10, cursor: "pointer" }}>
+              Share
+            </button>
           </div>
-        ))}
-      </div>
-
-      <input type="text" placeholder="Paste Base post link" value={postLink} onChange={e => setPostLink(e.target.value)} style={{ padding: 12, width: "100%", boxSizing: "border-box", marginBottom: 10 }} />
-      <input type="text" placeholder="Coin Contract Address" value={contract} onChange={e => setContract(e.target.value)} style={{ padding: 12, width: "100%", boxSizing: "border-box" }} />
-
-      <div style={{ marginTop: 20 }}>
-        <button onClick={handleBoost} disabled={loading} style={{ padding: "10px 20px", cursor: "pointer" }}>
-          {loading ? "Processing..." : "Boost Now"}
-        </button>
-      </div>
-
-      <div style={{ marginTop: 40 }}>
-        <a href="/trending">View Trending Posts</a>
-      </div>
+        ))
+      )}
     </main>
   )
 }
