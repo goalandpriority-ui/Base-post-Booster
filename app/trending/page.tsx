@@ -2,7 +2,20 @@
 
 import { useEffect, useState } from "react"
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
+import { Line } from "react-chartjs-2"
 import Link from "next/link"
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from "chart.js"
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -12,6 +25,7 @@ const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
 
 export default function Trending() {
   const [boostedPosts, setBoostedPosts] = useState<any[]>([])
+  const [selectedPost, setSelectedPost] = useState<any | null>(null)
 
   useEffect(() => {
     async function fetchPosts() {
@@ -34,7 +48,6 @@ export default function Trending() {
         setBoostedPosts(stored)
       }
     }
-
     fetchPosts()
   }, [])
 
@@ -47,29 +60,59 @@ export default function Trending() {
     }
   }
 
+  // Prepare chart data for selected post
+  const chartData = selectedPost
+    ? {
+        labels: [selectedPost.updated_at], // single point for demo
+        datasets: [
+          {
+            label: selectedPost.post + " ($UrMom)",
+            data: [selectedPost.boost_count],
+            borderColor: "rgba(75,192,192,1)",
+            backgroundColor: "rgba(75,192,192,0.2)",
+            tension: 0.4
+          }
+        ]
+      }
+    : null
+
   return (
     <main style={{ padding: 20, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 28, marginBottom: 30 }}>Trending Boosted Posts</h1>
+      {!selectedPost ? (
+        <>
+          <h1 style={{ fontSize: 28, marginBottom: 30 }}>Trending Boosted Posts</h1>
 
-      <div style={{ marginBottom: 20 }}>
-        <Link href="/">← Back to Boost Page</Link>
-      </div>
-
-      {boostedPosts.length === 0 ? (
-        <p>No boosted posts yet</p>
+          {boostedPosts.length === 0 ? (
+            <p>No boosted posts yet</p>
+          ) : (
+            boostedPosts.map((post, i) => (
+              <div
+                key={i}
+                style={{ border: "1px solid gray", padding: 15, marginBottom: 15, cursor: "pointer" }}
+                onClick={() => setSelectedPost(post)}
+              >
+                <p><strong>Post:</strong> {post.post}</p>
+                <p><strong>Contract:</strong> {post.contract || "-"}</p>
+                <p><strong>Tier:</strong> {post.tier}</p>
+                <p><strong>Boost Count:</strong> {post.boost_count}</p>
+                <p><strong>Time:</strong> {new Date(post.updated_at).toLocaleString()}</p>
+                <button onClick={(e) => { e.stopPropagation(); handleShare(post.post) }} style={{ marginTop: 10, cursor: "pointer" }}>
+                  Share
+                </button>
+              </div>
+            ))
+          )}
+        </>
       ) : (
-        boostedPosts.map((post, i) => (
-          <div key={i} style={{ border: "1px solid gray", padding: 15, marginBottom: 15 }}>
-            <p><strong>Post:</strong> {post.post}</p>
-            <p><strong>Contract:</strong> {post.contract || "-"}</p>
-            <p><strong>Tier:</strong> {post.tier}</p>
-            <p><strong>Boost Count:</strong> {post.boost_count}</p>
-            <p><strong>Time:</strong> {new Date(post.updated_at).toLocaleString()}</p>
-            <button onClick={() => handleShare(post.post)} style={{ marginTop: 10, cursor: "pointer" }}>
-              Share
+        <>
+          <h2 style={{ fontSize: 24, marginBottom: 20 }}>Post Chart: {selectedPost.post}</h2>
+          {chartData && <Line data={chartData} />}
+          <div style={{ marginTop: 20 }}>
+            <button onClick={() => setSelectedPost(null)} style={{ padding: "10px 20px", cursor: "pointer" }}>
+              Back to Trending
             </button>
           </div>
-        ))
+        </>
       )}
     </main>
   )
