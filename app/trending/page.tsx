@@ -12,7 +12,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
-// Dynamic chart import to avoid SSR issues
+// Dynamic chart import to avoid SSR errors
 const Line = dynamic(() => import("react-chartjs-2").then(mod => mod.Line), { ssr: false })
 import {
   Chart as ChartJS,
@@ -39,9 +39,13 @@ export default function Trending() {
           .select("*")
           .order("updated_at", { ascending: false })
 
+        console.log("Supabase data:", data)
+        console.log("Supabase error:", error)
+
         if (error) throw error
         setBoostedPosts(data || [])
-      } catch {
+      } catch (err) {
+        console.error("Fetch error:", err)
         const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
         setBoostedPosts(stored)
       } finally {
@@ -61,8 +65,6 @@ export default function Trending() {
   return (
     <main className="p-6 max-w-5xl mx-auto">
       <Toaster position="top-right" />
-
-      {/* Header with Back button */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Trending Boosted Posts</h1>
         <Link href="/" className="text-blue-600 hover:underline">
@@ -70,11 +72,10 @@ export default function Trending() {
         </Link>
       </div>
 
-      {/* Loading */}
       {loading ? (
-        <p className="text-gray-500 text-center">Loading...</p>
+        <p className="text-gray-500">Loading...</p>
       ) : boostedPosts.length === 0 ? (
-        <p className="text-gray-500 text-center">No boosted posts yet</p>
+        <p className="text-gray-500">No boosted posts yet</p>
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
           {boostedPosts.map((post, i) => {
@@ -83,35 +84,30 @@ export default function Trending() {
               datasets: [
                 {
                   label: post.tier ? `$${post.tier} Price` : "$UrMom Price",
-                  data: [10, 20, 15, 25, 30],
-                  borderColor: "rgba(34,197,94,1)",
-                  backgroundColor: "rgba(34,197,94,0.2)",
-                  tension: 0.4,
-                  fill: true,
+                  data: [10, 20, 15, 25, 30], // Replace with real coin data if needed
+                  borderColor: "rgba(75,192,192,1)",
+                  backgroundColor: "rgba(75,192,192,0.2)",
+                  tension: 0.3,
                 },
               ],
             }
 
             return (
-              <div key={i} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300">
-                <p className="font-semibold text-lg mb-1">Post:</p>
-                <p className="mb-2">{post.post}</p>
+              <div key={i} className="border rounded-lg p-4 shadow hover:shadow-lg transition">
+                <p><strong>Post:</strong> {post.post}</p>
+                <p><strong>Contract:</strong> {post.contract || "-"}</p>
+                <p><strong>Tier:</strong> {post.tier}</p>
+                <p><strong>Boost Count:</strong> {post.boost_count}</p>
+                <p><strong>Time:</strong> {new Date(post.updated_at).toLocaleString()}</p>
 
-                <p className="text-sm text-gray-500">Contract: {post.contract || "-"}</p>
-                <p className="text-sm text-gray-500">Tier: {post.tier}</p>
-                <p className="text-sm text-gray-500">Boost Count: {post.boost_count}</p>
-                <p className="text-sm text-gray-400 mb-4">{new Date(post.updated_at).toLocaleString()}</p>
-
-                {/* Chart */}
                 <div className="mt-4">
                   <Line
                     data={chartData}
                     options={{
                       responsive: true,
                       plugins: {
-                        legend: { position: "top", labels: { color: "#111", font: { size: 14 } } },
-                        title: { display: true, text: "Boosted Coin Chart", color: "#111", font: { size: 16 } },
-                        tooltip: { backgroundColor: "#111", titleColor: "#fff", bodyColor: "#fff" },
+                        legend: { position: "top" },
+                        title: { display: true, text: "Boosted Coin Chart" },
                       },
                     }}
                   />
@@ -119,7 +115,7 @@ export default function Trending() {
 
                 <button
                   onClick={() => handleShare(post.post)}
-                  className="mt-4 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors"
+                  className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
                 >
                   Share
                 </button>
