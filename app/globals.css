@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================= */
+/* 🏆 Animated Badge Effects */
+/* ============================= */
+
+/* 🥇 Gold Glow */
+@keyframes goldPulse {
+  0% { box-shadow: 0 0 5px #facc15; }
+  50% { box-shadow: 0 0 20px #facc15; }
+  100% { box-shadow: 0 0 5px #facc15; }
+}
+
+.gold-animate {
+  animation: goldPulse 1.5s infinite;
+}
+
+/* 🥈 Silver Shimmer */
+@keyframes shimmer {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.silver-animate {
+  animation: shimmer 2s infinite;
+}
+
+/* 🥉 Bronze Pop */
+@keyframes bronzePop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.bronze-animate {
+  animation: bronzePop 1.8s infinite;
+}
+
+/* 🔥 HOT Blink */
+@keyframes hotBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hot-animate {
+  animation: hotBlink 1s infinite;
+}
