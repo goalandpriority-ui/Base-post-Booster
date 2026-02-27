@@ -32,53 +32,97 @@ export default function Home() {
   ]
 
   async function handleBoost() {
-    if (!postLink) { alert("Paste post link"); return }
-    if (!window.ethereum) { alert("Install MetaMask"); return }
+    if (!postLink) {
+      alert("Paste post link")
+      return
+    }
+
+    if (!window.ethereum) {
+      alert("Install MetaMask")
+      return
+    }
 
     try {
       setLoading(true)
 
-      // Ethereum payment
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
+      // 🔥 Request wallet
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      })
+
+      // 🔥 Send ETH payment
       await window.ethereum.request({
         method: "eth_sendTransaction",
         params: [{
-          from: accounts[0],           // User wallet
-          to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2,     // Your receiving wallet
-          value: tiers[selectedTier].value
+          from: accounts[0],
+          to: YOUR_WALLET_ADDRESS,
+          value: tiers[selectedTier].value,
         }],
       })
 
-      // Supabase upsert
-      const postsToUpsert = [{
-        post: postLink,
-        contract: contract || null,
-        tier: tiers[selectedTier].name,
-        boost_count: 1,
-        updated_at: new Date().toISOString(),
-      }]
-
-      const { data, error } = await supabase
+      // 🔥 Check if post already exists
+      const { data: existingPost } = await supabase
         .from("boosted_posts")
-        .upsert(postsToUpsert, { onConflict: "post" })
+        .select("*")
+        .eq("post", postLink)
+        .maybeSingle()
 
-      if (error) console.error("Supabase upsert error:", error)
-      else console.log("Supabase upsert success:", data)
+      if (existingPost) {
+        // 🔥 Increment boost count
+        await supabase
+          .from("boosted_posts")
+          .update({
+            boost_count: existingPost.boost_count + 1,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("post", postLink)
 
-      // LocalStorage update
+      } else {
+        // 🔥 Insert new boosted post
+        await supabase
+          .from("boosted_posts")
+          .insert([{
+            post: postLink,
+            contract: contract || null,
+            tier: tiers[selectedTier].name,
+            boost_count: 1,
+            updated_at: new Date().toISOString(),
+          }])
+      }
+
+      // 🔥 Local backup
       let existing: any[] = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
       const index = existing.findIndex(item => item.post === postLink)
-      if (index !== -1) existing[index].boost_count += 1
-      else existing.push(postsToUpsert[0])
+
+      if (index !== -1) {
+        existing[index].boost_count += 1
+      } else {
+        existing.push({
+          post: postLink,
+          contract,
+          tier: tiers[selectedTier].name,
+          boost_count: 1,
+          updated_at: new Date().toISOString(),
+        })
+      }
+
       localStorage.setItem("boostedPosts", JSON.stringify(existing))
 
-      // Auto share to Farcaster / Mini app
+      // 🔥 Share
       const shareText = `I just boosted a post! Check it here: ${postLink} via ${MINI_APP_LINK}`
-      if (navigator.share) await navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
-      else console.log("Share API not supported, fallback link:", shareText)
 
-      alert("Boost successful")
-      setPostLink(""); setContract("")
+      if (navigator.share) {
+        await navigator.share({
+          text: shareText,
+          url: MINI_APP_LINK,
+          title: "Base Post Booster",
+        })
+      }
+
+      alert("Boost successful 🚀")
+      setPostLink("")
+      setContract("")
+
     } catch (err) {
       console.error(err)
       alert("Transaction failed")
@@ -91,6 +135,7 @@ export default function Home() {
     <main style={{ padding: 20, textAlign: "center", maxWidth: 500, margin: "0 auto" }}>
       <h1 style={{ fontSize: 28, marginBottom: 30 }}>Base Post Booster</h1>
 
+      {/* Tier Selection */}
       <div style={{ marginBottom: 30 }}>
         {tiers.map((tier, i) => (
           <div
@@ -98,7 +143,9 @@ export default function Home() {
             onClick={() => setSelectedTier(i)}
             style={{
               border: selectedTier === i ? "2px solid black" : "1px solid gray",
-              padding: 15, marginBottom: 15, cursor: "pointer"
+              padding: 15,
+              marginBottom: 15,
+              cursor: "pointer",
             }}
           >
             <h3>{tier.name}</h3>
@@ -108,15 +155,35 @@ export default function Home() {
         ))}
       </div>
 
-      <input type="text" placeholder="Paste Base post link" value={postLink} onChange={e => setPostLink(e.target.value)} style={{ padding: 12, width: "100%", boxSizing: "border-box", marginBottom: 10 }} />
-      <input type="text" placeholder="Coin Contract Address" value={contract} onChange={e => setContract(e.target.value)} style={{ padding: 12, width: "100%", boxSizing: "border-box" }} />
+      {/* Inputs */}
+      <input
+        type="text"
+        placeholder="Paste Base post link"
+        value={postLink}
+        onChange={e => setPostLink(e.target.value)}
+        style={{ padding: 12, width: "100%", marginBottom: 10 }}
+      />
 
+      <input
+        type="text"
+        placeholder="Coin Contract Address (optional)"
+        value={contract}
+        onChange={e => setContract(e.target.value)}
+        style={{ padding: 12, width: "100%" }}
+      />
+
+      {/* Boost Button */}
       <div style={{ marginTop: 20 }}>
-        <button onClick={handleBoost} disabled={loading} style={{ padding: "10px 20px", cursor: "pointer" }}>
+        <button
+          onClick={handleBoost}
+          disabled={loading}
+          style={{ padding: "10px 20px", cursor: "pointer" }}
+        >
           {loading ? "Processing..." : "Boost Now"}
         </button>
       </div>
 
+      {/* Trending Link */}
       <div style={{ marginTop: 40 }}>
         <Link href="/trending">View Trending Posts</Link>
       </div>
