@@ -20,7 +20,8 @@
     "react-hot-toast": "^2.4.1",
     "react-chartjs-2": "^5.2.0",
     "chart.js": "^4.3.0",
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "framer-motion": "^11.0.0"
   },
   "devDependencies": {
     "prisma": "^5.22.0",
