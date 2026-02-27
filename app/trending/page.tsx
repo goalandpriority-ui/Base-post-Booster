@@ -27,7 +27,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
-// Coin fetch interval in ms
+// Coin fetch interval
 const FETCH_INTERVAL = 10000 // 10 seconds
 
 export default function Trending() {
@@ -58,29 +58,29 @@ export default function Trending() {
     fetchPosts()
   }, [])
 
-  // Fetch coin prices periodically
+  // Fetch coin prices periodically (live chart)
   useEffect(() => {
-    let interval: NodeJS.Timer
+    let interval: number | undefined
+
     async function fetchCoinPrices() {
       try {
         const newPrices: { [contract: string]: number } = {}
 
         for (const post of boostedPosts) {
           if (!post.contract) continue
-          // Using CoinGecko API as example
+          // CoinGecko API example
           const res = await axios.get(
             `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${post.contract}&vs_currencies=usd`
           )
           newPrices[post.contract] = res.data[post.contract.toLowerCase()]?.usd || 0
         }
 
-        // Update chart prices
         setCoinPrices(prev => {
           const updated: { [contract: string]: number[] } = { ...prev }
           for (const contract in newPrices) {
             if (!updated[contract]) updated[contract] = []
             updated[contract].push(newPrices[contract])
-            if (updated[contract].length > 10) updated[contract].shift() // keep last 10 points
+            if (updated[contract].length > 10) updated[contract].shift() // last 10 points only
           }
           return updated
         })
@@ -90,11 +90,13 @@ export default function Trending() {
     }
 
     if (boostedPosts.length > 0) {
-      fetchCoinPrices() // first fetch immediately
-      interval = setInterval(fetchCoinPrices, FETCH_INTERVAL)
+      fetchCoinPrices()
+      interval = window.setInterval(fetchCoinPrices, FETCH_INTERVAL)
     }
 
-    return () => clearInterval(interval)
+    return () => {
+      if (interval) window.clearInterval(interval)
+    }
   }, [boostedPosts])
 
   function handleShare(postLink: string) {
