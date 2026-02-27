@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
 
 type Post = {
   id: number
@@ -76,31 +77,41 @@ export default function TrendingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #0f172a, #1e293b)",
+        }}
+        className="flex items-center justify-center text-white"
+      >
         Loading trending posts...
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-8">
-
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #0f172a, #1e293b)",
+      }}
+      className="text-white p-8"
+    >
       {/* HEADER */}
       <h1 className="text-3xl font-bold mb-2">
-        Trending Boosted Posts
+        🔥 Trending Boosted Posts
       </h1>
 
       <div className="mb-8">
-        <a
+        <Link
           href="/"
-          className="text-sm text-blue-500 hover:text-blue-400 transition"
+          className="text-sm text-blue-400 hover:text-blue-300 transition"
         >
           ← Back to Home
-        </a>
+        </Link>
       </div>
 
       {posts.length === 0 ? (
-        /* EMPTY STATE */
         <div className="flex flex-col items-center justify-center mt-20 text-center">
           <div className="text-6xl mb-4">🚀</div>
           <h2 className="text-xl font-semibold mb-2">
@@ -109,17 +120,15 @@ export default function TrendingPage() {
           <p className="text-gray-400 mb-6">
             Be the first to boost and appear on leaderboard!
           </p>
-          <a
+          <Link
             href="/"
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
           >
             🚀 Boost Now
-          </a>
+          </Link>
         </div>
       ) : (
-
-        /* LEADERBOARD */
-        <motion.div layout className="space-y-4">
+        <motion.div layout className="space-y-5">
           <AnimatePresence>
             {posts.map((post, index) => {
               const isNew = newIds.includes(post.id)
@@ -137,17 +146,17 @@ export default function TrendingPage() {
                     stiffness: 400,
                     damping: 25,
                   }}
-                  className={`relative p-6 rounded-xl bg-zinc-900 border border-zinc-800 flex justify-between items-center overflow-hidden hover:scale-[1.02] transition-all
+                  className={`relative p-6 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 flex justify-between items-center overflow-hidden hover:scale-[1.02] transition-all
                     ${index === 0 ? "ring-2 ring-yellow-400 shadow-lg shadow-yellow-500/20" : ""}
                     ${isNew ? "ring-2 ring-green-400 shadow-lg shadow-green-500/20" : ""}
                   `}
                 >
-                  {/* BIG BACKGROUND RANK */}
+                  {/* BIG FADED RANK */}
                   <div className="absolute right-6 text-[100px] font-extrabold text-white/5 select-none pointer-events-none">
                     #{index + 1}
                   </div>
 
-                  {/* 👑 Crown for #1 */}
+                  {/* 👑 Crown */}
                   {index === 0 && (
                     <div className="absolute -top-4 left-4 text-3xl animate-bounce">
                       👑
@@ -167,7 +176,7 @@ export default function TrendingPage() {
 
                   {/* CONTENT */}
                   <div className="relative z-10 max-w-[70%]">
-                    <p className="text-lg font-medium">
+                    <p className="text-lg font-medium break-words">
                       {post.content}
                     </p>
 
@@ -189,7 +198,7 @@ export default function TrendingPage() {
                       )}
                       {isHot && (
                         <span className="px-2 py-1 text-xs bg-red-600 rounded-full font-bold animate-pulse">
-                          HOT
+                          🔥 HOT
                         </span>
                       )}
                     </div>
