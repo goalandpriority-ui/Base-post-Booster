@@ -35,7 +35,7 @@ export default function Trending() {
   const [coinPrices, setCoinPrices] = useState<{ [contract: string]: number[] }>({})
   const [loading, setLoading] = useState(true)
 
-  // Fetch boosted posts from Supabase
+  // Fetch posts from Supabase
   useEffect(() => {
     async function fetchPosts() {
       try {
@@ -46,8 +46,7 @@ export default function Trending() {
 
         if (error) throw error
         setBoostedPosts(data || [])
-      } catch (err) {
-        console.error("Fetch failed:", err)
+      } catch {
         const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
         setBoostedPosts(stored)
       } finally {
@@ -58,17 +57,15 @@ export default function Trending() {
     fetchPosts()
   }, [])
 
-  // Fetch coin prices periodically (live chart)
+  // Fetch coin prices periodically
   useEffect(() => {
-    let interval: number | undefined
+    if (boostedPosts.length === 0) return
 
-    async function fetchCoinPrices() {
+    const interval = setInterval(async () => {
       try {
         const newPrices: { [contract: string]: number } = {}
-
         for (const post of boostedPosts) {
           if (!post.contract) continue
-          // CoinGecko API example
           const res = await axios.get(
             `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${post.contract}&vs_currencies=usd`
           )
@@ -80,25 +77,19 @@ export default function Trending() {
           for (const contract in newPrices) {
             if (!updated[contract]) updated[contract] = []
             updated[contract].push(newPrices[contract])
-            if (updated[contract].length > 10) updated[contract].shift() // last 10 points only
+            if (updated[contract].length > 10) updated[contract].shift()
           }
           return updated
         })
       } catch (err) {
         console.error("Coin fetch error:", err)
       }
-    }
+    }, FETCH_INTERVAL)
 
-    if (boostedPosts.length > 0) {
-      fetchCoinPrices()
-      interval = window.setInterval(fetchCoinPrices, FETCH_INTERVAL)
-    }
-
-    return () => {
-      if (interval) window.clearInterval(interval)
-    }
+    return () => clearInterval(interval)
   }, [boostedPosts])
 
+  // Share post
   function handleShare(postLink: string) {
     const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
     const shareText = `Check this boosted post: ${postLink} via ${MINI_APP_LINK}`
@@ -123,14 +114,13 @@ export default function Trending() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
           {boostedPosts.map((post, i) => {
+            const prices = coinPrices[post.contract!] || []
             const chartData = {
-              labels: Array(coinPrices[post.contract!]?.length || 0)
-                .fill("")
-                .map((_, idx) => `T-${coinPrices[post.contract!].length - idx}`),
+              labels: prices.map((_, idx) => `T-${prices.length - idx}`),
               datasets: [
                 {
                   label: post.tier ? `$${post.tier} Price` : "$Coin Price",
-                  data: coinPrices[post.contract!] || [],
+                  data: prices,
                   borderColor: "rgba(75,192,192,1)",
                   backgroundColor: "rgba(75,192,192,0.2)",
                   tension: 0.3,
