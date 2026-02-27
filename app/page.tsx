@@ -35,11 +35,6 @@ export default function Home() {
       return
     }
 
-    if (!contract) {
-      alert("Enter coin contract address")
-      return
-    }
-
     if (!window.ethereum) {
       alert("Install MetaMask")
       return
@@ -72,7 +67,7 @@ export default function Home() {
           .from("boosted_posts")
           .update({
             boost_count: existingPost.boost_count + 1,
-            contract: contract,
+            contract: contract || existingPost.contract,
             updated_at: new Date().toISOString(),
           })
           .eq("post", postLink)
@@ -81,14 +76,14 @@ export default function Home() {
           .from("boosted_posts")
           .insert([{
             post: postLink,
-            contract: contract,
+            contract: contract || null,
             tier: tiers[selectedTier].name,
             boost_count: 1,
             updated_at: new Date().toISOString(),
           }])
       }
 
-      alert("Boost successful 🚀")
+      alert("Boost successful")
       setPostLink("")
       setContract("")
 
@@ -112,10 +107,11 @@ export default function Home() {
         color: "white",
       }}
     >
-      <h1 style={{ fontSize: 28, marginBottom: 30 }}>
-        🚀 Base Post Booster
+      <h1 style={{ fontSize: 30, marginBottom: 30, fontWeight: "bold" }}>
+        Base Post Booster
       </h1>
 
+      {/* Tiers */}
       <div style={{ marginBottom: 30 }}>
         {tiers.map((tier, i) => (
           <div
@@ -123,16 +119,16 @@ export default function Home() {
             onClick={() => setSelectedTier(i)}
             style={{
               border: selectedTier === i ? "2px solid #38bdf8" : "1px solid #334155",
-              background: "#1e293b",
-              padding: 15,
+              background: selectedTier === i ? "#1e293b" : "#0f172a",
+              padding: 16,
               marginBottom: 15,
               cursor: "pointer",
-              borderRadius: 10,
+              borderRadius: 12,
               transition: "0.3s",
             }}
           >
-            <h3>{tier.name}</h3>
-            <p>{tier.price}</p>
+            <h3 style={{ marginBottom: 5 }}>{tier.name}</h3>
+            <p style={{ fontWeight: "bold" }}>{tier.price}</p>
             <p style={{ fontSize: 14, color: "#94a3b8" }}>
               {tier.duration}
             </p>
@@ -140,50 +136,39 @@ export default function Home() {
         ))}
       </div>
 
+      {/* Post Link */}
       <input
         type="text"
         placeholder="Paste Base post link"
         value={postLink}
         onChange={e => setPostLink(e.target.value)}
-        style={{
-          padding: 12,
-          width: "100%",
-          marginBottom: 10,
-          borderRadius: 8,
-          border: "1px solid #334155",
-          background: "#0f172a",
-          color: "white",
-        }}
+        style={inputStyle}
       />
 
+      {/* Optional Contract */}
       <input
         type="text"
-        placeholder="Coin Contract Address"
+        placeholder="Coin Contract Address (Optional)"
         value={contract}
         onChange={e => setContract(e.target.value)}
-        style={{
-          padding: 12,
-          width: "100%",
-          borderRadius: 8,
-          border: "1px solid #334155",
-          background: "#0f172a",
-          color: "white",
-        }}
+        style={{ ...inputStyle, marginTop: 10 }}
       />
 
+      {/* Button */}
       <div style={{ marginTop: 20 }}>
         <button
           onClick={handleBoost}
           disabled={loading}
           style={{
-            padding: "12px 20px",
+            padding: "14px 20px",
             cursor: "pointer",
             background: "#38bdf8",
             border: "none",
             color: "black",
             fontWeight: "bold",
-            borderRadius: 8,
+            borderRadius: 10,
             width: "100%",
+            fontSize: 16,
           }}
         >
           {loading ? "Processing..." : "Boost Now"}
@@ -191,10 +176,19 @@ export default function Home() {
       </div>
 
       <div style={{ marginTop: 40 }}>
-        <Link href="/trending" style={{ color: "#38bdf8" }}>
+        <Link href="/trending" style={{ color: "#38bdf8", fontWeight: "bold" }}>
           View Trending Posts →
         </Link>
       </div>
     </main>
   )
-          }
+}
+
+const inputStyle: React.CSSProperties = {
+  padding: 12,
+  width: "100%",
+  borderRadius: 10,
+  border: "1px solid #334155",
+  background: "#0f172a",
+  color: "white",
+}
