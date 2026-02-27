@@ -5,13 +5,14 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import toast, { Toaster } from "react-hot-toast"
+import axios from "axios"
 
 // Supabase setup
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
-// Dynamic chart import to avoid SSR errors
+// Dynamic chart import
 const Line = dynamic(() => import("react-chartjs-2").then(mod => mod.Line), { ssr: false })
 import {
   Chart as ChartJS,
@@ -26,33 +27,27 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
+// Coin fetch interval in ms
+const FETCH_INTERVAL = 10000 // 10 seconds
+
 export default function Trending() {
   const [boostedPosts, setBoostedPosts] = useState<any[]>([])
+  const [coinPrices, setCoinPrices] = useState<{ [contract: string]: number[] }>({})
   const [loading, setLoading] = useState(true)
 
+  // Fetch boosted posts from Supabase
   useEffect(() => {
     async function fetchPosts() {
       try {
-        // ✅ 5 seconds timeout fallback
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Supabase timeout")), 5000)
-        )
-
-        const supabasePromise = supabase
+        const { data, error } = await supabase
           .from("boosted_posts")
           .select("*")
           .order("updated_at", { ascending: false })
-
-        const { data, error } = await Promise.race([supabasePromise, timeoutPromise]) as any
-
-        console.log("Supabase data:", data)
-        console.log("Supabase error:", error)
 
         if (error) throw error
         setBoostedPosts(data || [])
       } catch (err) {
         console.error("Fetch failed:", err)
-        // fallback to localStorage
         const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
         setBoostedPosts(stored)
       } finally {
@@ -62,6 +57,45 @@ export default function Trending() {
 
     fetchPosts()
   }, [])
+
+  // Fetch coin prices periodically
+  useEffect(() => {
+    let interval: NodeJS.Timer
+    async function fetchCoinPrices() {
+      try {
+        const newPrices: { [contract: string]: number } = {}
+
+        for (const post of boostedPosts) {
+          if (!post.contract) continue
+          // Using CoinGecko API as example
+          const res = await axios.get(
+            `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${post.contract}&vs_currencies=usd`
+          )
+          newPrices[post.contract] = res.data[post.contract.toLowerCase()]?.usd || 0
+        }
+
+        // Update chart prices
+        setCoinPrices(prev => {
+          const updated: { [contract: string]: number[] } = { ...prev }
+          for (const contract in newPrices) {
+            if (!updated[contract]) updated[contract] = []
+            updated[contract].push(newPrices[contract])
+            if (updated[contract].length > 10) updated[contract].shift() // keep last 10 points
+          }
+          return updated
+        })
+      } catch (err) {
+        console.error("Coin fetch error:", err)
+      }
+    }
+
+    if (boostedPosts.length > 0) {
+      fetchCoinPrices() // first fetch immediately
+      interval = setInterval(fetchCoinPrices, FETCH_INTERVAL)
+    }
+
+    return () => clearInterval(interval)
+  }, [boostedPosts])
 
   function handleShare(postLink: string) {
     const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
@@ -88,11 +122,13 @@ export default function Trending() {
         <div className="grid gap-6 md:grid-cols-2">
           {boostedPosts.map((post, i) => {
             const chartData = {
-              labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+              labels: Array(coinPrices[post.contract!]?.length || 0)
+                .fill("")
+                .map((_, idx) => `T-${coinPrices[post.contract!].length - idx}`),
               datasets: [
                 {
-                  label: post.tier ? `$${post.tier} Price` : "$UrMom Price",
-                  data: [10, 20, 15, 25, 30], // later replace with real coin data
+                  label: post.tier ? `$${post.tier} Price` : "$Coin Price",
+                  data: coinPrices[post.contract!] || [],
                   borderColor: "rgba(75,192,192,1)",
                   backgroundColor: "rgba(75,192,192,0.2)",
                   tension: 0.3,
@@ -115,7 +151,7 @@ export default function Trending() {
                       responsive: true,
                       plugins: {
                         legend: { position: "top" },
-                        title: { display: true, text: "Boosted Coin Chart" },
+                        title: { display: true, text: "Live Coin Chart" },
                       },
                     }}
                   />
