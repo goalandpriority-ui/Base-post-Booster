@@ -8,10 +8,9 @@ type Post = {
   id: number
   content: string
   boost_count: number
-  coin?: string
-  user?: string
-  avatar?: string
-  history?: number[]
+  user_avatar?: string
+  user_handle?: string
+  coin_price?: number
 }
 
 const MINIAPP_URL = "https://base-post-booster.vercel.app"
@@ -20,8 +19,7 @@ export default function TrendingPage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [newIds, setNewIds] = useState<number[]>([])
-  const [expandedId, setExpandedId] = useState<number | null>(null)
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [expandedChart, setExpandedChart] = useState<number | null>(null)
   const previousIds = useRef<number[]>([])
 
   const fetchPosts = async () => {
@@ -58,15 +56,34 @@ export default function TrendingPage() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleShare = (post: Post) => {
-    const shareText = `${post.content}\nCheck leaderboard: ${MINIAPP_URL}`
-    navigator.clipboard.writeText(shareText)
-    alert("Miniapp link copied!")
+  const handleShare = async (post: Post) => {
+    const shareUrl = `${MINIAPP_URL}/trending`
+    const shareText = `${post.content}\n\nCheck leaderboard:\n${shareUrl}`
+
+    if (navigator.share) {
+      await navigator.share({
+        title: "Trending Boosted Post",
+        text: post.content,
+        url: shareUrl,
+      })
+    } else {
+      await navigator.clipboard.writeText(shareText)
+      alert("Miniapp link copied!")
+    }
   }
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", background: "#E3A6AE", display: "flex", alignItems: "center", justifyContent: "center", color: "black" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#E3A6AE",
+          color: "black",
+        }}
+      >
         Loading trending posts...
       </div>
     )
@@ -87,18 +104,26 @@ export default function TrendingPage() {
       {posts.length === 0 ? (
         <div style={{ textAlign: "center", marginTop: 80 }}>
           <h2>No boosted posts yet</h2>
-          <Link href="/" style={{ marginTop: 20, display: "inline-block", background: "black", color: "white", padding: "10px 20px", borderRadius: 8 }}>
+          <Link
+            href="/"
+            style={{
+              marginTop: 20,
+              display: "inline-block",
+              background: "black",
+              color: "white",
+              padding: "10px 20px",
+              borderRadius: 8,
+            }}
+          >
             Boost Now
           </Link>
         </div>
       ) : (
         <motion.div layout style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <AnimatePresence>
-            {posts.map((post, index) => {
+            {posts.map((post) => {
               const isNew = newIds.includes(post.id)
-              const isTop = index < 3
-              const isExpanded = expandedId === post.id
-              const isSelected = selectedId === post.id
+              const isExpanded = expandedChart === post.id
 
               return (
                 <motion.div
@@ -107,53 +132,108 @@ export default function TrendingPage() {
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  onClick={() => setSelectedId(isSelected ? null : post.id)}
                   style={{
-                    background: isSelected ? "#ffe4b5" : "white",
+                    background: "white",
                     padding: 20,
                     borderRadius: 12,
                     display: "flex",
                     flexDirection: "column",
-                    gap: 10,
-                    boxShadow: isTop ? "0 0 15px rgba(255,215,0,0.5)" : undefined,
-                    cursor: "pointer",
-                    transition: "0.3s",
+                    gap: 12,
                   }}
-                  onMouseEnter={() => console.log(`Hovering post ${post.id}`)}
-                  onMouseLeave={() => console.log(`Left post ${post.id}`)}
                 >
-                  {/* Top Info Row */}
+                  {/* User Avatar + Handle */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {post.user_avatar && (
+                      <img
+                        src={post.user_avatar}
+                        alt="avatar"
+                        style={{ width: 40, height: 40, borderRadius: "50%" }}
+                      />
+                    )}
+                    <span style={{ fontWeight: "bold" }}>
+                      {post.user_handle || "Anonymous"}
+                    </span>
+
+                    {isNew && (
+                      <span
+                        style={{
+                          marginLeft: 10,
+                          background: "green",
+                          color: "black",
+                          padding: "2px 6px",
+                          borderRadius: 6,
+                          fontSize: 12,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        NEW
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Post Content */}
+                  <p style={{ maxWidth: "100%" }}>{post.content}</p>
+
+                  {/* Boosts + Share */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      {post.avatar && <img src={post.avatar} alt="avatar" style={{ width: 40, height: 40, borderRadius: "50%" }} />}
-                      <span style={{ fontWeight: "bold" }}>{post.user || "Anon"}</span>
-                      {post.coin && (
-                        <span title={`Current price: $${(Math.random()*2000).toFixed(2)}`} style={{ marginLeft: 10, fontSize: 12, cursor: "help" }}>
-                          {post.coin}
-                        </span>
-                      )}
+                    <div>
+                      <p style={{ fontSize: 12 }}>Boosts</p>
+                      <p style={{ fontSize: 22, fontWeight: "bold" }}>{post.boost_count}</p>
                     </div>
 
-                    <button onClick={() => handleShare(post)} style={{ fontSize: 12, padding: "4px 8px", borderRadius: 6, background: "#38bdf8", border: "none", cursor: "pointer" }}>
-                      Share
-                    </button>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {post.coin_price && (
+                        <span
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "bold",
+                            padding: "2px 6px",
+                            background: "#f0f0f0",
+                            borderRadius: 6,
+                            cursor: "default",
+                          }}
+                          title={`Coin Price: $${post.coin_price}`}
+                        >
+                          ${post.coin_price}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => handleShare(post)}
+                        style={{
+                          padding: "6px 12px",
+                          borderRadius: 6,
+                          background: "#38bdf8",
+                          border: "none",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Share
+                      </button>
+
+                      <button
+                        onClick={() => setExpandedChart(isExpanded ? null : post.id)}
+                        style={{
+                          padding: "6px 12px",
+                          borderRadius: 6,
+                          background: "#fbbf24",
+                          border: "none",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {isExpanded ? "Hide Chart" : "View Chart"}
+                      </button>
+                    </div>
                   </div>
 
-                  <p>{post.content}</p>
-
-                  {/* Boost Count + Expand Chart */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span>Boosts: <b>{post.boost_count}</b></span>
-                    <button onClick={() => setExpandedId(isExpanded ? null : post.id)} style={{ fontSize: 12, padding: "4px 8px", borderRadius: 6, background: "#94a3b8", border: "none", cursor: "pointer" }}>
-                      {isExpanded ? "Collapse Chart" : "View Chart"}
-                    </button>
-                  </div>
-
-                  {/* Expandable Boost Chart */}
-                  {isExpanded && post.history && (
-                    <div style={{ marginTop: 10, height: 150, background: "#f0f0f0", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#333" }}>
-                      {/* Placeholder for chart */}
-                      Boost history chart for post {post.id}
+                  {/* Expandable Chart */}
+                  {isExpanded && (
+                    <div style={{ marginTop: 10, height: 200, background: "#e5e7eb", borderRadius: 8 }}>
+                      <iframe
+                        src={`https://widget.coinlore.com/coin_price_chart_widget/${post.id}`}
+                        style={{ width: "100%", height: "100%", border: "none", borderRadius: 8 }}
+                      />
                     </div>
                   )}
                 </motion.div>
