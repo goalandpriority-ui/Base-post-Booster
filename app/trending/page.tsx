@@ -1,155 +1,117 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { createClient, SupabaseClient } from "@supabase/supabase-js"
-import dynamic from "next/dynamic"
-import Link from "next/link"
-import toast, { Toaster } from "react-hot-toast"
-import axios from "axios"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+type Post = {
+  id: number
+  content: string
+  boost_count: number
+}
 
-const Line = dynamic(() => import("react-chartjs-2").then(mod => mod.Line), { ssr: false })
+export default function TrendingPage() {
+  const [posts, setPosts] = useState<Post[]>([])
+  const [loading, setLoading] = useState(true)
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js"
+  // Fetch posts
+  const fetchPosts = async () => {
+    try {
+      const res = await fetch("/api/posts")
+      const data = await res.json()
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
+      // Sort by boost_count DESC
+      const sorted = data.sort(
+        (a: Post, b: Post) => b.boost_count - a.boost_count
+      )
 
-const FETCH_INTERVAL = 10000
-
-export default function Trending() {
-  const [boostedPosts, setBoostedPosts] = useState<any[]>([])
-  const [coinPrices, setCoinPrices] = useState<{ [contract: string]: number[] }>({})
-
-  // 🔥 Fetch posts (NO loading state)
-  useEffect(() => {
-    async function fetchPosts() {
-      try {
-        const { data, error } = await supabase
-          .from("boosted_posts")
-          .select("*")
-          .order("updated_at", { ascending: false })
-
-        if (error) throw error
-        setBoostedPosts(data || [])
-      } catch {
-        const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
-        setBoostedPosts(stored)
-      }
+      setPosts(sorted)
+      setLoading(false)
+    } catch (err) {
+      console.error(err)
+      setLoading(false)
     }
+  }
 
+  // Initial load
+  useEffect(() => {
     fetchPosts()
   }, [])
 
-  // Coin price fetch
+  // ⚡ Real-time auto refresh every 5 sec
   useEffect(() => {
-    if (boostedPosts.length === 0) return
-
-    const interval = setInterval(async () => {
-      try {
-        const newPrices: { [contract: string]: number } = {}
-        for (const post of boostedPosts) {
-          if (!post.contract) continue
-          const res = await axios.get(
-            `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${post.contract}&vs_currencies=usd`
-          )
-          newPrices[post.contract] =
-            res.data[post.contract.toLowerCase()]?.usd || 0
-        }
-
-        setCoinPrices(prev => {
-          const updated: { [contract: string]: number[] } = { ...prev }
-          for (const contract in newPrices) {
-            if (!updated[contract]) updated[contract] = []
-            updated[contract].push(newPrices[contract])
-            if (updated[contract].length > 10) updated[contract].shift()
-          }
-          return updated
-        })
-      } catch (err) {
-        console.error("Coin fetch error:", err)
-      }
-    }, FETCH_INTERVAL)
+    const interval = setInterval(() => {
+      fetchPosts()
+    }, 5000)
 
     return () => clearInterval(interval)
-  }, [boostedPosts])
+  }, [])
 
-  function handleShare(postLink: string) {
-    const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
-    const shareText = `Check this boosted post: ${postLink} via ${MINI_APP_LINK}`
-
-    if (navigator.share)
-      navigator.share({ text: shareText, url: MINI_APP_LINK })
-    else toast.success("Share link ready!")
+  if (loading) {
+    return (
+      <div className="p-10 text-center text-gray-500">
+        Loading trending posts...
+      </div>
+    )
   }
 
   return (
-    <main className="p-6 max-w-5xl mx-auto">
-      <Toaster position="top-right" />
+    <div className="min-h-screen bg-black text-white p-8">
+      <h1 className="text-3xl font-bold mb-6">
+        🔥 Trending Boosted Posts
+      </h1>
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Trending Boosted Posts</h1>
-        <Link href="/" className="text-blue-600 hover:underline">
-          &larr; Back
-        </Link>
-      </div>
-
-      {/* 🔥 NO LOADING UI */}
-
-      {boostedPosts.length === 0 ? (
-        <p className="text-gray-500">No boosted posts yet</p>
+      {posts.length === 0 ? (
+        <p className="text-gray-400">No boosted posts yet</p>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          {boostedPosts.map((post, i) => {
-            const prices = coinPrices[post.contract!] || []
-
-            const chartData = {
-              labels: prices.map((_, idx) => `T-${prices.length - idx}`),
-              datasets: [
-                {
-                  label: "Live Coin Price",
-                  data: prices,
-                  borderColor: "rgba(75,192,192,1)",
-                  tension: 0.3,
-                },
-              ],
-            }
+        <div className="space-y-4">
+          {posts.map((post, index) => {
+            const isHot = post.boost_count > 5
 
             return (
-              <div key={i} className="border rounded-lg p-4 shadow">
-                <p><strong>Post:</strong> {post.post}</p>
-                <p><strong>Contract:</strong> {post.contract || "-"}</p>
-                <p><strong>Tier:</strong> {post.tier}</p>
-                <p><strong>Boost Count:</strong> {post.boost_count}</p>
+              <div
+                key={post.id}
+                className="p-5 rounded-xl bg-zinc-900 border border-zinc-800 flex justify-between items-center"
+              >
+                <div>
+                  <p className="text-lg">{post.content}</p>
 
-                {prices.length > 0 && (
-                  <div className="mt-4">
-                    <Line data={chartData} />
+                  <div className="flex gap-2 mt-2 items-center">
+                    {/* 🥇🥈🥉 Top 3 Badges */}
+                    {index === 0 && (
+                      <span className="px-2 py-1 text-xs bg-yellow-500 text-black rounded-full font-bold">
+                        🥇 Gold
+                      </span>
+                    )}
+                    {index === 1 && (
+                      <span className="px-2 py-1 text-xs bg-gray-300 text-black rounded-full font-bold">
+                        🥈 Silver
+                      </span>
+                    )}
+                    {index === 2 && (
+                      <span className="px-2 py-1 text-xs bg-orange-500 text-black rounded-full font-bold">
+                        🥉 Bronze
+                      </span>
+                    )}
+
+                    {/* 🔥 HOT badge */}
+                    {isHot && (
+                      <span className="px-2 py-1 text-xs bg-red-600 rounded-full font-bold">
+                        🔥 HOT
+                      </span>
+                    )}
                   </div>
-                )}
+                </div>
 
-                <button
-                  onClick={() => handleShare(post.post)}
-                  className="mt-4 w-full bg-blue-600 text-white py-2 rounded"
-                >
-                  Share
-                </button>
+                <div className="text-right">
+                  <p className="text-sm text-gray-400">Boosts</p>
+                  <p className="text-xl font-bold">
+                    {post.boost_count}
+                  </p>
+                </div>
               </div>
             )
           })}
         </div>
       )}
-    </main>
+    </div>
   )
 }
