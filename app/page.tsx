@@ -45,7 +45,6 @@ export default function Home() {
       })
 
       // Supabase upsert
-      // Ensure postLink is a string, not array
       const postsToUpsert = [{
         post: postLink,
         contract: contract || null,
@@ -54,9 +53,10 @@ export default function Home() {
         updated_at: new Date().toISOString(),
       }]
 
+      // FIX: Supabase v2 onConflict expects single string
       const { data, error } = await supabase
         .from("boosted_posts")
-        .upsert(postsToUpsert, { onConflict: ["post"] })
+        .upsert(postsToUpsert, { onConflict: "post" })
 
       if (error) console.error("Supabase upsert error:", error)
       else console.log("Supabase upsert success:", data)
