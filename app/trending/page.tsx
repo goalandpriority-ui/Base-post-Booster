@@ -101,8 +101,18 @@ export default function TrendingPage() {
                     stiffness: 500,
                     damping: 30,
                   }}
-                  className="relative p-5 rounded-xl bg-zinc-900 border border-zinc-800 flex justify-between items-center hover:scale-[1.02] transition-all"
+                  className={`relative p-6 rounded-xl bg-zinc-900 border border-zinc-800 flex justify-between items-center overflow-hidden hover:scale-[1.02] transition-all
+                  ${
+                    index === 0
+                      ? "ring-2 ring-yellow-400 shadow-lg shadow-yellow-500/20"
+                      : ""
+                  }`}
                 >
+                  {/* 🔥 BIG BACKGROUND RANK NUMBER */}
+                  <div className="absolute right-6 text-[100px] font-extrabold text-white/5 select-none pointer-events-none">
+                    #{index + 1}
+                  </div>
+
                   {/* 👑 Crown for #1 */}
                   {index === 0 && (
                     <div className="absolute -top-4 left-4 text-3xl crown-animate crown-glow">
@@ -110,37 +120,41 @@ export default function TrendingPage() {
                     </div>
                   )}
 
-                  <div>
-                    <p className="text-lg">{post.content}</p>
+                  {/* LEFT CONTENT */}
+                  <div className="relative z-10 max-w-[70%]">
+                    <p className="text-lg font-medium">
+                      {post.content}
+                    </p>
 
-                    <div className="flex gap-2 mt-2 items-center flex-wrap">
+                    <div className="flex gap-2 mt-3 items-center flex-wrap">
                       {index === 0 && (
-                        <span className="px-2 py-1 text-xs bg-yellow-500 text-black rounded-full font-bold gold-animate">
+                        <span className="px-2 py-1 text-xs bg-yellow-500 text-black rounded-full font-bold">
                           🥇 Gold
                         </span>
                       )}
                       {index === 1 && (
-                        <span className="px-2 py-1 text-xs bg-gray-300 text-black rounded-full font-bold silver-animate">
+                        <span className="px-2 py-1 text-xs bg-gray-300 text-black rounded-full font-bold">
                           🥈 Silver
                         </span>
                       )}
                       {index === 2 && (
-                        <span className="px-2 py-1 text-xs bg-orange-500 text-black rounded-full font-bold bronze-animate">
+                        <span className="px-2 py-1 text-xs bg-orange-500 text-black rounded-full font-bold">
                           🥉 Bronze
                         </span>
                       )}
                       {isHot && (
-                        <span className="px-2 py-1 text-xs bg-red-600 rounded-full font-bold hot-animate">
+                        <span className="px-2 py-1 text-xs bg-red-600 rounded-full font-bold animate-pulse">
                           HOT
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="text-right space-y-2">
+                  {/* RIGHT SIDE BOOST + SHARE */}
+                  <div className="relative z-10 text-right space-y-2">
                     <div>
                       <p className="text-sm text-gray-400">Boosts</p>
-                      <p className="text-xl font-bold">
+                      <p className="text-2xl font-bold">
                         {post.boost_count}
                       </p>
                     </div>
