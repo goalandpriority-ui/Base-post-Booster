@@ -1,3 +1,4 @@
+// app/trending/page.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -6,10 +7,12 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 import toast, { Toaster } from "react-hot-toast"
 
+// Supabase setup
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
+// Dynamic chart import to avoid SSR issues
 const Line = dynamic(() => import("react-chartjs-2").then(mod => mod.Line), { ssr: false })
 import {
   Chart as ChartJS,
@@ -28,23 +31,6 @@ export default function Trending() {
   const [boostedPosts, setBoostedPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  const dummyPosts = [
-    {
-      post: "https://base.app/post/1",
-      contract: "0x123",
-      tier: "Basic",
-      boost_count: 3,
-      updated_at: new Date().toISOString(),
-    },
-    {
-      post: "https://base.app/post/2",
-      contract: "0x456",
-      tier: "Pro",
-      boost_count: 5,
-      updated_at: new Date().toISOString(),
-    },
-  ]
-
   useEffect(() => {
     async function fetchPosts() {
       try {
@@ -54,34 +40,29 @@ export default function Trending() {
           .order("updated_at", { ascending: false })
 
         if (error) throw error
-        console.log("Supabase data:", data)
-
-        if (!data || data.length === 0) throw new Error("No posts found")
-        setBoostedPosts(data)
-      } catch (err) {
-        console.warn("Supabase fetch failed, using dummy posts:", err)
-        setBoostedPosts(dummyPosts)
+        setBoostedPosts(data || [])
+      } catch {
+        const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
+        setBoostedPosts(stored)
       } finally {
         setLoading(false)
       }
     }
-
     fetchPosts()
   }, [])
 
   function handleShare(postLink: string) {
     const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
     const shareText = `Check this boosted post: ${postLink} via ${MINI_APP_LINK}`
-    if (navigator.share) {
-      navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
-    } else {
-      toast.success(`Share link copied: ${shareText}`)
-    }
+    if (navigator.share) navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
+    else toast.success(`Share link copied: ${shareText}`)
   }
 
   return (
     <main className="p-6 max-w-5xl mx-auto">
       <Toaster position="top-right" />
+
+      {/* Header with Back button */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Trending Boosted Posts</h1>
         <Link href="/" className="text-blue-600 hover:underline">
@@ -89,10 +70,11 @@ export default function Trending() {
         </Link>
       </div>
 
+      {/* Loading */}
       {loading ? (
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-gray-500 text-center">Loading...</p>
       ) : boostedPosts.length === 0 ? (
-        <p className="text-gray-500">No boosted posts yet</p>
+        <p className="text-gray-500 text-center">No boosted posts yet</p>
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
           {boostedPosts.map((post, i) => {
@@ -102,29 +84,34 @@ export default function Trending() {
                 {
                   label: post.tier ? `$${post.tier} Price` : "$UrMom Price",
                   data: [10, 20, 15, 25, 30],
-                  borderColor: "rgba(75,192,192,1)",
-                  backgroundColor: "rgba(75,192,192,0.2)",
-                  tension: 0.3,
+                  borderColor: "rgba(34,197,94,1)",
+                  backgroundColor: "rgba(34,197,94,0.2)",
+                  tension: 0.4,
+                  fill: true,
                 },
               ],
             }
 
             return (
-              <div key={i} className="border rounded-lg p-4 shadow hover:shadow-lg transition">
-                <p><strong>Post:</strong> {post.post}</p>
-                <p><strong>Contract:</strong> {post.contract || "-"}</p>
-                <p><strong>Tier:</strong> {post.tier}</p>
-                <p><strong>Boost Count:</strong> {post.boost_count}</p>
-                <p><strong>Time:</strong> {new Date(post.updated_at).toLocaleString()}</p>
+              <div key={i} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300">
+                <p className="font-semibold text-lg mb-1">Post:</p>
+                <p className="mb-2">{post.post}</p>
 
+                <p className="text-sm text-gray-500">Contract: {post.contract || "-"}</p>
+                <p className="text-sm text-gray-500">Tier: {post.tier}</p>
+                <p className="text-sm text-gray-500">Boost Count: {post.boost_count}</p>
+                <p className="text-sm text-gray-400 mb-4">{new Date(post.updated_at).toLocaleString()}</p>
+
+                {/* Chart */}
                 <div className="mt-4">
                   <Line
                     data={chartData}
                     options={{
                       responsive: true,
                       plugins: {
-                        legend: { position: "top" },
-                        title: { display: true, text: "Boosted Coin Chart" },
+                        legend: { position: "top", labels: { color: "#111", font: { size: 14 } } },
+                        title: { display: true, text: "Boosted Coin Chart", color: "#111", font: { size: 16 } },
+                        tooltip: { backgroundColor: "#111", titleColor: "#fff", bodyColor: "#fff" },
                       },
                     }}
                   />
@@ -132,7 +119,7 @@ export default function Trending() {
 
                 <button
                   onClick={() => handleShare(post.post)}
-                  className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+                  className="mt-4 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors"
                 >
                   Share
                 </button>
