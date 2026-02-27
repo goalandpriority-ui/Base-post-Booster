@@ -51,37 +51,10 @@ export default function Home() {
         method: "eth_sendTransaction",
         params: [{
           from: accounts[0],
-          to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2,
+          to: YOUR_WALLET_ADDRESS,
           value: tiers[selectedTier].value,
         }],
       })
-
-      const { data: existingPost } = await supabase
-        .from("boosted_posts")
-        .select("*")
-        .eq("post", postLink)
-        .maybeSingle()
-
-      if (existingPost) {
-        await supabase
-          .from("boosted_posts")
-          .update({
-            boost_count: existingPost.boost_count + 1,
-            contract: contract || existingPost.contract,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("post", postLink)
-      } else {
-        await supabase
-          .from("boosted_posts")
-          .insert([{
-            post: postLink,
-            contract: contract || null,
-            tier: tiers[selectedTier].name,
-            boost_count: 1,
-            updated_at: new Date().toISOString(),
-          }])
-      }
 
       alert("Boost successful")
       setPostLink("")
@@ -99,12 +72,12 @@ export default function Home() {
     <main
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #0f172a, #1e293b)",
+        background: "#E3A6AE",
         padding: 20,
         textAlign: "center",
         maxWidth: 500,
         margin: "0 auto",
-        color: "white",
+        color: "black",
       }}
     >
       <h1 style={{ fontSize: 30, marginBottom: 30, fontWeight: "bold" }}>
@@ -118,8 +91,8 @@ export default function Home() {
             key={i}
             onClick={() => setSelectedTier(i)}
             style={{
-              border: selectedTier === i ? "2px solid #38bdf8" : "1px solid #334155",
-              background: selectedTier === i ? "#1e293b" : "#0f172a",
+              border: selectedTier === i ? "2px solid black" : "1px solid #999",
+              background: selectedTier === i ? "#ffffff" : "#f5f5f5",
               padding: 16,
               marginBottom: 15,
               cursor: "pointer",
@@ -129,7 +102,7 @@ export default function Home() {
           >
             <h3 style={{ marginBottom: 5 }}>{tier.name}</h3>
             <p style={{ fontWeight: "bold" }}>{tier.price}</p>
-            <p style={{ fontSize: 14, color: "#94a3b8" }}>
+            <p style={{ fontSize: 14, color: "#333" }}>
               {tier.duration}
             </p>
           </div>
@@ -162,9 +135,9 @@ export default function Home() {
           style={{
             padding: "14px 20px",
             cursor: "pointer",
-            background: "#38bdf8",
+            background: "black",
             border: "none",
-            color: "black",
+            color: "white",
             fontWeight: "bold",
             borderRadius: 10,
             width: "100%",
@@ -176,7 +149,7 @@ export default function Home() {
       </div>
 
       <div style={{ marginTop: 40 }}>
-        <Link href="/trending" style={{ color: "#38bdf8", fontWeight: "bold" }}>
+        <Link href="/trending" style={{ color: "black", fontWeight: "bold" }}>
           View Trending Posts →
         </Link>
       </div>
@@ -188,7 +161,7 @@ const inputStyle: React.CSSProperties = {
   padding: 12,
   width: "100%",
   borderRadius: 10,
-  border: "1px solid #334155",
-  background: "#0f172a",
-  color: "white",
+  border: "1px solid #999",
+  background: "#ffffff",
+  color: "black",
 }
