@@ -121,9 +121,18 @@ export default function TrendingPage() {
       ) : (
         <motion.div layout style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <AnimatePresence>
-            {posts.map((post) => {
+            {posts.map((post, index) => {
               const isNew = newIds.includes(post.id)
               const isExpanded = expandedChart === post.id
+
+              const getTopBadge = () => {
+                if (index === 0) return { text: "Gold", color: "#FFD700" }
+                if (index === 1) return { text: "Silver", color: "#C0C0C0" }
+                if (index === 2) return { text: "Bronze", color: "#CD7F32" }
+                return null
+              }
+
+              const topBadge = getTopBadge()
 
               return (
                 <motion.div
@@ -139,8 +148,30 @@ export default function TrendingPage() {
                     display: "flex",
                     flexDirection: "column",
                     gap: 12,
+                    position: "relative",
                   }}
                 >
+                  {/* Top Badge / Crown */}
+                  {topBadge && (
+                    <motion.div
+                      animate={{ y: [0, -6, 0] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                      style={{
+                        position: "absolute",
+                        top: -10,
+                        left: 10,
+                        background: topBadge.color,
+                        color: "black",
+                        padding: "2px 8px",
+                        borderRadius: 6,
+                        fontWeight: "bold",
+                        fontSize: 12,
+                      }}
+                    >
+                      {topBadge.text} 🏆
+                    </motion.div>
+                  )}
+
                   {/* User Avatar + Handle */}
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     {post.user_avatar && (
@@ -174,7 +205,7 @@ export default function TrendingPage() {
                   {/* Post Content */}
                   <p style={{ maxWidth: "100%" }}>{post.content}</p>
 
-                  {/* Boosts + Share */}
+                  {/* Boosts + Share + Coin Price + Expand Chart */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
                       <p style={{ fontSize: 12 }}>Boosts</p>
