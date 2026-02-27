@@ -88,16 +88,6 @@ export default function Home() {
           }])
       }
 
-      const shareText = `I just boosted a post! Check it here: ${postLink} via ${MINI_APP_LINK}`
-
-      if (navigator.share) {
-        await navigator.share({
-          text: shareText,
-          url: MINI_APP_LINK,
-          title: "Base Post Booster",
-        })
-      }
-
       alert("Boost successful 🚀")
       setPostLink("")
       setContract("")
@@ -111,8 +101,20 @@ export default function Home() {
   }
 
   return (
-    <main style={{ padding: 20, textAlign: "center", maxWidth: 500, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 28, marginBottom: 30 }}>Base Post Booster</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #0f172a, #1e293b)",
+        padding: 20,
+        textAlign: "center",
+        maxWidth: 500,
+        margin: "0 auto",
+        color: "white",
+      }}
+    >
+      <h1 style={{ fontSize: 28, marginBottom: 30 }}>
+        🚀 Base Post Booster
+      </h1>
 
       <div style={{ marginBottom: 30 }}>
         {tiers.map((tier, i) => (
@@ -120,15 +122,20 @@ export default function Home() {
             key={i}
             onClick={() => setSelectedTier(i)}
             style={{
-              border: selectedTier === i ? "2px solid black" : "1px solid gray",
+              border: selectedTier === i ? "2px solid #38bdf8" : "1px solid #334155",
+              background: "#1e293b",
               padding: 15,
               marginBottom: 15,
               cursor: "pointer",
+              borderRadius: 10,
+              transition: "0.3s",
             }}
           >
             <h3>{tier.name}</h3>
             <p>{tier.price}</p>
-            <p style={{ fontSize: 14, color: "gray" }}>{tier.duration}</p>
+            <p style={{ fontSize: 14, color: "#94a3b8" }}>
+              {tier.duration}
+            </p>
           </div>
         ))}
       </div>
@@ -138,7 +145,15 @@ export default function Home() {
         placeholder="Paste Base post link"
         value={postLink}
         onChange={e => setPostLink(e.target.value)}
-        style={{ padding: 12, width: "100%", marginBottom: 10 }}
+        style={{
+          padding: 12,
+          width: "100%",
+          marginBottom: 10,
+          borderRadius: 8,
+          border: "1px solid #334155",
+          background: "#0f172a",
+          color: "white",
+        }}
       />
 
       <input
@@ -146,22 +161,40 @@ export default function Home() {
         placeholder="Coin Contract Address"
         value={contract}
         onChange={e => setContract(e.target.value)}
-        style={{ padding: 12, width: "100%" }}
+        style={{
+          padding: 12,
+          width: "100%",
+          borderRadius: 8,
+          border: "1px solid #334155",
+          background: "#0f172a",
+          color: "white",
+        }}
       />
 
       <div style={{ marginTop: 20 }}>
         <button
           onClick={handleBoost}
           disabled={loading}
-          style={{ padding: "10px 20px", cursor: "pointer" }}
+          style={{
+            padding: "12px 20px",
+            cursor: "pointer",
+            background: "#38bdf8",
+            border: "none",
+            color: "black",
+            fontWeight: "bold",
+            borderRadius: 8,
+            width: "100%",
+          }}
         >
           {loading ? "Processing..." : "Boost Now"}
         </button>
       </div>
 
       <div style={{ marginTop: 40 }}>
-        <Link href="/trending">View Trending Posts</Link>
+        <Link href="/trending" style={{ color: "#38bdf8" }}>
+          View Trending Posts →
+        </Link>
       </div>
     </main>
   )
-}
+          }
