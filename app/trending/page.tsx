@@ -28,7 +28,6 @@ export default function TrendingPage() {
       )
 
       const currentIds = sorted.map((p: Post) => p.id)
-
       const newlyAdded = currentIds.filter(
         (id: number) => !previousIds.current.includes(id)
       )
@@ -53,157 +52,63 @@ export default function TrendingPage() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleShare = async (post: Post) => {
-    const shareUrl = `${MINIAPP_URL}/trending`
-
-    const shareText = `${post.content}\n\nCheck leaderboard:\n${shareUrl}`
-
-    if (navigator.share) {
-      await navigator.share({
-        title: "Trending Boosted Post",
-        text: post.content,
-        url: shareUrl,
-      })
-    } else {
-      await navigator.clipboard.writeText(shareText)
-      alert("Miniapp link copied!")
-    }
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div style={{ minHeight: "100vh", background: "#E3A6AE", display: "flex", alignItems: "center", justifyContent: "center", color: "black" }}>
         Loading trending posts...
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen p-8 max-w-4xl mx-auto">
+    <div style={{ minHeight: "100vh", background: "#E3A6AE", padding: 30, color: "black" }}>
 
-      <h1 className="text-3xl font-bold mb-2">
+      <h1 style={{ fontSize: 30, fontWeight: "bold", marginBottom: 20 }}>
         Trending Boosted Posts
       </h1>
 
-      <div className="mb-8">
-        <Link
-          href="/"
-          className="text-sm text-blue-400 hover:text-blue-300 transition"
-        >
+      <div style={{ marginBottom: 30 }}>
+        <Link href="/" style={{ fontWeight: "bold", color: "black" }}>
           ← Back to Home
         </Link>
       </div>
 
       {posts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center mt-20 text-center">
-          <h2 className="text-xl font-semibold mb-2">
-            No boosted posts yet
-          </h2>
-          <p className="text-gray-400 mb-6">
-            Be the first to boost and appear on leaderboard!
-          </p>
-          <Link
-            href="/"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
-          >
+        <div style={{ textAlign: "center", marginTop: 80 }}>
+          <h2>No boosted posts yet</h2>
+          <Link href="/" style={{ marginTop: 20, display: "inline-block", background: "black", color: "white", padding: "10px 20px", borderRadius: 8 }}>
             Boost Now
           </Link>
         </div>
       ) : (
-        <motion.div layout className="space-y-5">
+        <motion.div layout style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <AnimatePresence>
-            {posts.map((post, index) => {
-              const isNew = newIds.includes(post.id)
-              const isHot = post.boost_count > 5
+            {posts.map((post) => (
+              <motion.div
+                key={post.id}
+                layout
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                style={{
+                  background: "white",
+                  padding: 20,
+                  borderRadius: 12,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <p style={{ maxWidth: "70%" }}>{post.content}</p>
 
-              return (
-                <motion.div
-                  key={post.id}
-                  layout
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 30,
-                  }}
-                  className={`relative p-6 rounded-xl bg-white/5 border border-white/10 flex justify-between items-center overflow-hidden backdrop-blur-md
-                  ${index === 0 ? "ring-2 ring-yellow-400 shadow-lg shadow-yellow-500/20" : ""}
-                  ${isNew ? "ring-2 ring-green-400 shadow-lg shadow-green-500/20" : ""}
-                  `}
-                >
-                  {/* Big Rank Number */}
-                  <div className="absolute right-6 text-[100px] font-extrabold text-white/5 select-none pointer-events-none">
-                    #{index + 1}
-                  </div>
-
-                  {/* Floating Crown */}
-                  {index === 0 && (
-                    <motion.div
-                      animate={{ y: [0, -6, 0] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                      className="absolute -top-4 left-4 text-yellow-400 text-2xl"
-                    >
-                      ▲
-                    </motion.div>
-                  )}
-
-                  {/* NEW Badge */}
-                  {isNew && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute top-3 right-3 px-2 py-1 text-xs bg-green-500 text-black font-bold rounded-full"
-                    >
-                      NEW
-                    </motion.div>
-                  )}
-
-                  <div className="relative z-10 max-w-[70%]">
-                    <p className="text-lg font-medium break-words">
-                      {post.content}
-                    </p>
-
-                    <div className="flex gap-2 mt-3 flex-wrap">
-                      {index === 0 && (
-                        <span className="px-2 py-1 text-xs bg-yellow-500 text-black rounded-full font-bold">
-                          Gold
-                        </span>
-                      )}
-                      {index === 1 && (
-                        <span className="px-2 py-1 text-xs bg-gray-300 text-black rounded-full font-bold">
-                          Silver
-                        </span>
-                      )}
-                      {index === 2 && (
-                        <span className="px-2 py-1 text-xs bg-orange-500 text-black rounded-full font-bold">
-                          Bronze
-                        </span>
-                      )}
-                      {isHot && (
-                        <span className="px-2 py-1 text-xs bg-red-600 rounded-full font-bold animate-pulse">
-                          HOT
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="relative z-10 text-right">
-                    <p className="text-sm text-gray-400">Boosts</p>
-                    <p className="text-2xl font-bold">
-                      {post.boost_count}
-                    </p>
-
-                    <button
-                      onClick={() => handleShare(post)}
-                      className="mt-2 px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 rounded-lg transition"
-                    >
-                      Share
-                    </button>
-                  </div>
-                </motion.div>
-              )
-            })}
+                <div style={{ textAlign: "right" }}>
+                  <p style={{ fontSize: 12 }}>Boosts</p>
+                  <p style={{ fontSize: 22, fontWeight: "bold" }}>
+                    {post.boost_count}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
           </AnimatePresence>
         </motion.div>
       )}
