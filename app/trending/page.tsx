@@ -72,14 +72,14 @@ export default function TrendingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white bg-gradient-to-br from-slate-900 to-slate-800">
+      <div className="min-h-screen flex items-center justify-center">
         Loading trending posts...
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8">
+    <div className="min-h-screen p-8 max-w-4xl mx-auto">
 
       <h1 className="text-3xl font-bold mb-2">
         Trending Boosted Posts
@@ -127,22 +127,22 @@ export default function TrendingPage() {
                     stiffness: 400,
                     damping: 30,
                   }}
-                  className={`relative p-6 rounded-xl bg-white/5 border border-white/10 flex justify-between items-center overflow-hidden
+                  className={`relative p-6 rounded-xl bg-white/5 border border-white/10 flex justify-between items-center overflow-hidden backdrop-blur-md
                   ${index === 0 ? "ring-2 ring-yellow-400 shadow-lg shadow-yellow-500/20" : ""}
                   ${isNew ? "ring-2 ring-green-400 shadow-lg shadow-green-500/20" : ""}
                   `}
                 >
-                  {/* Big Faded Rank */}
+                  {/* Big Rank Number */}
                   <div className="absolute right-6 text-[100px] font-extrabold text-white/5 select-none pointer-events-none">
                     #{index + 1}
                   </div>
 
-                  {/* Floating Crown for #1 */}
+                  {/* Floating Crown */}
                   {index === 0 && (
                     <motion.div
                       animate={{ y: [0, -6, 0] }}
                       transition={{ repeat: Infinity, duration: 2 }}
-                      className="absolute -top-4 left-4 text-2xl text-yellow-400"
+                      className="absolute -top-4 left-4 text-yellow-400 text-2xl"
                     >
                       ▲
                     </motion.div>
@@ -159,7 +159,6 @@ export default function TrendingPage() {
                     </motion.div>
                   )}
 
-                  {/* Content */}
                   <div className="relative z-10 max-w-[70%]">
                     <p className="text-lg font-medium break-words">
                       {post.content}
@@ -189,7 +188,6 @@ export default function TrendingPage() {
                     </div>
                   </div>
 
-                  {/* Boost + Share */}
                   <div className="relative z-10 text-right">
                     <p className="text-sm text-gray-400">Boosts</p>
                     <p className="text-2xl font-bold">
