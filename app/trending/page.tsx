@@ -21,6 +21,7 @@ export default function TrendingPage() {
   const [loading, setLoading] = useState(true)
   const [newIds, setNewIds] = useState<number[]>([])
   const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
   const previousIds = useRef<number[]>([])
 
   const fetchPosts = async () => {
@@ -97,6 +98,7 @@ export default function TrendingPage() {
               const isNew = newIds.includes(post.id)
               const isTop = index < 3
               const isExpanded = expandedId === post.id
+              const isSelected = selectedId === post.id
 
               return (
                 <motion.div
@@ -105,15 +107,20 @@ export default function TrendingPage() {
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  onClick={() => setSelectedId(isSelected ? null : post.id)}
                   style={{
-                    background: "white",
+                    background: isSelected ? "#ffe4b5" : "white",
                     padding: 20,
                     borderRadius: 12,
                     display: "flex",
                     flexDirection: "column",
                     gap: 10,
                     boxShadow: isTop ? "0 0 15px rgba(255,215,0,0.5)" : undefined,
+                    cursor: "pointer",
+                    transition: "0.3s",
                   }}
+                  onMouseEnter={() => console.log(`Hovering post ${post.id}`)}
+                  onMouseLeave={() => console.log(`Left post ${post.id}`)}
                 >
                   {/* Top Info Row */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -134,7 +141,7 @@ export default function TrendingPage() {
 
                   <p>{post.content}</p>
 
-                  {/* Boost Count */}
+                  {/* Boost Count + Expand Chart */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span>Boosts: <b>{post.boost_count}</b></span>
                     <button onClick={() => setExpandedId(isExpanded ? null : post.id)} style={{ fontSize: 12, padding: "4px 8px", borderRadius: 6, background: "#94a3b8", border: "none", cursor: "pointer" }}>
@@ -145,7 +152,7 @@ export default function TrendingPage() {
                   {/* Expandable Boost Chart */}
                   {isExpanded && post.history && (
                     <div style={{ marginTop: 10, height: 150, background: "#f0f0f0", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#333" }}>
-                      {/* Placeholder for chart (replace with chart library later) */}
+                      {/* Placeholder for chart */}
                       Boost history chart for post {post.id}
                     </div>
                   )}
