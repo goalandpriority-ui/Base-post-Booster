@@ -51,7 +51,7 @@ export default function Home() {
         method: "eth_sendTransaction",
         params: [{
           from: accounts[0],
-          to: YOUR_WALLET_ADDRESS,
+          to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2,
           value: tiers[selectedTier].value,
         }],
       })
@@ -148,7 +148,7 @@ export default function Home() {
       {/* Optional Contract */}
       <input
         type="text"
-        placeholder="Coin Contract Address (Optional)"
+        placeholder="Coin Contract Address"
         value={contract}
         onChange={e => setContract(e.target.value)}
         style={{ ...inputStyle, marginTop: 10 }}
