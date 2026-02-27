@@ -1,8 +1,8 @@
-// app/page.tsx
 "use client"
 
 import { useState } from "react"
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
+import Link from "next/link"
 
 declare global {
   interface Window {
@@ -15,6 +15,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
+// Wallet address where you receive ETH
 const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
 const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
 
@@ -41,7 +42,11 @@ export default function Home() {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
       await window.ethereum.request({
         method: "eth_sendTransaction",
-        params: [{ from: accounts[0], to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2, value: tiers[selectedTier].value }],
+        params: [{
+          from: accounts[0],           // User wallet
+          to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2,     // Your receiving wallet
+          value: tiers[selectedTier].value
+        }],
       })
 
       // Supabase upsert
@@ -53,7 +58,6 @@ export default function Home() {
         updated_at: new Date().toISOString(),
       }]
 
-      // FIX: Supabase v2 onConflict expects single string
       const { data, error } = await supabase
         .from("boosted_posts")
         .upsert(postsToUpsert, { onConflict: "post" })
@@ -61,24 +65,17 @@ export default function Home() {
       if (error) console.error("Supabase upsert error:", error)
       else console.log("Supabase upsert success:", data)
 
-      // LocalStorage update for Trending page
+      // LocalStorage update
       let existing: any[] = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
-      const index = existing.findIndex(item => item.link === postLink)
-      if (index !== -1) existing[index].boostCount += 1
-      else existing.push({ link: postLink, contract, tier: tiers[selectedTier].name, boostCount: 1, time: new Date().toLocaleString() })
+      const index = existing.findIndex(item => item.post === postLink)
+      if (index !== -1) existing[index].boost_count += 1
+      else existing.push(postsToUpsert[0])
       localStorage.setItem("boostedPosts", JSON.stringify(existing))
 
       // Auto share to Farcaster / Mini app
-      try {
-        const shareText = `I just boosted a post! Check it here: ${postLink} via ${MINI_APP_LINK}`
-        if (navigator.share) {
-          await navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
-        } else {
-          console.log("Share API not supported, fallback link:", shareText)
-        }
-      } catch (shareError) {
-        console.error("Share failed:", shareError)
-      }
+      const shareText = `I just boosted a post! Check it here: ${postLink} via ${MINI_APP_LINK}`
+      if (navigator.share) await navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
+      else console.log("Share API not supported, fallback link:", shareText)
 
       alert("Boost successful")
       setPostLink(""); setContract("")
@@ -121,7 +118,7 @@ export default function Home() {
       </div>
 
       <div style={{ marginTop: 40 }}>
-        <a href="/trending">View Trending Posts</a>
+        <Link href="/trending">View Trending Posts</Link>
       </div>
     </main>
   )
