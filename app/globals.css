@@ -47,3 +47,29 @@
 .hot-animate {
   animation: hotBlink 1s infinite;
 }
+
+/* ============================= */
+/* 👑 Floating Crown Animation */
+/* ============================= */
+
+/* Crown floating up-down */
+@keyframes crownFloat {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+.crown-animate {
+  animation: crownFloat 2s ease-in-out infinite;
+}
+
+/* Crown golden glow */
+@keyframes crownGlow {
+  0% { filter: drop-shadow(0 0 4px gold); }
+  50% { filter: drop-shadow(0 0 12px gold); }
+  100% { filter: drop-shadow(0 0 4px gold); }
+}
+
+.crown-glow {
+  animation: crownGlow 2s infinite;
+}
