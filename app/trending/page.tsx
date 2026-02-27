@@ -1,4 +1,3 @@
-// app/trending/page.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -7,12 +6,10 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 import toast, { Toaster } from "react-hot-toast"
 
-// Supabase setup
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
-// Dynamic chart import to avoid SSR errors
 const Line = dynamic(() => import("react-chartjs-2").then(mod => mod.Line), { ssr: false })
 import {
   Chart as ChartJS,
@@ -31,6 +28,23 @@ export default function Trending() {
   const [boostedPosts, setBoostedPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
+  const dummyPosts = [
+    {
+      post: "https://base.app/post/1",
+      contract: "0x123",
+      tier: "Basic",
+      boost_count: 3,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      post: "https://base.app/post/2",
+      contract: "0x456",
+      tier: "Pro",
+      boost_count: 5,
+      updated_at: new Date().toISOString(),
+    },
+  ]
+
   useEffect(() => {
     async function fetchPosts() {
       try {
@@ -39,21 +53,14 @@ export default function Trending() {
           .select("*")
           .order("updated_at", { ascending: false })
 
-        if (error) {
-          console.error("Supabase fetch error:", error)
-          throw error
-        }
+        if (error) throw error
+        console.log("Supabase data:", data)
 
-        console.log("Fetched posts:", data)
-        if (!data || data.length === 0) throw new Error("No posts from Supabase")
+        if (!data || data.length === 0) throw new Error("No posts found")
         setBoostedPosts(data)
       } catch (err) {
-        console.warn("Using fallback dummy posts:", err)
-        // Dummy fallback data
-        setBoostedPosts([
-          { post: "https://base.app/post/1", contract: null, tier: "Basic", boost_count: 3, updated_at: new Date().toISOString() },
-          { post: "https://base.app/post/2", contract: "0x123", tier: "Pro", boost_count: 5, updated_at: new Date().toISOString() },
-        ])
+        console.warn("Supabase fetch failed, using dummy posts:", err)
+        setBoostedPosts(dummyPosts)
       } finally {
         setLoading(false)
       }
