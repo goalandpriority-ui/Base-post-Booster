@@ -49,9 +49,6 @@ export default function TrendingPage() {
 
   useEffect(() => {
     fetchPosts()
-  }, [])
-
-  useEffect(() => {
     const interval = setInterval(fetchPosts, 5000)
     return () => clearInterval(interval)
   }, [])
@@ -59,47 +56,33 @@ export default function TrendingPage() {
   const handleShare = async (post: Post) => {
     const shareUrl = `${MINIAPP_URL}/trending`
 
-    const shareData = {
-      title: "Trending Boosted Post",
-      text: post.content,
-      url: shareUrl,
-    }
+    const shareText = `${post.content}\n\nCheck leaderboard:\n${shareUrl}`
 
     if (navigator.share) {
-      await navigator.share(shareData)
+      await navigator.share({
+        title: "Trending Boosted Post",
+        text: post.content,
+        url: shareUrl,
+      })
     } else {
-      await navigator.clipboard.writeText(
-        `${post.content}\n\n${shareUrl}`
-      )
+      await navigator.clipboard.writeText(shareText)
       alert("Miniapp link copied!")
     }
   }
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "linear-gradient(135deg, #0f172a, #1e293b)",
-        }}
-        className="flex items-center justify-center text-white"
-      >
+      <div className="min-h-screen flex items-center justify-center text-white bg-gradient-to-br from-slate-900 to-slate-800">
         Loading trending posts...
       </div>
     )
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0f172a, #1e293b)",
-      }}
-      className="text-white p-8"
-    >
-      {/* HEADER */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8">
+
       <h1 className="text-3xl font-bold mb-2">
-        🔥 Trending Boosted Posts
+        Trending Boosted Posts
       </h1>
 
       <div className="mb-8">
@@ -113,7 +96,6 @@ export default function TrendingPage() {
 
       {posts.length === 0 ? (
         <div className="flex flex-col items-center justify-center mt-20 text-center">
-          <div className="text-6xl mb-4">🚀</div>
           <h2 className="text-xl font-semibold mb-2">
             No boosted posts yet
           </h2>
@@ -124,7 +106,7 @@ export default function TrendingPage() {
             href="/"
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
           >
-            🚀 Boost Now
+            Boost Now
           </Link>
         </div>
       ) : (
@@ -138,29 +120,32 @@ export default function TrendingPage() {
                 <motion.div
                   key={post.id}
                   layout
-                  initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{
                     type: "spring",
                     stiffness: 400,
-                    damping: 25,
+                    damping: 30,
                   }}
-                  className={`relative p-6 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 flex justify-between items-center overflow-hidden hover:scale-[1.02] transition-all
-                    ${index === 0 ? "ring-2 ring-yellow-400 shadow-lg shadow-yellow-500/20" : ""}
-                    ${isNew ? "ring-2 ring-green-400 shadow-lg shadow-green-500/20" : ""}
+                  className={`relative p-6 rounded-xl bg-white/5 border border-white/10 flex justify-between items-center overflow-hidden
+                  ${index === 0 ? "ring-2 ring-yellow-400 shadow-lg shadow-yellow-500/20" : ""}
+                  ${isNew ? "ring-2 ring-green-400 shadow-lg shadow-green-500/20" : ""}
                   `}
                 >
-                  {/* BIG FADED RANK */}
+                  {/* Big Faded Rank */}
                   <div className="absolute right-6 text-[100px] font-extrabold text-white/5 select-none pointer-events-none">
                     #{index + 1}
                   </div>
 
-                  {/* 👑 Crown */}
+                  {/* Floating Crown for #1 */}
                   {index === 0 && (
-                    <div className="absolute -top-4 left-4 text-3xl animate-bounce">
-                      👑
-                    </div>
+                    <motion.div
+                      animate={{ y: [0, -6, 0] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                      className="absolute -top-4 left-4 text-2xl text-yellow-400"
+                    >
+                      ▲
+                    </motion.div>
                   )}
 
                   {/* NEW Badge */}
@@ -174,7 +159,7 @@ export default function TrendingPage() {
                     </motion.div>
                   )}
 
-                  {/* CONTENT */}
+                  {/* Content */}
                   <div className="relative z-10 max-w-[70%]">
                     <p className="text-lg font-medium break-words">
                       {post.content}
@@ -183,28 +168,28 @@ export default function TrendingPage() {
                     <div className="flex gap-2 mt-3 flex-wrap">
                       {index === 0 && (
                         <span className="px-2 py-1 text-xs bg-yellow-500 text-black rounded-full font-bold">
-                          🥇 Gold
+                          Gold
                         </span>
                       )}
                       {index === 1 && (
                         <span className="px-2 py-1 text-xs bg-gray-300 text-black rounded-full font-bold">
-                          🥈 Silver
+                          Silver
                         </span>
                       )}
                       {index === 2 && (
                         <span className="px-2 py-1 text-xs bg-orange-500 text-black rounded-full font-bold">
-                          🥉 Bronze
+                          Bronze
                         </span>
                       )}
                       {isHot && (
                         <span className="px-2 py-1 text-xs bg-red-600 rounded-full font-bold animate-pulse">
-                          🔥 HOT
+                          HOT
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* BOOST + SHARE */}
+                  {/* Boost + Share */}
                   <div className="relative z-10 text-right">
                     <p className="text-sm text-gray-400">Boosts</p>
                     <p className="text-2xl font-bold">
