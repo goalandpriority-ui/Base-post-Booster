@@ -9,9 +9,10 @@ export default function RootLayout({
         style={{
           margin: 0,
           padding: 0,
-          background: "linear-gradient(135deg, #0f172a, #1e293b)",
-          color: "white",
+          background: "#E3A6AE",
+          color: "black",
           minHeight: "100vh",
+          fontFamily: "sans-serif",
         }}
       >
         {children}
