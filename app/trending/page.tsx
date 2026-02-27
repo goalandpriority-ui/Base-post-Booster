@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
+import Link from "next/link" // ✅ Link import
 
 // ✅ Chart imports
 import dynamic from "next/dynamic"
 
-// Supabase setup
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
@@ -40,7 +40,6 @@ export default function Trending() {
         if (error) throw error
         setBoostedPosts(data || [])
       } catch {
-        // fallback to localStorage
         const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
         setBoostedPosts(stored)
       }
@@ -62,17 +61,23 @@ export default function Trending() {
     <main style={{ padding: 20, textAlign: "center", maxWidth: 800, margin: "0 auto" }}>
       <h1 style={{ fontSize: 28, marginBottom: 30 }}>Trending Boosted Posts</h1>
 
+      {/* ✅ Back button */}
+      <div style={{ marginBottom: 20 }}>
+        <Link href="/">
+          <button style={{ padding: "8px 16px", cursor: "pointer" }}>← Back</button>
+        </Link>
+      </div>
+
       {boostedPosts.length === 0 ? (
         <p>No boosted posts yet</p>
       ) : (
         boostedPosts.map((post, i) => {
-          // Sample chart data for each post
           const chartData = {
             labels: ["Jan", "Feb", "Mar", "Apr", "May"],
             datasets: [
               {
                 label: post.tier ? `$${post.tier} Price` : "$UrMom Price",
-                data: [10, 20, 15, 25, 30], // Replace with real coin data later
+                data: [10, 20, 15, 25, 30], 
                 borderColor: "rgba(75,192,192,1)",
                 backgroundColor: "rgba(75,192,192,0.2)",
               },
@@ -87,7 +92,6 @@ export default function Trending() {
               <p><strong>Boost Count:</strong> {post.boost_count}</p>
               <p><strong>Time:</strong> {new Date(post.updated_at).toLocaleString()}</p>
 
-              {/* Chart */}
               <div style={{ marginTop: 20 }}>
                 <Line
                   data={chartData}
