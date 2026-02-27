@@ -39,23 +39,37 @@ export default function Trending() {
           .select("*")
           .order("updated_at", { ascending: false })
 
-        if (error) throw error
-        setBoostedPosts(data || [])
-      } catch {
-        const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
-        setBoostedPosts(stored)
+        if (error) {
+          console.error("Supabase fetch error:", error)
+          throw error
+        }
+
+        console.log("Fetched posts:", data)
+        if (!data || data.length === 0) throw new Error("No posts from Supabase")
+        setBoostedPosts(data)
+      } catch (err) {
+        console.warn("Using fallback dummy posts:", err)
+        // Dummy fallback data
+        setBoostedPosts([
+          { post: "https://base.app/post/1", contract: null, tier: "Basic", boost_count: 3, updated_at: new Date().toISOString() },
+          { post: "https://base.app/post/2", contract: "0x123", tier: "Pro", boost_count: 5, updated_at: new Date().toISOString() },
+        ])
       } finally {
         setLoading(false)
       }
     }
+
     fetchPosts()
   }, [])
 
   function handleShare(postLink: string) {
     const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
     const shareText = `Check this boosted post: ${postLink} via ${MINI_APP_LINK}`
-    if (navigator.share) navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
-    else toast.success(`Share link copied: ${shareText}`)
+    if (navigator.share) {
+      navigator.share({ text: shareText, url: MINI_APP_LINK, title: "Base Post Booster" })
+    } else {
+      toast.success(`Share link copied: ${shareText}`)
+    }
   }
 
   return (
