@@ -1,4 +1,3 @@
-// app/trending/page.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -34,10 +33,17 @@ export default function Trending() {
   useEffect(() => {
     async function fetchPosts() {
       try {
-        const { data, error } = await supabase
+        // ✅ 5 seconds timeout fallback
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Supabase timeout")), 5000)
+        )
+
+        const supabasePromise = supabase
           .from("boosted_posts")
           .select("*")
           .order("updated_at", { ascending: false })
+
+        const { data, error } = await Promise.race([supabasePromise, timeoutPromise]) as any
 
         console.log("Supabase data:", data)
         console.log("Supabase error:", error)
@@ -45,13 +51,15 @@ export default function Trending() {
         if (error) throw error
         setBoostedPosts(data || [])
       } catch (err) {
-        console.error("Fetch error:", err)
+        console.error("Fetch failed:", err)
+        // fallback to localStorage
         const stored = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
         setBoostedPosts(stored)
       } finally {
         setLoading(false)
       }
     }
+
     fetchPosts()
   }, [])
 
@@ -84,7 +92,7 @@ export default function Trending() {
               datasets: [
                 {
                   label: post.tier ? `$${post.tier} Price` : "$UrMom Price",
-                  data: [10, 20, 15, 25, 30], // Replace with real coin data if needed
+                  data: [10, 20, 15, 25, 30], // later replace with real coin data
                   borderColor: "rgba(75,192,192,1)",
                   backgroundColor: "rgba(75,192,192,0.2)",
                   tension: 0.3,
