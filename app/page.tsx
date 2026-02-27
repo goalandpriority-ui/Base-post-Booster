@@ -10,12 +10,10 @@ declare global {
   }
 }
 
-// Supabase setup
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
-// Wallet address where you receive ETH
 const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
 const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
 
@@ -37,6 +35,11 @@ export default function Home() {
       return
     }
 
+    if (!contract) {
+      alert("Enter coin contract address")
+      return
+    }
+
     if (!window.ethereum) {
       alert("Install MetaMask")
       return
@@ -45,12 +48,10 @@ export default function Home() {
     try {
       setLoading(true)
 
-      // 🔥 Request wallet
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       })
 
-      // 🔥 Send ETH payment
       await window.ethereum.request({
         method: "eth_sendTransaction",
         params: [{
@@ -60,7 +61,6 @@ export default function Home() {
         }],
       })
 
-      // 🔥 Check if post already exists
       const { data: existingPost } = await supabase
         .from("boosted_posts")
         .select("*")
@@ -68,47 +68,26 @@ export default function Home() {
         .maybeSingle()
 
       if (existingPost) {
-        // 🔥 Increment boost count
         await supabase
           .from("boosted_posts")
           .update({
             boost_count: existingPost.boost_count + 1,
+            contract: contract,
             updated_at: new Date().toISOString(),
           })
           .eq("post", postLink)
-
       } else {
-        // 🔥 Insert new boosted post
         await supabase
           .from("boosted_posts")
           .insert([{
             post: postLink,
-            contract: contract || null,
+            contract: contract,
             tier: tiers[selectedTier].name,
             boost_count: 1,
             updated_at: new Date().toISOString(),
           }])
       }
 
-      // 🔥 Local backup
-      let existing: any[] = JSON.parse(localStorage.getItem("boostedPosts") || "[]")
-      const index = existing.findIndex(item => item.post === postLink)
-
-      if (index !== -1) {
-        existing[index].boost_count += 1
-      } else {
-        existing.push({
-          post: postLink,
-          contract,
-          tier: tiers[selectedTier].name,
-          boost_count: 1,
-          updated_at: new Date().toISOString(),
-        })
-      }
-
-      localStorage.setItem("boostedPosts", JSON.stringify(existing))
-
-      // 🔥 Share
       const shareText = `I just boosted a post! Check it here: ${postLink} via ${MINI_APP_LINK}`
 
       if (navigator.share) {
@@ -135,7 +114,6 @@ export default function Home() {
     <main style={{ padding: 20, textAlign: "center", maxWidth: 500, margin: "0 auto" }}>
       <h1 style={{ fontSize: 28, marginBottom: 30 }}>Base Post Booster</h1>
 
-      {/* Tier Selection */}
       <div style={{ marginBottom: 30 }}>
         {tiers.map((tier, i) => (
           <div
@@ -155,7 +133,6 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Inputs */}
       <input
         type="text"
         placeholder="Paste Base post link"
@@ -166,13 +143,12 @@ export default function Home() {
 
       <input
         type="text"
-        placeholder="Coin Contract Address (optional)"
+        placeholder="Coin Contract Address"
         value={contract}
         onChange={e => setContract(e.target.value)}
         style={{ padding: 12, width: "100%" }}
       />
 
-      {/* Boost Button */}
       <div style={{ marginTop: 20 }}>
         <button
           onClick={handleBoost}
@@ -183,7 +159,6 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Trending Link */}
       <div style={{ marginTop: 40 }}>
         <Link href="/trending">View Trending Posts</Link>
       </div>
