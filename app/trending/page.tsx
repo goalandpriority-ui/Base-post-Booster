@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
 type Post = {
   id: number
@@ -83,69 +84,79 @@ export default function TrendingPage() {
       {posts.length === 0 ? (
         <p className="text-gray-400">No boosted posts yet</p>
       ) : (
-        <div className="space-y-4">
-          {posts.map((post, index) => {
-            const isHot = post.boost_count > 5
+        <motion.div layout className="space-y-4">
+          <AnimatePresence>
+            {posts.map((post, index) => {
+              const isHot = post.boost_count > 5
 
-            return (
-              <div
-                key={post.id}
-                className="relative p-5 rounded-xl bg-zinc-900 border border-zinc-800 flex justify-between items-center transition-all duration-300 hover:scale-[1.02]"
-              >
-                {/* 👑 Floating Crown for Rank #1 */}
-                {index === 0 && (
-                  <div className="absolute -top-4 left-4 text-3xl crown-animate crown-glow">
-                    👑
-                  </div>
-                )}
+              return (
+                <motion.div
+                  key={post.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 30,
+                  }}
+                  className="relative p-5 rounded-xl bg-zinc-900 border border-zinc-800 flex justify-between items-center hover:scale-[1.02] transition-all"
+                >
+                  {/* 👑 Crown for #1 */}
+                  {index === 0 && (
+                    <div className="absolute -top-4 left-4 text-3xl crown-animate crown-glow">
+                      👑
+                    </div>
+                  )}
 
-                <div>
-                  <p className="text-lg">{post.content}</p>
-
-                  <div className="flex gap-2 mt-2 items-center flex-wrap">
-                    {index === 0 && (
-                      <span className="px-2 py-1 text-xs bg-yellow-500 text-black rounded-full font-bold gold-animate">
-                        🥇 Gold
-                      </span>
-                    )}
-                    {index === 1 && (
-                      <span className="px-2 py-1 text-xs bg-gray-300 text-black rounded-full font-bold silver-animate">
-                        🥈 Silver
-                      </span>
-                    )}
-                    {index === 2 && (
-                      <span className="px-2 py-1 text-xs bg-orange-500 text-black rounded-full font-bold bronze-animate">
-                        🥉 Bronze
-                      </span>
-                    )}
-
-                    {isHot && (
-                      <span className="px-2 py-1 text-xs bg-red-600 rounded-full font-bold hot-animate">
-                        HOT
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="text-right space-y-2">
                   <div>
-                    <p className="text-sm text-gray-400">Boosts</p>
-                    <p className="text-xl font-bold">
-                      {post.boost_count}
-                    </p>
+                    <p className="text-lg">{post.content}</p>
+
+                    <div className="flex gap-2 mt-2 items-center flex-wrap">
+                      {index === 0 && (
+                        <span className="px-2 py-1 text-xs bg-yellow-500 text-black rounded-full font-bold gold-animate">
+                          🥇 Gold
+                        </span>
+                      )}
+                      {index === 1 && (
+                        <span className="px-2 py-1 text-xs bg-gray-300 text-black rounded-full font-bold silver-animate">
+                          🥈 Silver
+                        </span>
+                      )}
+                      {index === 2 && (
+                        <span className="px-2 py-1 text-xs bg-orange-500 text-black rounded-full font-bold bronze-animate">
+                          🥉 Bronze
+                        </span>
+                      )}
+                      {isHot && (
+                        <span className="px-2 py-1 text-xs bg-red-600 rounded-full font-bold hot-animate">
+                          HOT
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <button
-                    onClick={() => handleShare(post)}
-                    className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 rounded-lg transition"
-                  >
-                    Share
-                  </button>
-                </div>
-              </div>
-            )
-          })}
-        </div>
+                  <div className="text-right space-y-2">
+                    <div>
+                      <p className="text-sm text-gray-400">Boosts</p>
+                      <p className="text-xl font-bold">
+                        {post.boost_count}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => handleShare(post)}
+                      className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+                    >
+                      Share
+                    </button>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </motion.div>
       )}
     </div>
   )
