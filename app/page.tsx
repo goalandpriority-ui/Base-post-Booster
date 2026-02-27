@@ -44,15 +44,15 @@ export default function Home() {
         params: [{ from: accounts[0], to: 0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2, value: tiers[selectedTier].value }],
       })
 
-      // Supabase upsert fix for TypeScript
-      const postsArray = Array.isArray(postLink) ? postLink : [postLink as string]
-      const postsToUpsert = postsArray.map(post => ({
-        post,
+      // Supabase upsert
+      // Ensure postLink is a string, not array
+      const postsToUpsert = [{
+        post: postLink,
         contract: contract || null,
         tier: tiers[selectedTier].name,
         boost_count: 1,
         updated_at: new Date().toISOString(),
-      }))
+      }]
 
       const { data, error } = await supabase
         .from("boosted_posts")
