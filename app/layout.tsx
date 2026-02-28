@@ -2,9 +2,8 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 
-export const dynamic = "force-static";
-
 export const metadata: Metadata = {
+  metadataBase: new URL("https://base-post-booster.vercel.app"),
   title: "Base Post Booster 🚀",
   description: "Boost posts. Climb leaderboard. Go viral on Base 🔥",
   openGraph: {
@@ -12,7 +11,7 @@ export const metadata: Metadata = {
     description: "Boost posts. Climb leaderboard. Go viral on Base 🔥",
     images: [
       {
-        url: "https://base-post-booster.vercel.app/og.png",
+        url: "/og.png",
         width: 1200,
         height: 630,
       },
