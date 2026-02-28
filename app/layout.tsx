@@ -1,3 +1,7 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import React from "react";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
 
@@ -11,7 +15,7 @@ export const metadata: Metadata = {
     siteName: "Base Post Booster",
     images: [
       {
-        url: "/og.png", // relative path is better
+        url: "/og.png",
         width: 1200,
         height: 630,
       },
@@ -26,3 +30,15 @@ export const metadata: Metadata = {
     images: ["/og.png"],
   },
 };
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
