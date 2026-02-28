@@ -3,5 +3,16 @@
     "header": "eyJmaWQiOjIzODAwNiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGVmOTAzMTEwMTRBMWE3ZmY4MDMwNzlmQTVlOGIxMmQ3MjhGNjY0RUUifQ",
     "payload": "eyJkb21haW4iOiJiYXNlLXBvc3QtYm9vc3Rlci52ZXJjZWwuYXBwIn0",
     "signature": "H87IwIN7EOdg5WDKqB0TULuwV9o9EssTlFHhnfz5NCRIz9/14Y4DYYiORw3UG3eAQQMn3UCgb7RV2xQGw39Lwhs="
+  },
+  "frame": {
+    "version": "1",
+    "name": "Base Post Booster",
+    "iconUrl": "https://base-post-booster.vercel.app/icon.png",
+    "homeUrl": "https://base-post-booster.vercel.app",
+    "imageUrl": "https://base-post-booster.vercel.app/og.png",
+    "buttonTitle": "Open App 🚀",
+    "splashImageUrl": "https://base-post-booster.vercel.app/og.png",
+    "splashBackgroundColor": "#000000",
+    "webhookUrl": "https://base-post-booster.vercel.app/api/webhook"
   }
 }
