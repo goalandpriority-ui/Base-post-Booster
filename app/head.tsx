@@ -12,6 +12,10 @@ export default function Head() {
         property="fc:frame:button:1:target"
         content="https://base-post-booster.vercel.app"
       />
+      <meta
+        property="fc:frame:post_url"
+        content="https://base-post-booster.vercel.app/api/frame"
+      />
     </>
   );
 }
