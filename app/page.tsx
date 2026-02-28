@@ -72,7 +72,7 @@ export default function Home() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#E3A6AE",
+        background: "#E3A6AE", // pink background
         padding: 20,
         textAlign: "center",
         maxWidth: 500,
@@ -80,7 +80,15 @@ export default function Home() {
         color: "black",
       }}
     >
-      <h1 style={{ fontSize: 30, marginBottom: 30, fontWeight: "bold" }}>
+      <h1 style={{
+        fontSize: 30,
+        marginBottom: 30,
+        fontWeight: "bold",
+        color: "#ffffff",
+        background: "#3b82f6", // blue box
+        padding: "10px 20px",
+        borderRadius: 12,
+      }}>
         Base Post Booster
       </h1>
 
@@ -102,9 +110,7 @@ export default function Home() {
           >
             <h3 style={{ marginBottom: 5 }}>{tier.name}</h3>
             <p style={{ fontWeight: "bold" }}>{tier.price}</p>
-            <p style={{ fontSize: 14, color: "#333" }}>
-              {tier.duration}
-            </p>
+            <p style={{ fontSize: 14, color: "#333" }}>{tier.duration}</p>
           </div>
         ))}
       </div>
