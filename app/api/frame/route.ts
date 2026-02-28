@@ -4,6 +4,14 @@ const html = `
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Base Post Booster Frame</title>
+
+    <!-- Open Graph (REQUIRED) -->
+    <meta property="og:title" content="Base Post Booster 🚀" />
+    <meta property="og:image" content="https://base-post-booster.vercel.app/og.png" />
+    <meta property="og:description" content="Boost your Base posts instantly" />
+
+    <!-- Frame Tags -->
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="https://base-post-booster.vercel.app/og.png" />
     <meta property="fc:frame:button:1" content="Open App 🚀" />
@@ -19,16 +27,12 @@ const html = `
 
 export async function GET() {
   return new NextResponse(html, {
-    headers: {
-      "Content-Type": "text/html",
-    },
+    headers: { "Content-Type": "text/html" },
   });
 }
 
 export async function POST() {
   return new NextResponse(html, {
-    headers: {
-      "Content-Type": "text/html",
-    },
+    headers: { "Content-Type": "text/html" },
   });
 }
