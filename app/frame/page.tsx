@@ -1,9 +1,17 @@
-export const metadata = {
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
   title: "Base Post Booster",
   description: "Boost your Base posts",
   openGraph: {
     title: "Base Post Booster",
-    images: ["https://base-post-booster.vercel.app/og.png"],
+    images: [
+      {
+        url: "https://base-post-booster.vercel.app/og.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   other: {
     "fc:frame": "vNext",
