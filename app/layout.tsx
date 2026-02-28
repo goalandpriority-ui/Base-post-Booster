@@ -4,10 +4,8 @@ import React from "react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
-
   title: "Base Post Booster",
   description: "Boost your Base posts instantly 🚀",
-
   openGraph: {
     title: "Base Post Booster",
     description: "Boost your Base posts instantly 🚀",
@@ -22,7 +20,6 @@ export const metadata: Metadata = {
     ],
     type: "website",
   },
-
   twitter: {
     card: "summary_large_image",
     title: "Base Post Booster",
@@ -38,6 +35,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="fc:miniapp" content="1" />
+      </head>
       <body>{children}</body>
     </html>
   );
