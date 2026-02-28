@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: "Base Post Booster",
     images: [
       {
-        url: "/og.png",
+        url: "/og.png", // must exist in /public
         width: 1200,
         height: 630,
       },
@@ -29,6 +29,15 @@ export const metadata: Metadata = {
     description: "Boost your Base posts instantly 🚀",
     images: ["/og.png"],
   },
+
+  other: {
+    "fc:frame": "vNext",
+    "fc:frame:image": "https://base-post-booster.vercel.app/og.png",
+    "fc:frame:button:1": "Open App 🚀",
+    "fc:frame:button:1:action": "link",
+    "fc:frame:button:1:target":
+      "https://base-post-booster.vercel.app",
+  },
 };
 
 export default function RootLayout({
@@ -38,14 +47,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        {/* Required because manifest contains "frame" */}
-        <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content="https://base-post-booster.vercel.app/og.png" />
-        <meta property="fc:frame:button:1" content="Open App 🚀" />
-        <meta property="fc:frame:button:1:action" content="link" />
-        <meta property="fc:frame:button:1:target" content="https://base-post-booster.vercel.app" />
-      </head>
       <body>{children}</body>
     </html>
   );
