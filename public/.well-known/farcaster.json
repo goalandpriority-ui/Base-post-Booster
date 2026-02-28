@@ -5,10 +5,11 @@
     "signature": "H87IwIN7EOdg5WDKqB0TULuwV9o9EssTlFHhnfz5NCRIz9/14Y4DYYiORw3UG3eAQQMn3UCgb7RV2xQGw39Lwhs="
   },
   "frame": {
-    "version": "1",
+    "version": "open",
     "name": "Base Post Booster",
     "iconUrl": "https://base-post-booster.vercel.app/icon.png",
     "homeUrl": "https://base-post-booster.vercel.app",
+    "frameUrl": "https://base-post-booster.vercel.app/frame",
     "imageUrl": "https://base-post-booster.vercel.app/og.png",
     "buttonTitle": "Open App 🚀",
     "splashImageUrl": "https://base-post-booster.vercel.app/og.png",
