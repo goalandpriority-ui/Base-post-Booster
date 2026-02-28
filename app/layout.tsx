@@ -8,18 +8,20 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Base Post Booster",
     description: "Boost your Base posts instantly 🚀",
-    images: ["https://base-post-booster.vercel.app/og.png"],
+    images: [
+      {
+        url: "https://base-post-booster.vercel.app/og.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
 
-  other: {
-    "fc:frame": "vNext",
-    "fc:frame:image": "https://base-post-booster.vercel.app/og.png",
-    "fc:frame:button:1": "Open App 🚀",
-    "fc:frame:button:1:action": "link",
-    "fc:frame:button:1:target":
-      "https://base-post-booster.vercel.app",
-    "fc:frame:post_url":
-      "https://base-post-booster.vercel.app",
+  twitter: {
+    card: "summary_large_image",
+    title: "Base Post Booster",
+    description: "Boost your Base posts instantly 🚀",
+    images: ["https://base-post-booster.vercel.app/og.png"],
   },
 };
 
