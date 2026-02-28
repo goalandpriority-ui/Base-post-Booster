@@ -1,4 +1,4 @@
-/** next.config.js */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
     return [
@@ -6,11 +6,15 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           { key: 'X-Frame-Options', value: 'ALLOWALL' },
-          { key: 'Content-Security-Policy', value: "frame-ancestors 'self' https://*.farcaster.xyz" },
+          {
+            key: 'Content-Security-Policy',
+            value:
+              "frame-ancestors 'self' https://warpcast.com https://*.farcaster.xyz;",
+          },
         ],
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
