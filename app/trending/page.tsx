@@ -147,7 +147,6 @@ export default function TrendingPage() {
                     position: "relative",
                   }}
                 >
-                  {/* Top Badge / Crown */}
                   {topBadge && (
                     <motion.div
                       animate={{ y: [0, -6, 0] }}
@@ -168,7 +167,6 @@ export default function TrendingPage() {
                     </motion.div>
                   )}
 
-                  {/* User Avatar + Handle */}
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     {post.user_avatar && (
                       <img
@@ -198,10 +196,8 @@ export default function TrendingPage() {
                     )}
                   </div>
 
-                  {/* Post Content */}
                   <p style={{ maxWidth: "100%" }}>{post.content}</p>
 
-                  {/* Boosts + Share + Coin Price + Expand Chart */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
                       <p style={{ fontSize: 12 }}>Boosts</p>
@@ -217,9 +213,7 @@ export default function TrendingPage() {
                             padding: "2px 6px",
                             background: "#f0f0f0",
                             borderRadius: 6,
-                            cursor: "default",
                           }}
-                          title={`Coin Price: $${post.coin_price}`}
                         >
                           ${post.coin_price}
                         </span>
@@ -254,7 +248,6 @@ export default function TrendingPage() {
                     </div>
                   </div>
 
-                  {/* Expandable Chart */}
                   {isExpanded && (
                     <div style={{ marginTop: 10, height: 200, background: "#e5e7eb", borderRadius: 8 }}>
                       <iframe
@@ -271,4 +264,4 @@ export default function TrendingPage() {
       )}
     </div>
   )
-          }
+                               }
