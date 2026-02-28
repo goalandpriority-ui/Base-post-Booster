@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     images: ['https://base-post-booster.vercel.app/og.png'],
   },
   other: {
-    'fc:frame': 'vNext',
+    'fc:frame': '1', // changed from vNext
     'fc:frame:image': 'https://base-post-booster.vercel.app/og.png',
     'fc:frame:button:1': 'Open App',
     'fc:frame:button:1:action': 'link',
@@ -22,14 +22,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body style={{
-        margin: 0,
-        padding: 0,
-        background: "#E3A6AE",
-        color: "black",
-        minHeight: "100vh",
-        fontFamily: "sans-serif",
-      }}>
+      <body
+        style={{
+          margin: 0,
+          padding: 0,
+          background: "#E3A6AE",
+          color: "black",
+          minHeight: "100vh",
+          fontFamily: "sans-serif",
+        }}
+      >
         {children}
       </body>
     </html>
