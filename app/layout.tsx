@@ -1,44 +1,50 @@
-import type { Metadata } from "next";
 import "./globals.css";
-
-export const metadata: Metadata = {
-  title: "Base Post Booster 🚀",
-  description: "Boost posts. Climb leaderboard. Go viral on Base 🔥",
-
-  openGraph: {
-    title: "Base Post Booster 🚀",
-    description: "Boost posts. Climb leaderboard. Go viral on Base 🔥",
-    url: "https://base-post-booster.vercel.app",
-    siteName: "Base Post Booster",
-    images: [
-      {
-        url: "https://base-post-booster.vercel.app/og.png",
-        width: 1200,
-        height: 630,
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-
-  other: {
-    "fc:frame": "1",
-    "fc:frame:image":
-      "https://base-post-booster.vercel.app/og.png",
-    "fc:frame:button:1": "Open App 🚀",
-    "fc:frame:button:1:action": "link",
-    "fc:frame:button:1:target":
-      "https://base-post-booster.vercel.app",
-  },
-};
+import type { ReactNode } from "react";
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Basic SEO */}
+        <title>Base Post Booster 🚀</title>
+        <meta
+          name="description"
+          content="Boost posts. Climb leaderboard. Go viral on Base 🔥"
+        />
+
+        {/* Open Graph */}
+        <meta property="og:title" content="Base Post Booster 🚀" />
+        <meta
+          property="og:description"
+          content="Boost posts. Climb leaderboard. Go viral on Base 🔥"
+        />
+        <meta
+          property="og:image"
+          content="https://base-post-booster.vercel.app/og.png"
+        />
+        <meta
+          property="og:url"
+          content="https://base-post-booster.vercel.app"
+        />
+        <meta property="og:type" content="website" />
+
+        {/* Farcaster Frame (IMPORTANT) */}
+        <meta property="fc:frame" content="1" />
+        <meta
+          property="fc:frame:image"
+          content="https://base-post-booster.vercel.app/og.png"
+        />
+        <meta property="fc:frame:button:1" content="Open App 🚀" />
+        <meta property="fc:frame:button:1:action" content="link" />
+        <meta
+          property="fc:frame:button:1:target"
+          content="https://base-post-booster.vercel.app"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
