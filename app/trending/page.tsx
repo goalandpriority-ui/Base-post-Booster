@@ -27,14 +27,10 @@ export default function TrendingPage() {
       const res = await fetch("/api/posts")
       const data = await res.json()
 
-      const sorted = data.sort(
-        (a: Post, b: Post) => b.boost_count - a.boost_count
-      )
+      const sorted = data.sort((a: Post, b: Post) => b.boost_count - a.boost_count)
 
       const currentIds = sorted.map((p: Post) => p.id)
-      const newlyAdded = currentIds.filter(
-        (id: number) => !previousIds.current.includes(id)
-      )
+      const newlyAdded = currentIds.filter(id => !previousIds.current.includes(id))
 
       if (previousIds.current.length > 0 && newlyAdded.length > 0) {
         setNewIds(newlyAdded)
@@ -275,4 +271,4 @@ export default function TrendingPage() {
       )}
     </div>
   )
-}
+          }
