@@ -9,6 +9,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Basic SEO */}
+        <title>Base Post Booster 🚀</title>
+        <meta
+          name="description"
+          content="Boost posts. Climb leaderboard. Go viral on Base 🔥"
+        />
+
         {/* Open Graph */}
         <meta property="og:title" content="Base Post Booster 🚀" />
         <meta
@@ -25,17 +32,21 @@ export default function RootLayout({
         />
         <meta property="og:type" content="website" />
 
-        {/* Open Frames v2 (IMPORTANT) */}
-        <meta property="of:version" content="vNext" />
+        {/* Farcaster Frame vNext */}
+        <meta property="fc:frame" content="vNext" />
         <meta
-          property="of:image"
+          property="fc:frame:image"
           content="https://base-post-booster.vercel.app/og.png"
         />
-        <meta property="of:button:1" content="Open App 🚀" />
-        <meta property="of:button:1:action" content="link" />
+        <meta property="fc:frame:button:1" content="Open App 🚀" />
+        <meta property="fc:frame:button:1:action" content="link" />
         <meta
-          property="of:button:1:target"
+          property="fc:frame:button:1:target"
           content="https://base-post-booster.vercel.app"
+        />
+        <meta
+          property="fc:frame:post_url"
+          content="https://base-post-booster.vercel.app/api/frame"
         />
       </head>
       <body>{children}</body>
