@@ -1,11 +1,8 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import React from "react";
-
-export const metadata: Metadata = {
+export const metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
   title: "Base Post Booster",
   description: "Boost your Base posts instantly 🚀",
+
   openGraph: {
     title: "Base Post Booster",
     description: "Boost your Base posts instantly 🚀",
@@ -20,28 +17,16 @@ export const metadata: Metadata = {
     ],
     type: "website",
   },
+
   twitter: {
     card: "summary_large_image",
     title: "Base Post Booster",
     description: "Boost your Base posts instantly 🚀",
     images: ["https://base-post-booster.vercel.app/og.png"],
   },
-};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <head>
-        <meta
-          name="fc:miniapp"
-          content="https://base-post-booster.vercel.app/.well-known/farcaster.json"
-        />
-      </head>
-      <body>{children}</body>
-    </html>
-  );
-}
+  other: {
+    "fc:miniapp":
+      "https://base-post-booster.vercel.app/.well-known/farcaster.json",
+  },
+} as const;
