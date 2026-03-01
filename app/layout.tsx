@@ -1,7 +1,3 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import React from "react";
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
 
@@ -29,16 +25,9 @@ export const metadata: Metadata = {
     description: "Boost your Base posts instantly 🚀",
     images: ["https://base-post-booster.vercel.app/og.png"],
   },
-};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
+  other: {
+    "fc:miniapp":
+      "https://base-post-booster.vercel.app/.well-known/farcaster.json",
+  },
+};
