@@ -4,7 +4,7 @@
     "payload": "eyJkb21haW4iOiJiYXNlLXBvc3QtYm9vc3Rlci52ZXJjZWwuYXBwIn0",
     "signature": "H87IwIN7EOdg5WDKqB0TULuwV9o9EssTlFHhnfz5NCRIz9/14Y4DYYiORw3UG3eAQQMn3UCgb7RV2xQGw39Lwhs="
   },
-  "frame": {
+  "miniapp": {
     "version": "1",
     "name": "Base Post Booster",
     "iconUrl": "https://base-post-booster.vercel.app/icon.png",
