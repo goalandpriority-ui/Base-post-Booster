@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: "Base Post Booster",
     images: [
       {
-        url: "/og.png", // must exist in /public
+        url: "https://base-post-booster.vercel.app/og.png",
         width: 1200,
         height: 630,
       },
@@ -27,16 +27,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Base Post Booster",
     description: "Boost your Base posts instantly 🚀",
-    images: ["/og.png"],
-  },
-
-  other: {
-    "fc:frame": "vNext",
-    "fc:frame:image": "https://base-post-booster.vercel.app/og.png",
-    "fc:frame:button:1": "Open App 🚀",
-    "fc:frame:button:1:action": "link",
-    "fc:frame:button:1:target":
-      "https://base-post-booster.vercel.app",
+    images: ["https://base-post-booster.vercel.app/og.png"],
   },
 };
 
