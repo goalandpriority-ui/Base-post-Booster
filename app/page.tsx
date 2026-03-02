@@ -19,7 +19,7 @@ export default function Home() {
   const [contract, setContract] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const { address, isConnected } = useAccount()  // chainId & chain remove panni (type error fix)
+  const { address, isConnected } = useAccount()  // chainId remove panni (type error fix)
   const { connect } = useConnect()
   const { sendTransaction } = useSendTransaction()
 
@@ -36,11 +36,11 @@ export default function Home() {
     }
 
     if (!isConnected) {
-      connect() // default popup (MetaMask detect pannum)
+      connect() // wagmi default popup – MetaMask or other wallet open aagum
       return
     }
 
-    // Chain check optional – ippo remove panni test pannu (later add pannalaam)
+    // Chain check optional – ippo remove panni test pannu
     // if (chainId !== base.id) { alert("Switch to Base chain"); return; }
 
     try {
@@ -172,4 +172,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-                   }
+}
