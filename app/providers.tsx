@@ -6,13 +6,14 @@ import { publicProvider } from "wagmi/providers/public"
 import { InjectedConnector } from "wagmi/connectors/injected"
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { ReactNode } from "react"
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [base],
   [publicProvider()]
 )
 
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ""
 
 const config = createConfig({
   autoConnect: true,
@@ -31,7 +32,7 @@ const config = createConfig({
 
 const queryClient = new QueryClient()
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiConfig config={config}>
       <QueryClientProvider client={queryClient}>
