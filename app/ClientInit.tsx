@@ -1,17 +1,46 @@
 "use client"
 
-import { useEffect } from "react";
-import { sdk } from "@farcaster/miniapp-sdk";
+import { useEffect } from "react"
+import { sdk } from "@farcaster/miniapp-sdk"
+import { useConnect, useAccount } from "wagmi"
 
 export default function ClientInit() {
+  const { connect, connectors } = useConnect()
+  const { isConnected } = useAccount()
+
   useEffect(() => {
-    // Farcaster splash screen hide pannum – idhu main fix
-    sdk.actions.ready();
+    // Tell Farcaster app we are ready
+    sdk.actions.ready()
 
-    // Optional debug (remove later if want)
-    // console.log("Farcaster Mini App ready called");
-    // sdk.context.then(ctx => console.log("Launch context:", ctx));
-  }, []);
+    async function autoConnect() {
+      if (isConnected) return
 
-  return null; // invisible
+      // Try injected connector first (Base app / Farcaster wallet)
+      const injectedConnector = connectors.find(
+        (c) => c.type === "injected"
+      )
+
+      if (injectedConnector) {
+        try {
+          await connect({ connector: injectedConnector })
+          return
+        } catch (err) {
+          console.log("Injected connect failed")
+        }
+      }
+
+      // Fallback to WalletConnect
+      const wcConnector = connectors.find(
+        (c) => c.type === "walletConnect"
+      )
+
+      if (wcConnector) {
+        await connect({ connector: wcConnector })
+      }
+    }
+
+    autoConnect()
+  }, [connect, connectors, isConnected])
+
+  return null
 }
