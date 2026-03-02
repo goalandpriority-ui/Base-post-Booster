@@ -25,12 +25,18 @@ export default function TrendingPage() {
   const fetchPosts = async () => {
     try {
       const res = await fetch("/api/posts")
-      const data = await res.json()
+      const data: Post[] = await res.json()
 
-      const sorted = data.sort((a: Post, b: Post) => b.boost_count - a.boost_count)
+      const sorted = data.sort(
+        (a: Post, b: Post) => b.boost_count - a.boost_count
+      )
 
       const currentIds = sorted.map((p: Post) => p.id)
-      const newlyAdded = currentIds.filter(id => !previousIds.current.includes(id))
+
+      // ✅ STRICT MODE FIX
+      const newlyAdded = currentIds.filter((id: number) =>
+        !previousIds.current.includes(id)
+      )
 
       if (previousIds.current.length > 0 && newlyAdded.length > 0) {
         setNewIds(newlyAdded)
@@ -86,7 +92,14 @@ export default function TrendingPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#E3A6AE", padding: 30, color: "black" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#E3A6AE",
+        padding: 30,
+        color: "black",
+      }}
+    >
       <h1 style={{ fontSize: 30, fontWeight: "bold", marginBottom: 20 }}>
         Trending Boosted Posts
       </h1>
@@ -115,16 +128,22 @@ export default function TrendingPage() {
           </Link>
         </div>
       ) : (
-        <motion.div layout style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        <motion.div
+          layout
+          style={{ display: "flex", flexDirection: "column", gap: 20 }}
+        >
           <AnimatePresence>
             {posts.map((post, index) => {
               const isNew = newIds.includes(post.id)
               const isExpanded = expandedChart === post.id
 
               const getTopBadge = () => {
-                if (index === 0) return { text: "Gold", color: "#FFD700" }
-                if (index === 1) return { text: "Silver", color: "#C0C0C0" }
-                if (index === 2) return { text: "Bronze", color: "#CD7F32" }
+                if (index === 0)
+                  return { text: "Gold", color: "#FFD700" }
+                if (index === 1)
+                  return { text: "Silver", color: "#C0C0C0" }
+                if (index === 2)
+                  return { text: "Bronze", color: "#CD7F32" }
                 return null
               }
 
@@ -136,7 +155,11 @@ export default function TrendingPage() {
                   layout
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                  }}
                   style={{
                     background: "white",
                     padding: 20,
@@ -167,14 +190,25 @@ export default function TrendingPage() {
                     </motion.div>
                   )}
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
                     {post.user_avatar && (
                       <img
                         src={post.user_avatar}
                         alt="avatar"
-                        style={{ width: 40, height: 40, borderRadius: "50%" }}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: "50%",
+                        }}
                       />
                     )}
+
                     <span style={{ fontWeight: "bold" }}>
                       {post.user_handle || "Anonymous"}
                     </span>
@@ -196,12 +230,25 @@ export default function TrendingPage() {
                     )}
                   </div>
 
-                  <p style={{ maxWidth: "100%" }}>{post.content}</p>
+                  <p>{post.content}</p>
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
                     <div>
                       <p style={{ fontSize: 12 }}>Boosts</p>
-                      <p style={{ fontSize: 22, fontWeight: "bold" }}>{post.boost_count}</p>
+                      <p
+                        style={{
+                          fontSize: 22,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {post.boost_count}
+                      </p>
                     </div>
 
                     <div style={{ display: "flex", gap: 10 }}>
@@ -218,6 +265,7 @@ export default function TrendingPage() {
                           ${post.coin_price}
                         </span>
                       )}
+
                       <button
                         onClick={() => handleShare(post)}
                         style={{
@@ -233,7 +281,11 @@ export default function TrendingPage() {
                       </button>
 
                       <button
-                        onClick={() => setExpandedChart(isExpanded ? null : post.id)}
+                        onClick={() =>
+                          setExpandedChart(
+                            isExpanded ? null : post.id
+                          )
+                        }
                         style={{
                           padding: "6px 12px",
                           borderRadius: 6,
@@ -243,16 +295,30 @@ export default function TrendingPage() {
                           cursor: "pointer",
                         }}
                       >
-                        {isExpanded ? "Hide Chart" : "View Chart"}
+                        {isExpanded
+                          ? "Hide Chart"
+                          : "View Chart"}
                       </button>
                     </div>
                   </div>
 
                   {isExpanded && (
-                    <div style={{ marginTop: 10, height: 200, background: "#e5e7eb", borderRadius: 8 }}>
+                    <div
+                      style={{
+                        marginTop: 10,
+                        height: 200,
+                        background: "#e5e7eb",
+                        borderRadius: 8,
+                      }}
+                    >
                       <iframe
                         src={`https://widget.coinlore.com/coin_price_chart_widget/${post.id}`}
-                        style={{ width: "100%", height: "100%", border: "none", borderRadius: 8 }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          border: "none",
+                          borderRadius: 8,
+                        }}
                       />
                     </div>
                   )}
@@ -264,4 +330,4 @@ export default function TrendingPage() {
       )}
     </div>
   )
-                               }
+}
