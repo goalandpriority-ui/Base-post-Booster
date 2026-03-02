@@ -2,7 +2,7 @@ import "./globals.css"
 import type { ReactNode } from "react"
 import type { Metadata } from "next"
 import ClientInit from "./ClientInit"
-import { Providers } from "./providers"
+import  Providers  from "./providers"
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
