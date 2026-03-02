@@ -19,8 +19,8 @@ export default function Home() {
   const [contract, setContract] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const { address, isConnected } = useAccount()  // chainId & chain remove panni
-  const { connect } = useConnect()
+  const { address, isConnected } = useAccount()
+  const { connect, connectors } = useConnect()
   const { sendTransaction } = useSendTransaction()
 
   const tiers = [
@@ -35,8 +35,17 @@ export default function Home() {
       return
     }
 
+    // ✅ FIXED CONNECT LOGIC FOR WAGMI v2
     if (!isConnected) {
-      connect() // wagmi default popup
+      const injectedConnector = connectors.find(
+        (connector) => connector.id === "injected"
+      )
+
+      if (injectedConnector) {
+        await connect({ connector: injectedConnector })
+      } else {
+        alert("No wallet found")
+      }
       return
     }
 
@@ -44,7 +53,7 @@ export default function Home() {
       setLoading(true)
 
       const hash = await sendTransaction({
-        to: YOUR_WALLET_ADDRESS,
+        to: YOUR_WALLET_ADDRESS as `0x${string}`,
         value: tiers[selectedTier].value,
       })
 
@@ -52,7 +61,6 @@ export default function Home() {
 
       setPostLink("")
       setContract("")
-
     } catch (err: any) {
       console.error(err)
       alert("Transaction failed: " + (err.shortMessage || err.message || "Unknown error"))
@@ -73,15 +81,17 @@ export default function Home() {
         color: "black",
       }}
     >
-      <h1 style={{
-        fontSize: 30,
-        marginBottom: 30,
-        fontWeight: "bold",
-        color: "#ffffff",
-        background: "#3b82f6",
-        padding: "10px 20px",
-        borderRadius: 12,
-      }}>
+      <h1
+        style={{
+          fontSize: 30,
+          marginBottom: 30,
+          fontWeight: "bold",
+          color: "#ffffff",
+          background: "#3b82f6",
+          padding: "10px 20px",
+          borderRadius: 12,
+        }}
+      >
         Base Post Booster
       </h1>
 
@@ -108,25 +118,22 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Post Link */}
       <input
         type="text"
         placeholder="Paste Base post link"
         value={postLink}
-        onChange={e => setPostLink(e.target.value)}
+        onChange={(e) => setPostLink(e.target.value)}
         style={inputStyle}
       />
 
-      {/* Optional Contract */}
       <input
         type="text"
         placeholder="Coin Contract Address (optional)"
         value={contract}
-        onChange={e => setContract(e.target.value)}
+        onChange={(e) => setContract(e.target.value)}
         style={{ ...inputStyle, marginTop: 10 }}
       />
 
-      {/* Button */}
       <div style={{ marginTop: 20 }}>
         <button
           onClick={handleBoost}
