@@ -1,22 +1,22 @@
 "use client"
 
-import { WagmiProvider, createConfig } from "wagmi"
+import { WagmiConfig, createConfig } from "wagmi"  // WagmiConfig use pannu (v1 la common)
 import { base } from "wagmi/chains"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 const config = createConfig({
   chains: [base],
-  // transports: default-a use pannum (http included)
+  // transports default-a http use pannum – no need http import
 })
 
 const queryClient = new QueryClient()
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={config}>
+    <WagmiConfig config={config}>
       <QueryClientProvider client={queryClient}>
         {children}
       </QueryClientProvider>
-    </WagmiProvider>
+    </WagmiConfig>
   )
 }
