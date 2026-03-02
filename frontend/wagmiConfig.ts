@@ -1,15 +1,17 @@
 'use client'
 
-import { configureChains, createConfig } from 'wagmi'
-import { mainnet, goerli } from 'wagmi/chains'
-import { publicProvider } from 'wagmi/providers/public'
-
-export const { publicClient } = configureChains(
-  [mainnet, goerli],
-  [publicProvider()]
-)
+import { createConfig, http } from 'wagmi'
+import { mainnet } from 'wagmi/chains'
+import { injected } from 'wagmi/connectors'
 
 export const wagmiConfig = createConfig({
-  autoConnect: true,
-  publicClient,
+  chains: [mainnet],
+
+  connectors: [
+    injected(),
+  ],
+
+  transports: {
+    [mainnet.id]: http(),
+  },
 })
