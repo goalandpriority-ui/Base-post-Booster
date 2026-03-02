@@ -3,12 +3,10 @@
 import { useState } from "react"
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import Link from "next/link"
-
-declare global {
-  interface Window {
-    ethereum?: any
-  }
-}
+import { useAccount, useConnect, useSendTransaction } from "wagmi"
+import { base } from "wagmi/chains"
+import { injected } from "wagmi/connectors"
+import { parseEther } from "viem"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -23,10 +21,14 @@ export default function Home() {
   const [contract, setContract] = useState("")
   const [loading, setLoading] = useState(false)
 
+  const { address, isConnected, chainId } = useAccount()
+  const { connect } = useConnect()
+  const { sendTransaction } = useSendTransaction()
+
   const tiers = [
-    { name: "Basic", price: "0.001 ETH", duration: "24 Hours Boost", value: "0x38D7EA4C68000" },
-    { name: "Pro", price: "0.003 ETH", duration: "48 Hours Boost", value: "0xAA87BEE538000" },
-    { name: "Elite", price: "0.005 ETH", duration: "72 Hours Boost", value: "0x11C37937E08000" },
+    { name: "Basic", price: "0.001 ETH", duration: "24 Hours Boost", value: parseEther("0.001") },
+    { name: "Pro", price: "0.003 ETH", duration: "48 Hours Boost", value: parseEther("0.003") },
+    { name: "Elite", price: "0.005 ETH", duration: "72 Hours Boost", value: parseEther("0.005") },
   ]
 
   async function handleBoost() {
@@ -35,34 +37,38 @@ export default function Home() {
       return
     }
 
-    if (!window.ethereum) {
-      alert("Install MetaMask")
+    if (!isConnected) {
+      connect({ connector: injected() }) // MetaMask or injected wallet connect pannum
+      return
+    }
+
+    // Base chain check (optional but good)
+    if (chainId !== base.id) {
+      alert("Please switch to Base chain in your wallet (Chain ID: 8453)")
       return
     }
 
     try {
       setLoading(true)
 
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
+      const hash = await sendTransaction({
+        to: YOUR_WALLET_ADDRESS,
+        value: tiers[selectedTier].value,
       })
 
-      await window.ethereum.request({
-        method: "eth_sendTransaction",
-        params: [{
-          from: accounts[0],
-          to: YOUR_WALLET_ADDRESS,
-          value: tiers[selectedTier].value,
-        }],
-      })
+      // Transaction hash vandhadhu confirm pannu (receipt wait optional)
+      alert(`Boost successful! Transaction hash: ${hash}`)
 
-      alert("Boost successful")
       setPostLink("")
       setContract("")
 
-    } catch (err) {
+      // Optional: Boost record Supabase la save pannu (future trending update ku)
+      // const postId = postLink.split('/').pop() || postLink
+      // await supabase.from('posts').upsert({ id: postId, content: postLink, boost_count: 1 })
+
+    } catch (err: any) {
       console.error(err)
-      alert("Transaction failed")
+      alert("Transaction failed: " + (err.shortMessage || err.message || "Unknown error"))
     } finally {
       setLoading(false)
     }
@@ -72,7 +78,7 @@ export default function Home() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#E3A6AE", // pink background
+        background: "#E3A6AE",
         padding: 20,
         textAlign: "center",
         maxWidth: 500,
@@ -85,7 +91,7 @@ export default function Home() {
         marginBottom: 30,
         fontWeight: "bold",
         color: "#ffffff",
-        background: "#3b82f6", // blue box
+        background: "#3b82f6",
         padding: "10px 20px",
         borderRadius: 12,
       }}>
@@ -127,7 +133,7 @@ export default function Home() {
       {/* Optional Contract */}
       <input
         type="text"
-        placeholder="Coin Contract Address"
+        placeholder="Coin Contract Address (optional)"
         value={contract}
         onChange={e => setContract(e.target.value)}
         style={{ ...inputStyle, marginTop: 10 }}
@@ -150,9 +156,15 @@ export default function Home() {
             fontSize: 16,
           }}
         >
-          {loading ? "Processing..." : "Boost Now"}
+          {loading ? "Processing..." : isConnected ? "Boost Now" : "Connect Wallet"}
         </button>
       </div>
+
+      {isConnected && (
+        <p style={{ marginTop: 10, fontSize: 14 }}>
+          Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
+        </p>
+      )}
 
       <div style={{ marginTop: 40 }}>
         <Link href="/trending" style={{ color: "black", fontWeight: "bold" }}>
@@ -170,4 +182,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-}
+    }
