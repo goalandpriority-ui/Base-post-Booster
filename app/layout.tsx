@@ -36,11 +36,36 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Farcaster Mini App Meta Tag */}
+        {/* Correct Farcaster Mini App Embed Meta - This fixes "No embed found" */}
         <meta
           name="fc:miniapp"
-          content="https://base-post-booster.vercel.app/.well-known/farcaster.json"
+          content={JSON.stringify({
+            version: "1",
+            imageUrl: "https://base-post-booster.vercel.app/og.png",
+            button: {
+              title: "Open App 🚀",
+              action: "launch_miniapp",
+            },
+            // More optional: You can add homeUrl etc. if needed, but manifest handles most
+          })}
         />
+
+        {/* Backup/legacy support - optional, but add if embed still issues */}
+        {/* <meta
+          name="fc:frame"
+          content={JSON.stringify({
+            version: "vNext",
+            imageUrl: "https://base-post-booster.vercel.app/og.png",
+            button: {
+              title: "Boost Now 🚀",
+              action: "launch_miniapp",
+              target: "https://base-post-booster.vercel.app",
+            },
+          })}
+        /> */}
+
+        {/* Your old wrong one - REMOVE this */}
+        {/* <meta name="fc:miniapp" content="https://base-post-booster.vercel.app/.well-known/farcaster.json" /> */}
       </head>
       <body>{children}</body>
     </html>
