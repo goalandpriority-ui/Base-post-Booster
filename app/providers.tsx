@@ -1,34 +1,25 @@
 "use client"
 
-import { useEffect } from "react"
-import { sdk } from "@farcaster/miniapp-sdk"
-import { useAccount, useConnect } from "wagmi"
+import { WagmiProvider, createConfig, http } from "wagmi"
+import { base } from "wagmi/chains"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { ReactNode } from "react"
 
-export default function ClientInit() {
-  const { isConnected } = useAccount()
-  const { connect, connectors } = useConnect()
+const queryClient = new QueryClient()
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        await sdk.actions.ready()
+const config = createConfig({
+  chains: [base],
+  transports: {
+    [base.id]: http(),
+  },
+})
 
-        if (!isConnected && connectors?.length) {
-          const injectedConnector = connectors.find(
-            (c) => c.id === "injected"
-          )
-
-          if (injectedConnector) {
-            connect({ connector: injectedConnector })
-          }
-        }
-      } catch (error) {
-        console.error("Miniapp init failed:", error)
-      }
-    }
-
-    init()
-  }, [isConnected, connect, connectors])
-
-  return null
+export default function Providers({ children }: { children: ReactNode }) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
 }
