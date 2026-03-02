@@ -1,4 +1,3 @@
-// app/ClientInit.tsx
 "use client"
 
 import { useEffect } from "react";
@@ -6,11 +5,13 @@ import { sdk } from "@farcaster/miniapp-sdk";
 
 export default function ClientInit() {
   useEffect(() => {
-    // Splash hide pannu – idhu Mini App launch la important
+    // Farcaster splash screen hide pannum – idhu main fix
     sdk.actions.ready();
-    // Optional debug: Farcaster context paaru (FID, etc.)
-    // sdk.context.then(ctx => console.log("Farcaster launch context:", ctx));
-  }, []); // once on mount
 
-  return null; // invisible component
+    // Optional debug (remove later if want)
+    // console.log("Farcaster Mini App ready called");
+    // sdk.context.then(ctx => console.log("Launch context:", ctx));
+  }, []);
+
+  return null; // invisible
 }
