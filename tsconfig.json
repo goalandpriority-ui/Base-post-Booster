@@ -4,7 +4,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,                      // ← true pannu (wagmi types-ku important)
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -29,7 +29,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "wagmi.d.ts"                         // ← add pannu (file path correct ah irukkanum)
+    "wagmi.d.ts"
   ],
   "exclude": ["node_modules"]
 }
