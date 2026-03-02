@@ -1,35 +1,34 @@
 "use client"
 
-import { ReactNode } from "react"
-import { WagmiProvider, createConfig, http } from "wagmi"
-import { base } from "wagmi/chains"
-import { injected, walletConnect } from "wagmi/connectors"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { useEffect } from "react"
+import { sdk } from "@farcaster/miniapp-sdk"
+import { useAccount, useConnect } from "wagmi"
 
-const projectId =
-  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ""
+export default function ClientInit() {
+  const { isConnected } = useAccount()
+  const { connect, connectors } = useConnect()
 
-const config = createConfig({
-  chains: [base],
-  connectors: [
-    injected(),
-    walletConnect({
-      projectId,
-    }),
-  ],
-  transports: {
-    [base.id]: http(),
-  },
-})
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await sdk.actions.ready()
 
-const queryClient = new QueryClient()
+        if (!isConnected && connectors?.length) {
+          const injectedConnector = connectors.find(
+            (c) => c.id === "injected"
+          )
 
-export function Providers({ children }: { children: ReactNode }) {
-  return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    </WagmiProvider>
-  )
+          if (injectedConnector) {
+            connect({ connector: injectedConnector })
+          }
+        }
+      } catch (error) {
+        console.error("Miniapp init failed:", error)
+      }
+    }
+
+    init()
+  }, [isConnected, connect, connectors])
+
+  return null
 }
