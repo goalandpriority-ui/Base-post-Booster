@@ -19,7 +19,7 @@ export default function Home() {
   const [contract, setContract] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const { address, isConnected } = useAccount()  // chainId remove panni (type error fix)
+  const { address, isConnected } = useAccount()  // chainId & chain remove panni
   const { connect } = useConnect()
   const { sendTransaction } = useSendTransaction()
 
@@ -36,12 +36,9 @@ export default function Home() {
     }
 
     if (!isConnected) {
-      connect() // wagmi default popup – MetaMask or other wallet open aagum
+      connect() // wagmi default popup
       return
     }
-
-    // Chain check optional – ippo remove panni test pannu
-    // if (chainId !== base.id) { alert("Switch to Base chain"); return; }
 
     try {
       setLoading(true)
