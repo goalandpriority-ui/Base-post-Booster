@@ -9,23 +9,28 @@ export default function ClientInit() {
   const { connect, connectors } = useConnect()
 
   useEffect(() => {
-    async function init() {
+    const init = async () => {
       try {
+        // Hide Farcaster splash
         await sdk.actions.ready()
 
-        if (!isConnected && connectors.length > 0) {
-          const injected = connectors.find((c) => c.id === "injected")
-          if (injected) {
-            connect({ connector: injected })
+        // Auto-connect injected wallet (like MetaMask)
+        if (!isConnected && connectors?.length) {
+          const injectedConnector = connectors.find(
+            (connector) => connector.id === "injected"
+          )
+
+          if (injectedConnector) {
+            connect({ connector: injectedConnector })
           }
         }
-      } catch (error) {
-        console.error("Miniapp init failed:", error)
+      } catch (err) {
+        console.error("Miniapp init failed:", err)
       }
     }
 
     init()
-  }, [isConnected, connect, connectors])
+  }, [isConnected, connectors, connect])
 
   return null
 }
