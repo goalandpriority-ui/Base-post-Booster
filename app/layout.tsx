@@ -1,8 +1,8 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import ClientInit from "./ClientInit"; // splash hide component
-import { Providers } from "./providers"; // wagmi wrap
+import ClientInit from "./ClientInit";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
