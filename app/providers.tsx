@@ -1,43 +1,35 @@
 "use client"
 
-import { WagmiConfig, createConfig, configureChains } from "wagmi"
-import { base } from "wagmi/chains"
-import { publicProvider } from "wagmi/providers/public"
-import { InjectedConnector } from "wagmi/connectors/injected"
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactNode } from "react"
+import { WagmiProvider, createConfig, http } from "wagmi"
+import { base } from "wagmi/chains"
+import { injected, walletConnect } from "wagmi/connectors"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [base],
-  [publicProvider()]
-)
-
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ""
+const projectId =
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ""
 
 const config = createConfig({
-  autoConnect: true,
+  chains: [base],
   connectors: [
-    new InjectedConnector({ chains }),
-    new WalletConnectConnector({
-      chains,
-      options: {
-        projectId,
-      },
+    injected(),
+    walletConnect({
+      projectId,
     }),
   ],
-  publicClient,
-  webSocketPublicClient,
+  transports: {
+    [base.id]: http(),
+  },
 })
 
 const queryClient = new QueryClient()
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <WagmiConfig config={config}>
+    <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         {children}
       </QueryClientProvider>
-    </WagmiConfig>
+    </WagmiProvider>
   )
 }
