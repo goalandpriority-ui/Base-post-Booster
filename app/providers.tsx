@@ -1,16 +1,17 @@
 "use client"
 
 import { WagmiProvider, createConfig } from "wagmi"
-import { http } from "viem"  // ← http viem-la irundhu import pannu (v2-la correct)
+import { http } from "viem"                    // ← viem-la irundhu import
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { base } from "wagmi/chains"
 
 export const config = createConfig({
-  chains: [base],  // ← MUST irukkanum
+  chains: [base],                             // ← idhu MUST (single chain ok)
   transports: {
-    [base.id]: http(),  // viem http use pannu
+    [base.id]: http(),                        // default public RPC
+    // or custom: http('https://mainnet.base.org')
   },
-  ssr: true,  // Next.js hydration fix
+  ssr: true,                                  // Next.js hydration avoid
 })
 
 const queryClient = new QueryClient()
