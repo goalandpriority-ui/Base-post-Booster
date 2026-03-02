@@ -4,7 +4,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,                 // ← Try turning this ON after the other fixes
+    "strict": true,                      // ← true pannu (wagmi types-ku important)
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -13,7 +13,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,            // ← Add this
+    "incremental": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
@@ -28,8 +28,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",         // ← Add this
-    "wagmi.d.ts"                   // ← If you created the file
+    ".next/types/**/*.ts",
+    "wagmi.d.ts"                         // ← add pannu (file path correct ah irukkanum)
   ],
   "exclude": ["node_modules"]
 }
