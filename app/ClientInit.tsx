@@ -13,11 +13,8 @@ export default function ClientInit() {
       try {
         await sdk.actions.ready()
 
-        if (!isConnected && connectors?.length) {
-          const injected = connectors.find(
-            (c) => c.id === "injected"
-          )
-
+        if (!isConnected && connectors.length > 0) {
+          const injected = connectors.find((c) => c.id === "injected")
           if (injected) {
             connect({ connector: injected })
           }
