@@ -5,7 +5,6 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import Link from "next/link"
 import { useAccount, useConnect, useSendTransaction } from "wagmi"
 import { base } from "wagmi/chains"
-import { injected } from "@wagmi/connectors"  // Correct import
 import { parseEther } from "viem"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -38,7 +37,7 @@ export default function Home() {
     }
 
     if (!isConnected) {
-      connect({ connector: injected() }) // Wallet connect popup open pannum
+      connect() // wagmi default connector use pannum (MetaMask popup varum)
       return
     }
 
@@ -59,10 +58,6 @@ export default function Home() {
 
       setPostLink("")
       setContract("")
-
-      // Future: Supabase la boost save pannu
-      // const postId = postLink.split('/').pop() || postLink
-      // await supabase.from('posts').upsert({ id: postId, content: postLink, boost_count: 1 })
 
     } catch (err: any) {
       console.error(err)
@@ -180,4 +175,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-            }
+}
