@@ -128,7 +128,7 @@ export default function Home() {
 
       <input
         type="text"
-        placeholder="Coin Contract Address (optional)"
+        placeholder="Coin Contract Address "
         value={contract}
         onChange={(e) => setContract(e.target.value)}
         style={{ ...inputStyle, marginTop: 10 }}
