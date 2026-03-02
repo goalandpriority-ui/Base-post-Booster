@@ -1,22 +1,32 @@
-// app/layout.tsx – updated version (your existing + SDK)
-"use client";  // Add this at top if not there (for useEffect)
-
+// app/layout.tsx – full corrected version
 import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { useEffect } from "react";  // Add this
-import { sdk } from "@farcaster/miniapp-sdk";  // Add this import
+import ClientInit from "./ClientInit";  // Add this import
 
 export const metadata: Metadata = {
-  // your existing metadata (title, og, etc.)
   metadataBase: new URL("https://base-post-booster.vercel.app"),
   title: "Base Post Booster",
   description: "Boost your Base posts instantly 🚀",
   openGraph: {
-    // ...
+    title: "Base Post Booster",
+    description: "Boost your Base posts instantly 🚀",
+    url: "https://base-post-booster.vercel.app",
+    siteName: "Base Post Booster",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 800,  // 3:2 ratio recommend
+      },
+    ],
+    type: "website",
   },
   twitter: {
-    // ...
+    card: "summary_large_image",
+    title: "Base Post Booster",
+    description: "Boost your Base posts instantly 🚀",
+    images: ["/og.png"],
   },
 };
 
@@ -25,13 +35,6 @@ export default function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  useEffect(() => {
-    // MUST call this to hide splash and show app content
-    sdk.actions.ready();
-    // Optional: Debug context
-    // sdk.context.then(ctx => console.log("Farcaster context:", ctx));
-  }, []);  // Run once
-
   const embedConfig = {
     version: "1",
     imageUrl: "https://base-post-booster.vercel.app/og.png",
@@ -53,7 +56,10 @@ export default function RootLayout({
         {/* optional backup */}
         <meta name="fc:frame" content={JSON.stringify(embedConfig)} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ClientInit />  {/* Add here – splash ready call pannum */}
+      </body>
     </html>
   );
 }
