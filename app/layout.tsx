@@ -1,7 +1,8 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import ClientInit from "./ClientInit";  // Import pannu
+import ClientInit from "./ClientInit"; // Splash screen hide ku
+import { Providers } from "./providers"; // wagmi wallet config wrap ku (new file)
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
       {
         url: "/og.png",
         width: 1200,
-        height: 800,  // 3:2 ratio recommend pannirukken
+        height: 800, // 3:2 ratio better for preview card
       },
     ],
     type: "website",
@@ -51,14 +52,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Embed meta – preview la card varudhu */}
+        {/* Farcaster Mini App embed meta – preview card ku */}
         <meta name="fc:miniapp" content={JSON.stringify(embedConfig)} />
-        {/* Optional legacy backup */}
+        {/* Legacy support optional */}
         <meta name="fc:frame" content={JSON.stringify(embedConfig)} />
       </head>
       <body>
-        {children}
-        <ClientInit />  {/* Splash hide pannum */}
+        {/* wagmi + query provider wrap – wallet connect ku important */}
+        <Providers>
+          {children}
+        </Providers>
+
+        {/* Farcaster splash hide pannum component */}
+        <ClientInit />
       </body>
     </html>
   );
