@@ -20,7 +20,7 @@ export default function Home() {
   const [contract, setContract] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const { address, isConnected, chainId } = useAccount()  // chainId direct-a eduthukko
+  const { address, isConnected, chain } = useAccount()  // chain object eduthukko
   const { connect } = useConnect()
   const { sendTransaction } = useSendTransaction()
 
@@ -37,12 +37,12 @@ export default function Home() {
     }
 
     if (!isConnected) {
-      connect()  // wagmi default connector popup (MetaMask auto detect)
+      connect() // default wagmi connector popup
       return
     }
 
-    // Chain check
-    if (chainId !== base.id) {
+    // Chain check – chain?.id use pannu
+    if (chain?.id !== base.id) {
       alert("Switch to Base chain (Chain ID 8453) in your wallet")
       return
     }
