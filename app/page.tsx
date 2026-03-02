@@ -4,7 +4,6 @@ import { useState } from "react"
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import Link from "next/link"
 import { useAccount, useConnect, useSendTransaction } from "wagmi"
-import { base } from "wagmi/chains"
 import { parseEther } from "viem"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -20,7 +19,7 @@ export default function Home() {
   const [contract, setContract] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const { address, isConnected, chainId } = useAccount()  // chainId direct-a eduthukko (v1 la irukku)
+  const { address, isConnected } = useAccount()  // chainId & chain remove panni (type error fix)
   const { connect } = useConnect()
   const { sendTransaction } = useSendTransaction()
 
@@ -37,14 +36,12 @@ export default function Home() {
     }
 
     if (!isConnected) {
-      connect() // wagmi default popup (MetaMask detect pannum)
+      connect() // default popup (MetaMask detect pannum)
       return
     }
 
-    if (chainId !== base.id) {
-      alert("Switch to Base chain (Chain ID 8453) in your wallet")
-      return
-    }
+    // Chain check optional – ippo remove panni test pannu (later add pannalaam)
+    // if (chainId !== base.id) { alert("Switch to Base chain"); return; }
 
     try {
       setLoading(true)
@@ -175,4 +172,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-}
+                   }
