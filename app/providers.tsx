@@ -1,10 +1,15 @@
 "use client"
 
 import { WagmiConfig, createConfig } from "wagmi"
+import { http } from "viem" // viem la http import pannu
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { base } from "wagmi/chains"
 
 const config = createConfig({
-  // wagmi v1 la chains & transports optional – default http use pannum, Base chain MetaMask la auto detect aagum
+  chains: [base],
+  transports: {
+    [base.id]: http(), // default http transport for Base chain
+  },
 })
 
 const queryClient = new QueryClient()
