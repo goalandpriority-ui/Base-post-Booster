@@ -5,7 +5,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import Link from "next/link"
 import { useAccount, useConnect, useSendTransaction } from "wagmi"
 import { base } from "wagmi/chains"
-import { injected } from "wagmi/connectors"
+import { injected } from "@wagmi/connectors"  // Correct import
 import { parseEther } from "viem"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -38,13 +38,12 @@ export default function Home() {
     }
 
     if (!isConnected) {
-      connect({ connector: injected() }) // MetaMask or injected wallet connect pannum
+      connect({ connector: injected() }) // Wallet connect popup open pannum
       return
     }
 
-    // Base chain check (optional but good)
     if (chainId !== base.id) {
-      alert("Please switch to Base chain in your wallet (Chain ID: 8453)")
+      alert("Switch to Base chain (Chain ID 8453) in your wallet")
       return
     }
 
@@ -56,13 +55,12 @@ export default function Home() {
         value: tiers[selectedTier].value,
       })
 
-      // Transaction hash vandhadhu confirm pannu (receipt wait optional)
-      alert(`Boost successful! Transaction hash: ${hash}`)
+      alert(`Boost successful! Tx hash: ${hash}`)
 
       setPostLink("")
       setContract("")
 
-      // Optional: Boost record Supabase la save pannu (future trending update ku)
+      // Future: Supabase la boost save pannu
       // const postId = postLink.split('/').pop() || postLink
       // await supabase.from('posts').upsert({ id: postId, content: postLink, boost_count: 1 })
 
@@ -161,7 +159,7 @@ export default function Home() {
       </div>
 
       {isConnected && (
-        <p style={{ marginTop: 10, fontSize: 14 }}>
+        <p style={{ marginTop: 10, fontSize: 14, color: "#333" }}>
           Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
         </p>
       )}
@@ -182,4 +180,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-    }
+            }
