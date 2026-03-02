@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 const config = createConfig({
   chains: [base],
-  // no transports needed – wagmi default http use pannum
 })
 
 const queryClient = new QueryClient()
