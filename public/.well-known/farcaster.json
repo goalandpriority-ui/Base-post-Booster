@@ -9,9 +9,11 @@
     "name": "Base Post Booster",
     "description": "Boost your Farcaster posts with ETH on Base – instant visibility!",
     "iconUrl": "https://base-post-booster.vercel.app/icon.png",
+    "imageUrl": "https://base-post-booster.vercel.app/og.png",
+    "homeUrl": "https://base-post-booster.vercel.app",
+    "buttonTitle": "Open App 🚀",
     "splashImageUrl": "https://base-post-booster.vercel.app/og.png",
-    "websiteUrl": "https://base-post-booster.vercel.app",
-    "deepLinkUrl": "https://base-post-booster.vercel.app",
+    "splashBackgroundColor": "#000000",
     "category": "social",
     "chains": ["base"]
   }
