@@ -1,7 +1,8 @@
 import "./globals.css";
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
   title: "Base Post Booster",
   description: "Boost your Base posts instantly 🚀",
@@ -12,7 +13,7 @@ export const metadata = {
     siteName: "Base Post Booster",
     images: [
       {
-        url: "https://base-post-booster.vercel.app/og.png",
+        url: "/og.png",
         width: 1200,
         height: 630,
       },
@@ -23,13 +24,9 @@ export const metadata = {
     card: "summary_large_image",
     title: "Base Post Booster",
     description: "Boost your Base posts instantly 🚀",
-    images: ["https://base-post-booster.vercel.app/og.png"],
+    images: ["/og.png"],
   },
-  other: {
-    "fc:miniapp":
-      "https://base-post-booster.vercel.app/.well-known/farcaster.json",
-  },
-} as const;
+};
 
 export default function RootLayout({
   children,
@@ -38,6 +35,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Farcaster Mini App Meta Tag */}
+        <meta
+          name="fc:miniapp"
+          content="https://base-post-booster.vercel.app/.well-known/farcaster.json"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
