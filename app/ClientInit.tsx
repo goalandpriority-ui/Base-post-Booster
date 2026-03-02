@@ -5,7 +5,7 @@ import { sdk } from "@farcaster/miniapp-sdk"
 import { useAccount, useConnect } from "wagmi"
 
 export default function ClientInit() {
-  const { address, isConnected } = useAccount()
+  const { isConnected } = useAccount()
   const { connect, connectors } = useConnect()
 
   useEffect(() => {
@@ -13,18 +13,17 @@ export default function ClientInit() {
       try {
         await sdk.actions.ready()
 
-        // Auto connect injected wallet if not connected
         if (!isConnected && connectors.length > 0) {
-          const injectedConnector = connectors.find(
+          const injected = connectors.find(
             (c) => c.id === "injected"
           )
 
-          if (injectedConnector) {
-            connect({ connector: injectedConnector })
+          if (injected) {
+            connect({ connector: injected })
           }
         }
-      } catch (err) {
-        console.error("Miniapp init failed:", err)
+      } catch (error) {
+        console.error("Miniapp init failed:", error)
       }
     }
 
