@@ -15,7 +15,7 @@ export const metadata: Metadata = {
       {
         url: "/og.png",
         width: 1200,
-        height: 630,
+        height: 800,  // Change to 1200x800 if your og.png is 3:2 ratio (recommended over 630)
       },
     ],
     type: "website",
@@ -33,39 +33,38 @@ export default function RootLayout({
 }: {
   children: ReactNode;
 }) {
+  // Embed JSON – exact spec follow panni
+  const embedConfig = {
+    version: "1",
+    imageUrl: "https://base-post-booster.vercel.app/og.png",  // Must load, 3:2 ratio
+    button: {
+      title: "Open App 🚀",  // Max 32 chars
+      action: {
+        type: "launch_frame",  // Required for embed launch
+        name: "Base Post Booster",  // Mandatory! App name here
+        // url: "https://base-post-booster.vercel.app",  // Optional, defaults to manifest homeUrl
+        splashImageUrl: "https://base-post-booster.vercel.app/og.png",  // Or better 200x200 if you have separate
+        splashBackgroundColor: "#000000",
+      },
+    },
+  };
+
   return (
     <html lang="en">
       <head>
-        {/* Correct Farcaster Mini App Embed Meta - This fixes "No embed found" */}
+        {/* Primary: fc:miniapp meta – this makes "Embed found" work */}
         <meta
           name="fc:miniapp"
-          content={JSON.stringify({
-            version: "1",
-            imageUrl: "https://base-post-booster.vercel.app/og.png",
-            button: {
-              title: "Open App 🚀",
-              action: "launch_miniapp",
-            },
-            // More optional: You can add homeUrl etc. if needed, but manifest handles most
-          })}
+          content={JSON.stringify(embedConfig)}
         />
 
-        {/* Backup/legacy support - optional, but add if embed still issues */}
-        {/* <meta
+        {/* Backup for legacy/compatibility – add pannita safe */}
+        <meta
           name="fc:frame"
-          content={JSON.stringify({
-            version: "vNext",
-            imageUrl: "https://base-post-booster.vercel.app/og.png",
-            button: {
-              title: "Boost Now 🚀",
-              action: "launch_miniapp",
-              target: "https://base-post-booster.vercel.app",
-            },
-          })}
-        /> */}
+          content={JSON.stringify(embedConfig)}
+        />
 
-        {/* Your old wrong one - REMOVE this */}
-        {/* <meta name="fc:miniapp" content="https://base-post-booster.vercel.app/.well-known/farcaster.json" /> */}
+        {/* No need for old URL content meta – remove if any */}
       </head>
       <body>{children}</body>
     </html>
