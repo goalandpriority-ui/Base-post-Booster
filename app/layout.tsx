@@ -1,8 +1,7 @@
-// app/layout.tsx – full corrected version
 import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import ClientInit from "./ClientInit";  // Add this import
+import ClientInit from "./ClientInit";  // Import pannu
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
@@ -17,7 +16,7 @@ export const metadata: Metadata = {
       {
         url: "/og.png",
         width: 1200,
-        height: 800,  // 3:2 ratio recommend
+        height: 800,  // 3:2 ratio recommend pannirukken
       },
     ],
     type: "website",
@@ -52,13 +51,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Embed meta – preview la card varudhu */}
         <meta name="fc:miniapp" content={JSON.stringify(embedConfig)} />
-        {/* optional backup */}
+        {/* Optional legacy backup */}
         <meta name="fc:frame" content={JSON.stringify(embedConfig)} />
       </head>
       <body>
         {children}
-        <ClientInit />  {/* Add here – splash ready call pannum */}
+        <ClientInit />  {/* Splash hide pannum */}
       </body>
     </html>
   );
