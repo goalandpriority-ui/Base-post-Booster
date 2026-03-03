@@ -7,10 +7,8 @@ import Link from "next/link"
 type Post = {
   id: number
   content: string
+  contract: string
   boost_count: number
-  user_avatar?: string
-  user_handle?: string
-  coin_price?: number
 }
 
 const MINIAPP_URL = "https://base-post-booster.vercel.app"
@@ -33,8 +31,8 @@ export default function TrendingPage() {
 
       const currentIds = sorted.map((p: Post) => p.id)
 
-      const newlyAdded = currentIds.filter((id: number) =>
-        !previousIds.current.includes(id)
+      const newlyAdded = currentIds.filter(
+        (id: number) => !previousIds.current.includes(id)
       )
 
       if (previousIds.current.length > 0 && newlyAdded.length > 0) {
@@ -131,36 +129,7 @@ export default function TrendingPage() {
                   gap: 12,
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  {post.user_avatar && (
-                    <img
-                      src={post.user_avatar}
-                      alt="avatar"
-                      style={{ width: 40, height: 40, borderRadius: "50%" }}
-                    />
-                  )}
-
-                  <span style={{ fontWeight: "bold" }}>
-                    {post.user_handle || "Anonymous"}
-                  </span>
-
-                  {isNew && (
-                    <span
-                      style={{
-                        marginLeft: 10,
-                        background: "green",
-                        padding: "2px 6px",
-                        borderRadius: 6,
-                        fontSize: 12,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      NEW
-                    </span>
-                  )}
-                </div>
-
-                <p>{post.content}</p>
+                <p style={{ fontWeight: "bold" }}>{post.content}</p>
 
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <div>
@@ -171,20 +140,6 @@ export default function TrendingPage() {
                   </div>
 
                   <div style={{ display: "flex", gap: 10 }}>
-                    {post.coin_price && (
-                      <span
-                        style={{
-                          fontSize: 14,
-                          fontWeight: "bold",
-                          padding: "2px 6px",
-                          background: "#f0f0f0",
-                          borderRadius: 6,
-                        }}
-                      >
-                        ${post.coin_price}
-                      </span>
-                    )}
-
                     <button
                       onClick={() =>
                         setExpandedChart(isExpanded ? null : post.id)
@@ -206,34 +161,21 @@ export default function TrendingPage() {
                 {isExpanded && (
                   <div
                     style={{
-                      marginTop: 10,
-                      height: 120,
-                      background: "#111",
-                      borderRadius: 8,
-                      display: "flex",
-                      alignItems: "flex-end",
-                      padding: 10,
-                      gap: 4,
+                      marginTop: 15,
+                      height: 450,
+                      borderRadius: 12,
+                      overflow: "hidden",
+                      background: "black",
                     }}
                   >
-                    {/* Simple Boost Growth Chart */}
-                    {[...Array(10)].map((_, i) => {
-                      const height =
-                        (post.boost_count / 10) *
-                        (0.5 + Math.random())
-
-                      return (
-                        <div
-                          key={i}
-                          style={{
-                            flex: 1,
-                            height: `${height}px`,
-                            background: "#38bdf8",
-                            borderRadius: 4,
-                          }}
-                        />
-                      )
-                    })}
+                    <iframe
+                      src={`https://dexscreener.com/base/${post.contract}?embed=1&theme=dark`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        border: "none",
+                      }}
+                    />
                   </div>
                 )}
               </motion.div>
@@ -243,4 +185,4 @@ export default function TrendingPage() {
       </motion.div>
     </div>
   )
-}
+        }
