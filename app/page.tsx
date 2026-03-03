@@ -22,8 +22,6 @@ export default function Home() {
 
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
-
-  // ✅ FIXED FOR WAGMI V2
   const { sendTransactionAsync } = useSendTransaction()
 
   const tiers = [
@@ -54,14 +52,14 @@ export default function Home() {
     try {
       setLoading(true)
 
-      // ✅ Correct wagmi v2 transaction
+      // ✅ Send transaction
       const txHash = await sendTransactionAsync({
         to: YOUR_WALLET_ADDRESS as `0x${string}`,
         value: tiers[selectedTier].value,
       })
 
-      // ✅ SAVE TO DATABASE
-      await fetch("/api/save-boost", {
+      // ✅ Save boost to database
+      const saveRes = await fetch("/api/save-boost", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -73,6 +71,26 @@ export default function Home() {
         }),
       })
 
+      if (!saveRes.ok) {
+        const err = await saveRes.text()
+        console.error("Save failed:", err)
+        alert("Boost save failed!")
+        return
+      }
+
+      // ✅ AUTO OPEN FARCASTER SHARE
+      const text = `🚀 My post is boosted on Base Post Booster!
+
+Post: ${postLink}
+
+Boost yours 👇
+${MINI_APP_LINK}`
+
+      window.open(
+        `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`,
+        "_blank"
+      )
+
       alert(`Boost successful! Tx hash: ${txHash}`)
 
       setLastBoost(postLink)
@@ -80,7 +98,10 @@ export default function Home() {
       setContract("")
     } catch (err: any) {
       console.error(err)
-      alert("Transaction failed: " + (err.shortMessage || err.message || "Unknown error"))
+      alert(
+        "Transaction failed: " +
+          (err.shortMessage || err.message || "Unknown error")
+      )
     } finally {
       setLoading(false)
     }
@@ -145,7 +166,7 @@ export default function Home() {
 
       <input
         type="text"
-        placeholder="Coin Contract Address "
+        placeholder="Coin Contract Address"
         value={contract}
         onChange={(e) => setContract(e.target.value)}
         style={{ ...inputStyle, marginTop: 10 }}
@@ -167,38 +188,13 @@ export default function Home() {
             fontSize: 16,
           }}
         >
-          {loading ? "Processing..." : isConnected ? "Boost Now" : "Connect Wallet"}
+          {loading
+            ? "Processing..."
+            : isConnected
+            ? "Boost Now"
+            : "Connect Wallet"}
         </button>
       </div>
-
-      {/* ✅ Share after boost */}
-      {lastBoost && (
-        <button
-          onClick={() => {
-            const text = `🚀 My post is boosted on Base Post Booster!
-
-Post: ${lastBoost}
-
-Boost yours 👇
-${MINI_APP_LINK}`
-            window.open(
-              `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`,
-              "_blank"
-            )
-          }}
-          style={{
-            marginTop: 12,
-            padding: 12,
-            background: "#38bdf8",
-            border: "none",
-            borderRadius: 8,
-            fontWeight: "bold",
-            width: "100%",
-          }}
-        >
-          Share on Farcaster 🚀
-        </button>
-      )}
 
       {isConnected && (
         <p style={{ marginTop: 10, fontSize: 14, color: "#333" }}>
@@ -222,4 +218,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-}
+            }
