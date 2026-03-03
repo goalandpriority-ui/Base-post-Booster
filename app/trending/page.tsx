@@ -33,7 +33,6 @@ export default function TrendingPage() {
 
       const currentIds = sorted.map((p: Post) => p.id)
 
-      // ✅ STRICT MODE FIX
       const newlyAdded = currentIds.filter((id: number) =>
         !previousIds.current.includes(id)
       )
@@ -110,224 +109,138 @@ export default function TrendingPage() {
         </Link>
       </div>
 
-      {posts.length === 0 ? (
-        <div style={{ textAlign: "center", marginTop: 80 }}>
-          <h2>No boosted posts yet</h2>
-          <Link
-            href="/"
-            style={{
-              marginTop: 20,
-              display: "inline-block",
-              background: "black",
-              color: "white",
-              padding: "10px 20px",
-              borderRadius: 8,
-            }}
-          >
-            Boost Now
-          </Link>
-        </div>
-      ) : (
-        <motion.div
-          layout
-          style={{ display: "flex", flexDirection: "column", gap: 20 }}
-        >
-          <AnimatePresence>
-            {posts.map((post, index) => {
-              const isNew = newIds.includes(post.id)
-              const isExpanded = expandedChart === post.id
+      <motion.div layout style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        <AnimatePresence>
+          {posts.map((post, index) => {
+            const isNew = newIds.includes(post.id)
+            const isExpanded = expandedChart === post.id
 
-              const getTopBadge = () => {
-                if (index === 0)
-                  return { text: "Gold", color: "#FFD700" }
-                if (index === 1)
-                  return { text: "Silver", color: "#C0C0C0" }
-                if (index === 2)
-                  return { text: "Bronze", color: "#CD7F32" }
-                return null
-              }
-
-              const topBadge = getTopBadge()
-
-              return (
-                <motion.div
-                  key={post.id}
-                  layout
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 30,
-                  }}
-                  style={{
-                    background: "white",
-                    padding: 20,
-                    borderRadius: 12,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 12,
-                    position: "relative",
-                  }}
-                >
-                  {topBadge && (
-                    <motion.div
-                      animate={{ y: [0, -6, 0] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                      style={{
-                        position: "absolute",
-                        top: -10,
-                        left: 10,
-                        background: topBadge.color,
-                        color: "black",
-                        padding: "2px 8px",
-                        borderRadius: 6,
-                        fontWeight: "bold",
-                        fontSize: 12,
-                      }}
-                    >
-                      {topBadge.text} 🏆
-                    </motion.div>
+            return (
+              <motion.div
+                key={post.id}
+                layout
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                style={{
+                  background: "white",
+                  padding: 20,
+                  borderRadius: 12,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  {post.user_avatar && (
+                    <img
+                      src={post.user_avatar}
+                      alt="avatar"
+                      style={{ width: 40, height: 40, borderRadius: "50%" }}
+                    />
                   )}
 
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                    }}
-                  >
-                    {post.user_avatar && (
-                      <img
-                        src={post.user_avatar}
-                        alt="avatar"
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: "50%",
-                        }}
-                      />
-                    )}
+                  <span style={{ fontWeight: "bold" }}>
+                    {post.user_handle || "Anonymous"}
+                  </span>
 
-                    <span style={{ fontWeight: "bold" }}>
-                      {post.user_handle || "Anonymous"}
+                  {isNew && (
+                    <span
+                      style={{
+                        marginLeft: 10,
+                        background: "green",
+                        padding: "2px 6px",
+                        borderRadius: 6,
+                        fontSize: 12,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      NEW
                     </span>
+                  )}
+                </div>
 
-                    {isNew && (
+                <p>{post.content}</p>
+
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div>
+                    <p style={{ fontSize: 12 }}>Boosts</p>
+                    <p style={{ fontSize: 22, fontWeight: "bold" }}>
+                      {post.boost_count}
+                    </p>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 10 }}>
+                    {post.coin_price && (
                       <span
                         style={{
-                          marginLeft: 10,
-                          background: "green",
-                          color: "black",
-                          padding: "2px 6px",
-                          borderRadius: 6,
-                          fontSize: 12,
+                          fontSize: 14,
                           fontWeight: "bold",
+                          padding: "2px 6px",
+                          background: "#f0f0f0",
+                          borderRadius: 6,
                         }}
                       >
-                        NEW
+                        ${post.coin_price}
                       </span>
                     )}
-                  </div>
 
-                  <p>{post.content}</p>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <div>
-                      <p style={{ fontSize: 12 }}>Boosts</p>
-                      <p
-                        style={{
-                          fontSize: 22,
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {post.boost_count}
-                      </p>
-                    </div>
-
-                    <div style={{ display: "flex", gap: 10 }}>
-                      {post.coin_price && (
-                        <span
-                          style={{
-                            fontSize: 14,
-                            fontWeight: "bold",
-                            padding: "2px 6px",
-                            background: "#f0f0f0",
-                            borderRadius: 6,
-                          }}
-                        >
-                          ${post.coin_price}
-                        </span>
-                      )}
-
-                      <button
-                        onClick={() => handleShare(post)}
-                        style={{
-                          padding: "6px 12px",
-                          borderRadius: 6,
-                          background: "#38bdf8",
-                          border: "none",
-                          fontWeight: "bold",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Share
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          setExpandedChart(
-                            isExpanded ? null : post.id
-                          )
-                        }
-                        style={{
-                          padding: "6px 12px",
-                          borderRadius: 6,
-                          background: "#fbbf24",
-                          border: "none",
-                          fontWeight: "bold",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {isExpanded
-                          ? "Hide Chart"
-                          : "View Chart"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {isExpanded && (
-                    <div
+                    <button
+                      onClick={() =>
+                        setExpandedChart(isExpanded ? null : post.id)
+                      }
                       style={{
-                        marginTop: 10,
-                        height: 200,
-                        background: "#e5e7eb",
-                        borderRadius: 8,
+                        padding: "6px 12px",
+                        borderRadius: 6,
+                        background: "#fbbf24",
+                        border: "none",
+                        fontWeight: "bold",
+                        cursor: "pointer",
                       }}
                     >
-                      <iframe
-                        src={`https://widget.coinlore.com/coin_price_chart_widget/${post.id}`}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          border: "none",
-                          borderRadius: 8,
-                        }}
-                      />
-                    </div>
-                  )}
-                </motion.div>
-              )
-            })}
-          </AnimatePresence>
-        </motion.div>
-      )}
+                      {isExpanded ? "Hide Chart" : "View Chart"}
+                    </button>
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div
+                    style={{
+                      marginTop: 10,
+                      height: 120,
+                      background: "#111",
+                      borderRadius: 8,
+                      display: "flex",
+                      alignItems: "flex-end",
+                      padding: 10,
+                      gap: 4,
+                    }}
+                  >
+                    {/* Simple Boost Growth Chart */}
+                    {[...Array(10)].map((_, i) => {
+                      const height =
+                        (post.boost_count / 10) *
+                        (0.5 + Math.random())
+
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            flex: 1,
+                            height: `${height}px`,
+                            background: "#38bdf8",
+                            borderRadius: 4,
+                          }}
+                        />
+                      )
+                    })}
+                  </div>
+                )}
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
+      </motion.div>
     </div>
   )
 }
