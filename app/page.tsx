@@ -18,10 +18,13 @@ export default function Home() {
   const [postLink, setPostLink] = useState("")
   const [contract, setContract] = useState("")
   const [loading, setLoading] = useState(false)
+  const [lastBoost, setLastBoost] = useState<string | null>(null)
 
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
-  const { sendTransaction } = useSendTransaction()
+
+  // ✅ FIXED FOR WAGMI V2
+  const { sendTransactionAsync } = useSendTransaction()
 
   const tiers = [
     { name: "Basic", price: "0.001 ETH", duration: "24 Hours Boost", value: parseEther("0.001") },
@@ -35,7 +38,6 @@ export default function Home() {
       return
     }
 
-    // ✅ FIXED CONNECT LOGIC FOR WAGMI v2
     if (!isConnected) {
       const injectedConnector = connectors.find(
         (connector) => connector.id === "injected"
@@ -52,13 +54,28 @@ export default function Home() {
     try {
       setLoading(true)
 
-      const hash = await sendTransaction({
+      // ✅ Correct wagmi v2 transaction
+      const txHash = await sendTransactionAsync({
         to: YOUR_WALLET_ADDRESS as `0x${string}`,
         value: tiers[selectedTier].value,
       })
 
-      alert(`Boost successful! Tx hash: ${hash}`)
+      // ✅ SAVE TO DATABASE
+      await fetch("/api/save-boost", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wallet: address,
+          postUrl: postLink,
+          contract: contract,
+          txHash: txHash,
+          amount: Number(tiers[selectedTier].value) / 1e18,
+        }),
+      })
 
+      alert(`Boost successful! Tx hash: ${txHash}`)
+
+      setLastBoost(postLink)
       setPostLink("")
       setContract("")
     } catch (err: any) {
@@ -153,6 +170,35 @@ export default function Home() {
           {loading ? "Processing..." : isConnected ? "Boost Now" : "Connect Wallet"}
         </button>
       </div>
+
+      {/* ✅ Share after boost */}
+      {lastBoost && (
+        <button
+          onClick={() => {
+            const text = `🚀 My post is boosted on Base Post Booster!
+
+Post: ${lastBoost}
+
+Boost yours 👇
+${MINI_APP_LINK}`
+            window.open(
+              `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`,
+              "_blank"
+            )
+          }}
+          style={{
+            marginTop: 12,
+            padding: 12,
+            background: "#38bdf8",
+            border: "none",
+            borderRadius: 8,
+            fontWeight: "bold",
+            width: "100%",
+          }}
+        >
+          Share on Farcaster 🚀
+        </button>
+      )}
 
       {isConnected && (
         <p style={{ marginTop: 10, fontSize: 14, color: "#333" }}>
