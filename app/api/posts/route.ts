@@ -1,26 +1,33 @@
 import { NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { prisma } from "@/lib/prisma"
 
 export async function GET() {
-  const leaderboard = await prisma.boost.groupBy({
-    by: ["postUrl", "contract"],
-    _sum: { amount: true },
-    orderBy: {
+  try {
+    const leaderboard = await prisma.boost.groupBy({
+      by: ["postUrl", "contract"],
       _sum: {
-        amount: "desc",
+        amount: true,
       },
-    },
-    take: 25,
-  })
+      orderBy: {
+        _sum: {
+          amount: "desc",
+        },
+      },
+    })
 
-  const formatted = leaderboard.map((item, index) => ({
-    id: index + 1,
-    content: item.postUrl,
-    boost_count: item._sum.amount,
-    contract: item.contract,
-  }))
+    const formatted = leaderboard.map((item, index) => ({
+      id: index + 1,
+      content: item.postUrl,
+      contract: item.contract,
+      boost_count: item._sum.amount ?? 0,
+    }))
 
-  return NextResponse.json(formatted)
+    return NextResponse.json(formatted)
+  } catch (error) {
+    console.error(error)
+    return NextResponse.json(
+      { error: "Failed to fetch leaderboard" },
+      { status: 500 }
+    )
+  }
 }
