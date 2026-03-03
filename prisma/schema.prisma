@@ -8,10 +8,15 @@ datasource db {
 }
 
 model Boost {
-  id          String   @id @default(cuid())
-  wallet      String
-  postUrl     String
-  txHash      String
-  amount      Float
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  wallet    String   // user wallet address
+  postUrl   String   // boosted post URL
+  contract  String   // ✅ token contract address (Base chain)
+  txHash    String   // transaction hash
+  amount    Float    // boost amount
+  createdAt DateTime @default(now())
+
+  @@index([postUrl])
+  @@index([wallet])
+  @@index([contract])
 }
