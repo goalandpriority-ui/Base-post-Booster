@@ -11,6 +11,7 @@ export async function POST(req: Request) {
       data: {
         wallet: body.wallet,
         postUrl: body.postUrl,
+        contract: body.contract || null,
         txHash: body.txHash,
         amount: body.amount,
       },
