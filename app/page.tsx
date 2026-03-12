@@ -116,8 +116,6 @@ ${MINI_APP_LINK}`
 
     } catch (err) {
 
-      console.log("Farcaster share fallback")
-
       window.open(
         `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`,
         "_blank"
@@ -154,7 +152,6 @@ ${MINI_APP_LINK}`
       setPostLink("")
       setContract("")
 
-      // 🔥 Viral UX redirect
       setTimeout(() => {
         router.push("/trending")
       }, 1500)
@@ -226,13 +223,10 @@ ${MINI_APP_LINK}`
               marginBottom: 15,
               cursor: "pointer",
               borderRadius: 12,
-              transition: "0.3s",
             }}
           >
 
-            <h3 style={{ marginBottom: 5 }}>
-              {tier.name}
-            </h3>
+            <h3>{tier.name}</h3>
 
             <p style={{ fontWeight: "bold" }}>
               {tier.price}
@@ -270,7 +264,6 @@ ${MINI_APP_LINK}`
           disabled={loading}
           style={{
             padding: "14px 20px",
-            cursor: "pointer",
             background: "black",
             border: "none",
             color: "white",
@@ -292,39 +285,20 @@ ${MINI_APP_LINK}`
       </div>
 
       {isConnected && (
-        <p
-          style={{
-            marginTop: 10,
-            fontSize: 14,
-          }}
-        >
+        <p style={{ marginTop: 10, fontSize: 14 }}>
           Connected: {address?.slice(0,6)}...
           {address?.slice(-4)}
         </p>
       )}
 
       <div style={{ marginTop: 40 }}>
-        <Link
-          href="/trending"
-          style={{
-            color: "black",
-            fontWeight: "bold",
-          }}
-        >
+        <Link href="/trending" style={{ fontWeight: "bold" }}>
           View Trending Posts →
         </Link>
       </div>
 
-      {/* 🏆 Leaderboard Button */}
-
       <div style={{ marginTop: 20 }}>
-        <Link
-          href="/leaderboard"
-          style={{
-            color: "black",
-            fontWeight: "bold",
-          }}
-        >
+        <Link href="/leaderboard" style={{ fontWeight: "bold" }}>
           View Leaderboard →
         </Link>
       </div>
@@ -340,35 +314,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-}            fontSize: 14,
-          }}
-        >
-          Connected: {address?.slice(0,6)}...
-          {address?.slice(-4)}
-        </p>
-      )}
-
-      <div style={{ marginTop: 40 }}>
-        <Link
-          href="/trending"
-          style={{
-            color: "black",
-            fontWeight: "bold",
-          }}
-        >
-          View Trending Posts →
-        </Link>
-      </div>
-
-    </main>
-  )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: 12,
-  width: "100%",
-  borderRadius: 10,
-  border: "1px solid #999",
-  background: "#ffffff",
-  color: "black",
-              }
+  }
