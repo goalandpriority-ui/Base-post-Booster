@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 
 type Post = {
-  id: number
+  id: string
   content: string
   contract: string
   boost_count: number
