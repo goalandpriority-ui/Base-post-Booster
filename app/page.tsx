@@ -118,13 +118,9 @@ export default function Home() {
     if (!isConnected) {
 
       if (connectors.length > 0) {
-
         await connect({ connector: connectors[0] })
-
       } else {
-
         alert("No wallet available")
-
       }
 
       return
@@ -232,11 +228,15 @@ ${MINI_APP_LINK}`
   useEffect(() => {
 
     if (txConfirmed && txHash) {
+
       saveBoost()
+
+      // prevent duplicate trigger
       setTxHash(undefined)
+
     }
 
-  }, [txConfirmed])
+  }, [txConfirmed, txHash])
 
   return (
     <main
@@ -423,4 +423,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-        }
+}
