@@ -14,17 +14,23 @@ export async function POST(req: Request) {
 
     const boost = await prisma.boost.create({
       data: {
-        wallet: body.wallet,
-        postUrl: body.postUrl,
-        contract: body.contract || null,
-        txHash: body.txHash,
-        amount: parseFloat(body.amount), // 👈 IMPORTANT FIX
+        wallet: String(body.wallet),
+        postUrl: String(body.postUrl),
+
+        // ✅ SAFE CONTRACT VALUE
+        contract: body.contract ? String(body.contract) : "",
+
+        txHash: String(body.txHash),
+
+        // ✅ SAFE NUMBER CONVERSION
+        amount: Number(body.amount),
       },
     })
 
     return NextResponse.json(boost)
   } catch (error) {
     console.error("SAVE BOOST ERROR:", error)
+
     return NextResponse.json(
       { error: "Failed to save boost" },
       { status: 500 }
