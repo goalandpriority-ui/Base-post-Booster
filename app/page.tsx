@@ -55,7 +55,6 @@ export default function Home() {
     },
   ]
 
-  // AUTO DETECT COIN FROM BASE LINK
   async function detectCoinFromBaseLink(link: string) {
 
     if (!link.includes("base.app/content")) return
@@ -84,7 +83,6 @@ export default function Home() {
     }
   }
 
-  // FETCH COIN ANALYTICS
   async function fetchCoinData(contract: string) {
 
     try {
@@ -349,13 +347,21 @@ ${MINI_APP_LINK}`
           <p>24H Volume: ${coinData.volume24h}</p>
           <p>Liquidity: ${coinData.liquidity}</p>
 
-          <a
-            href={coinData.chart}
-            target="_blank"
-            style={{ fontWeight: "bold" }}
-          >
-            View Chart →
-          </a>
+          <div style={{ marginTop: 15 }}>
+
+            <h4 style={{ marginBottom: 10 }}>Live Chart</h4>
+
+            <iframe
+              src={`https://dexscreener.com/base/${contract}?embed=1&theme=dark`}
+              width="100%"
+              height="420"
+              style={{
+                border: "none",
+                borderRadius: 12
+              }}
+            />
+
+          </div>
 
         </div>
 
@@ -418,4 +424,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-        }
+              }
