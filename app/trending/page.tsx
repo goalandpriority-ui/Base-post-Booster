@@ -31,13 +31,13 @@ export default function TrendingPage() {
       const data: Post[] = await res.json()
 
       const sorted = data.sort(
-        (a: Post, b: Post) => b.boost_count - a.boost_count
+        (a, b) => b.boost_count - a.boost_count
       )
 
-      const currentIds = sorted.map((p: Post) => p.id)
+      const currentIds = sorted.map((p) => p.id)
 
       const newlyAdded = currentIds.filter(
-        (id: string) => !previousIds.current.includes(id)
+        (id) => !previousIds.current.includes(id)
       )
 
       if (previousIds.current.length > 0 && newlyAdded.length > 0) {
@@ -148,7 +148,7 @@ ${shareUrl}`
 
         <AnimatePresence>
 
-          {posts.map((post, index) => {
+          {posts.map((post) => {
 
             const isNew = newIds.includes(post.id)
 
@@ -161,11 +161,7 @@ ${shareUrl}`
                 layout
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 30,
-                }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 style={{
                   background: "white",
                   padding: 20,
@@ -173,8 +169,9 @@ ${shareUrl}`
                   display: "flex",
                   flexDirection: "column",
                   gap: 12,
-                  border: isNew
-                    ? "3px solid #22c55e"
+                  border: isNew ? "3px solid #22c55e" : "none",
+                  boxShadow: isNew
+                    ? "0 0 20px rgba(34,197,94,0.6)"
                     : "none",
                 }}
               >
@@ -183,12 +180,7 @@ ${shareUrl}`
                   {post.content}
                 </p>
 
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
 
                   <div>
 
@@ -196,30 +188,27 @@ ${shareUrl}`
                       Boosts
                     </p>
 
-                    <p
+                    <motion.p
+                      key={post.boost_count}
+                      initial={{ scale: 1.4 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.3 }}
                       style={{
                         fontSize: 22,
                         fontWeight: "bold",
                       }}
                     >
                       {post.boost_count}
-                    </p>
+                    </motion.p>
 
                   </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 10,
-                    }}
-                  >
+                  <div style={{ display: "flex", gap: 10 }}>
 
                     <button
                       onClick={() =>
                         setExpandedChart(
-                          isExpanded
-                            ? null
-                            : post.id
+                          isExpanded ? null : post.id
                         )
                       }
                       style={{
@@ -231,9 +220,7 @@ ${shareUrl}`
                         cursor: "pointer",
                       }}
                     >
-                      {isExpanded
-                        ? "Hide Chart"
-                        : "View Chart"}
+                      {isExpanded ? "Hide Chart" : "View Chart"}
                     </button>
 
                     <button
@@ -294,4 +281,4 @@ ${shareUrl}`
 
   )
 
-                        }
+}
