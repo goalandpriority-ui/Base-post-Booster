@@ -25,7 +25,7 @@ export default function Home() {
   const { sendTransactionAsync } = useSendTransaction()
 
   const tiers = [
-    { name: "Basic", price: "0.001 ETH", duration: "24 Hours Boost", value: parseEther("0.001") },
+    { name: "Basic", price: "0.00001 ETH", duration: "24 Hours Boost", value: parseEther("0.001") },
     { name: "Pro", price: "0.003 ETH", duration: "48 Hours Boost", value: parseEther("0.003") },
     { name: "Elite", price: "0.005 ETH", duration: "72 Hours Boost", value: parseEther("0.005") },
   ]
