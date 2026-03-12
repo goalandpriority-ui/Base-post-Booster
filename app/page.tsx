@@ -5,11 +5,14 @@ import Link from "next/link"
 import { useAccount, useConnect, useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
 import { parseEther } from "viem"
 import { sdk } from "@farcaster/miniapp-sdk"
+import { useRouter } from "next/navigation"
 
 const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
 const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
 
 export default function Home() {
+
+  const router = useRouter()
 
   const [selectedTier, setSelectedTier] = useState(0)
   const [postLink, setPostLink] = useState("")
@@ -113,7 +116,7 @@ ${MINI_APP_LINK}`
 
     } catch (err) {
 
-      console.log("Farcaster share failed, using fallback")
+      console.log("Farcaster share fallback")
 
       window.open(
         `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`,
@@ -150,6 +153,11 @@ ${MINI_APP_LINK}`
 
       setPostLink("")
       setContract("")
+
+      // 🔥 Viral UX redirect
+      setTimeout(() => {
+        router.push("/trending")
+      }, 1500)
 
     } catch (err) {
 
@@ -288,6 +296,51 @@ ${MINI_APP_LINK}`
           style={{
             marginTop: 10,
             fontSize: 14,
+          }}
+        >
+          Connected: {address?.slice(0,6)}...
+          {address?.slice(-4)}
+        </p>
+      )}
+
+      <div style={{ marginTop: 40 }}>
+        <Link
+          href="/trending"
+          style={{
+            color: "black",
+            fontWeight: "bold",
+          }}
+        >
+          View Trending Posts →
+        </Link>
+      </div>
+
+      {/* 🏆 Leaderboard Button */}
+
+      <div style={{ marginTop: 20 }}>
+        <Link
+          href="/leaderboard"
+          style={{
+            color: "black",
+            fontWeight: "bold",
+          }}
+        >
+          View Leaderboard →
+        </Link>
+      </div>
+
+    </main>
+  )
+}
+
+const inputStyle: React.CSSProperties = {
+  padding: 12,
+  width: "100%",
+  borderRadius: 10,
+  border: "1px solid #999",
+  background: "#ffffff",
+  color: "black",
+}            fontSize: 14,
           }}
         >
           Connected: {address?.slice(0,6)}...
