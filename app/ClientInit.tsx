@@ -15,17 +15,19 @@ export default function ClientInit() {
 
       try {
 
-        // Farcaster splash screen remove
+        // Farcaster Miniapp ready signal
         await sdk.actions.ready()
 
-        // Auto connect Farcaster wallet
-        if (!isConnected && connectors.length > 0) {
-          connect({ connector: connectors[0] })
+        // Wallet auto connect
+        if (!isConnected && connectors?.length > 0) {
+          connect({
+            connector: connectors[0],
+          })
         }
 
-      } catch (err) {
+      } catch (error) {
 
-        console.error("Miniapp init failed:", err)
+        console.error("Miniapp init failed:", error)
 
       }
 
