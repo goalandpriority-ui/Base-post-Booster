@@ -10,7 +10,7 @@ export async function GET() {
     boosts.forEach((b) => {
       if (!map[b.postUrl]) {
         map[b.postUrl] = {
-          id: Object.keys(map).length + 1,
+          id: b.postUrl, // ✅ FIX: stable ID
           content: b.postUrl,
           contract: b.contract,
           boost_count: 1,
