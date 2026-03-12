@@ -2,7 +2,7 @@ import "./globals.css"
 import type { ReactNode } from "react"
 import type { Metadata } from "next"
 import ClientInit from "./ClientInit"
-import  Providers  from "./providers"
+import Providers from "./providers"
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://base-post-booster.vercel.app"),
@@ -37,11 +37,8 @@ export default function RootLayout({
           name="fc:miniapp"
           content={JSON.stringify(embedConfig)}
         />
-        <meta
-          name="fc:frame"
-          content={JSON.stringify(embedConfig)}
-        />
       </head>
+
       <body>
         <Providers>
           <ClientInit />
