@@ -15,14 +15,20 @@ export default function ClientInit() {
 
       try {
 
-        // Farcaster Miniapp ready signal
+        // Farcaster Miniapp ready
         await sdk.actions.ready()
 
-        // Wallet auto connect
+        // Auto connect injected wallet (Warpcast wallet)
         if (!isConnected && connectors?.length > 0) {
-          connect({
-            connector: connectors[0],
-          })
+
+          const injectedConnector = connectors.find(
+            (c) => c.id === "injected"
+          )
+
+          if (injectedConnector) {
+            connect({ connector: injectedConnector })
+          }
+
         }
 
       } catch (error) {
