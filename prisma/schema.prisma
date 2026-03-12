@@ -9,14 +9,31 @@ datasource db {
 
 model Boost {
   id        String   @id @default(cuid())
-  wallet    String   // user wallet address
-  postUrl   String   // boosted post URL
-  contract  String   // ✅ token contract address (Base chain)
-  txHash    String   // transaction hash
-  amount    Float    // boost amount
+
+  // user wallet address
+  wallet    String
+
+  // boosted post URL
+  postUrl   String
+
+  // token contract address (Base chain)
+  contract  String
+
+  // transaction hash (must be unique)
+  txHash    String   @unique
+
+  // boost payment amount
+  amount    Float
+
+  // timestamp
   createdAt DateTime @default(now())
 
+  // indexes for faster queries
   @@index([postUrl])
   @@index([wallet])
   @@index([contract])
+  @@index([createdAt])
+
+  // useful for trending calculations
+  @@index([postUrl, createdAt])
 }
