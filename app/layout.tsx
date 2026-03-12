@@ -34,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+
         <meta
           name="fc:miniapp"
           content={JSON.stringify(embedConfig)}
@@ -43,6 +44,9 @@ export default function RootLayout({
           name="fc:frame"
           content={JSON.stringify(embedConfig)}
         />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
       </head>
 
       <body>
