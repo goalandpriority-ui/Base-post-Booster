@@ -53,6 +53,34 @@ export default function Home() {
     },
   ]
 
+  // 🔥 AUTO DETECT COIN FROM BASE LINK
+  async function detectCoinFromBaseLink(link: string) {
+
+    if (!link.includes("base.app/content")) return
+
+    try {
+
+      const res = await fetch("/api/detectCoin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ link }),
+      })
+
+      const data = await res.json()
+
+      if (data.contract) {
+        setContract(data.contract)
+      }
+
+    } catch (err) {
+
+      console.error("Coin detect failed", err)
+
+    }
+  }
+
   async function handleBoost() {
 
     if (!postLink) {
@@ -245,7 +273,11 @@ ${MINI_APP_LINK}`
         type="text"
         placeholder="Paste Base post link"
         value={postLink}
-        onChange={(e) => setPostLink(e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value
+          setPostLink(value)
+          detectCoinFromBaseLink(value)
+        }}
         style={inputStyle}
       />
 
@@ -314,4 +346,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-  }
+}
