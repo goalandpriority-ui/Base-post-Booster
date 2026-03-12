@@ -17,6 +17,8 @@ export default function Home() {
   const [selectedTier, setSelectedTier] = useState(0)
   const [postLink, setPostLink] = useState("")
   const [contract, setContract] = useState("")
+  const [coinData, setCoinData] = useState<any>(null)
+  const [coinLoading, setCoinLoading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
 
@@ -53,7 +55,7 @@ export default function Home() {
     },
   ]
 
-  // 🔥 AUTO DETECT COIN FROM BASE LINK
+  // AUTO DETECT COIN FROM BASE LINK
   async function detectCoinFromBaseLink(link: string) {
 
     if (!link.includes("base.app/content")) return
@@ -72,11 +74,44 @@ export default function Home() {
 
       if (data.contract) {
         setContract(data.contract)
+        fetchCoinData(data.contract)
       }
 
     } catch (err) {
 
       console.error("Coin detect failed", err)
+
+    }
+  }
+
+  // FETCH COIN ANALYTICS
+  async function fetchCoinData(contract: string) {
+
+    try {
+
+      setCoinLoading(true)
+
+      const res = await fetch("/api/coinData", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ contract })
+      })
+
+      const data = await res.json()
+
+      if (!data.error) {
+        setCoinData(data)
+      }
+
+    } catch (err) {
+
+      console.error("Coin data fetch failed")
+
+    } finally {
+
+      setCoinLoading(false)
 
     }
   }
@@ -179,6 +214,7 @@ ${MINI_APP_LINK}`
 
       setPostLink("")
       setContract("")
+      setCoinData(null)
 
       setTimeout(() => {
         router.push("/trending")
@@ -289,6 +325,42 @@ ${MINI_APP_LINK}`
         style={{ ...inputStyle, marginTop: 10 }}
       />
 
+      {coinLoading && (
+        <p style={{ marginTop: 10 }}>Loading coin data...</p>
+      )}
+
+      {coinData && (
+
+        <div
+          style={{
+            background: "#ffffff",
+            padding: 15,
+            marginTop: 15,
+            borderRadius: 12
+          }}
+        >
+
+          <h3>
+            {coinData.name} ({coinData.symbol})
+          </h3>
+
+          <p>Price: ${coinData.price}</p>
+          <p>Market Cap: ${coinData.marketcap}</p>
+          <p>24H Volume: ${coinData.volume24h}</p>
+          <p>Liquidity: ${coinData.liquidity}</p>
+
+          <a
+            href={coinData.chart}
+            target="_blank"
+            style={{ fontWeight: "bold" }}
+          >
+            View Chart →
+          </a>
+
+        </div>
+
+      )}
+
       <div style={{ marginTop: 20 }}>
 
         <button
@@ -346,4 +418,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-}
+        }
