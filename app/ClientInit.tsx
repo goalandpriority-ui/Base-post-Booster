@@ -14,8 +14,8 @@ export default function ClientInit() {
         // Hide Farcaster splash
         await sdk.actions.ready()
 
-        // Auto-connect injected wallet (like MetaMask)
-        if (!isConnected && connectors?.length) {
+        // Auto-connect injected wallet
+        if (!isConnected && connectors.length > 0) {
           const injectedConnector = connectors.find(
             (connector) => connector.id === "injected"
           )
