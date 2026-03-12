@@ -21,9 +21,6 @@ const config = createConfig({
   transports: {
     [base.id]: http(),
   },
-
-  // ✅ WALLET AUTO CONNECT
-  autoConnect: true,
 })
 
 export default function Providers({ children }: { children: ReactNode }) {
