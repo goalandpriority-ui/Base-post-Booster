@@ -24,7 +24,6 @@ export default function Home() {
 
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
-
   const { sendTransactionAsync } = useSendTransaction()
 
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
@@ -116,31 +115,21 @@ export default function Home() {
 
   async function handleBoost() {
 
-    // FIRST CONNECT WALLET
     if (!isConnected) {
 
       if (connectors.length > 0) {
 
-        const injectedConnector = connectors.find(
-          (connector) => connector.id === "injected"
-        )
-
-        if (injectedConnector) {
-          await connect({ connector: injectedConnector })
-        } else {
-          await connect({ connector: connectors[0] })
-        }
+        await connect({ connector: connectors[0] })
 
       } else {
 
-        alert("No wallet found")
+        alert("No wallet available")
 
       }
 
       return
     }
 
-    // THEN CHECK POST LINK
     if (!postLink) {
       alert("Paste post link")
       return
@@ -434,4 +423,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-            }
+        }
