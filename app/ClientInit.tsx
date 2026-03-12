@@ -11,21 +11,27 @@ export default function ClientInit() {
   useEffect(() => {
     const init = async () => {
       try {
-        // Hide Farcaster splash
+
         await sdk.actions.ready()
 
-        // Auto-connect injected wallet
         if (!isConnected && connectors.length > 0) {
-          const injectedConnector = connectors.find(
-            (connector) => connector.id === "injected"
+
+          const injected = connectors.find(
+            (c) => c.id === "injected"
           )
 
-          if (injectedConnector) {
-            connect({ connector: injectedConnector })
+          if (injected) {
+            connect({ connector: injected })
+          } else {
+            connect({ connector: connectors[0] })
           }
+
         }
+
       } catch (err) {
+
         console.error("Miniapp init failed:", err)
+
       }
     }
 
