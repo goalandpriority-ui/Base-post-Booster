@@ -3,29 +3,31 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET() {
   try {
-    const boosts = await prisma.boost.findMany()
 
-    const map: Record<string, any> = {}
-
-    boosts.forEach((b) => {
-      if (!map[b.postUrl]) {
-        map[b.postUrl] = {
-          id: b.postUrl, // ✅ FIX: stable ID
-          content: b.postUrl,
-          contract: b.contract,
-          boost_count: 1,
-        }
-      } else {
-        map[b.postUrl].boost_count += 1
-      }
+    const posts = await prisma.boost.groupBy({
+      by: ["postUrl", "contract"],
+      _count: {
+        postUrl: true,
+      },
+      orderBy: {
+        _count: {
+          postUrl: "desc",
+        },
+      },
     })
 
-    const posts = Object.values(map)
+    const formatted = posts.map((post, index) => ({
+      id: `${index}-${post.postUrl}`,
+      content: post.postUrl,
+      contract: post.contract,
+      boost_count: post._count.postUrl,
+    }))
 
-    return NextResponse.json(posts)
+    return NextResponse.json(formatted)
 
   } catch (error) {
-    console.error(error)
+
+    console.error("POSTS API ERROR:", error)
 
     return NextResponse.json(
       { error: "Failed to fetch posts" },
