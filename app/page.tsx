@@ -25,9 +25,24 @@ export default function Home() {
   const { sendTransactionAsync } = useSendTransaction()
 
   const tiers = [
-    { name: "Basic", price: "0.00001 ETH", duration: "24 Hours Boost", value: parseEther("0.001") },
-    { name: "Pro", price: "0.003 ETH", duration: "48 Hours Boost", value: parseEther("0.003") },
-    { name: "Elite", price: "0.005 ETH", duration: "72 Hours Boost", value: parseEther("0.005") },
+    {
+      name: "Basic",
+      price: "0.00001 ETH",
+      duration: "24 Hours Boost",
+      value: parseEther("0.00001"),
+    },
+    {
+      name: "Pro",
+      price: "0.003 ETH",
+      duration: "48 Hours Boost",
+      value: parseEther("0.003"),
+    },
+    {
+      name: "Elite",
+      price: "0.005 ETH",
+      duration: "72 Hours Boost",
+      value: parseEther("0.005"),
+    },
   ]
 
   async function handleBoost() {
@@ -52,20 +67,25 @@ export default function Home() {
     try {
       setLoading(true)
 
-      // ✅ Send transaction
+      // ✅ SEND TRANSACTION
       const txHash = await sendTransactionAsync({
         to: YOUR_WALLET_ADDRESS as `0x${string}`,
         value: tiers[selectedTier].value,
       })
 
-      // ✅ Save boost to database
+      // ✅ SAFETY CHECK
+      if (!txHash) {
+        throw new Error("Transaction failed")
+      }
+
+      // ✅ SAVE BOOST
       const saveRes = await fetch("/api/save-boost", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           wallet: address,
           postUrl: postLink,
-          contract: contract,
+          contract: contract || "",
           txHash: txHash,
           amount: Number(tiers[selectedTier].value) / 1e18,
         }),
@@ -78,7 +98,7 @@ export default function Home() {
         return
       }
 
-      // ✅ AUTO OPEN FARCASTER SHARE
+      // ✅ FARCASTER SHARE
       const text = `🚀 My post is boosted on Base Post Booster!
 
 Post: ${postLink}
@@ -140,8 +160,12 @@ ${MINI_APP_LINK}`
             key={i}
             onClick={() => setSelectedTier(i)}
             style={{
-              border: selectedTier === i ? "2px solid black" : "1px solid #999",
-              background: selectedTier === i ? "#ffffff" : "#f5f5f5",
+              border:
+                selectedTier === i
+                  ? "2px solid black"
+                  : "1px solid #999",
+              background:
+                selectedTier === i ? "#ffffff" : "#f5f5f5",
               padding: 16,
               marginBottom: 15,
               cursor: "pointer",
@@ -151,7 +175,9 @@ ${MINI_APP_LINK}`
           >
             <h3 style={{ marginBottom: 5 }}>{tier.name}</h3>
             <p style={{ fontWeight: "bold" }}>{tier.price}</p>
-            <p style={{ fontSize: 14, color: "#333" }}>{tier.duration}</p>
+            <p style={{ fontSize: 14, color: "#333" }}>
+              {tier.duration}
+            </p>
           </div>
         ))}
       </div>
@@ -197,13 +223,23 @@ ${MINI_APP_LINK}`
       </div>
 
       {isConnected && (
-        <p style={{ marginTop: 10, fontSize: 14, color: "#333" }}>
-          Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
+        <p
+          style={{
+            marginTop: 10,
+            fontSize: 14,
+            color: "#333",
+          }}
+        >
+          Connected: {address?.slice(0, 6)}...
+          {address?.slice(-4)}
         </p>
       )}
 
       <div style={{ marginTop: 40 }}>
-        <Link href="/trending" style={{ color: "black", fontWeight: "bold" }}>
+        <Link
+          href="/trending"
+          style={{ color: "black", fontWeight: "bold" }}
+        >
           View Trending Posts →
         </Link>
       </div>
@@ -218,4 +254,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-            }
+}
