@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useAccount, useConnect, useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
 import { parseEther } from "viem"
+import { sdk } from "@farcaster/miniapp-sdk"
 
 const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
 const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
@@ -95,6 +96,32 @@ export default function Home() {
     }
   }
 
+  async function shareToFarcaster(postUrl: string) {
+
+    const text = `🚀 I just boosted this post on Base Post Booster!
+
+${postUrl}
+
+Boost yours 👇
+${MINI_APP_LINK}`
+
+    try {
+
+      await sdk.actions.composeCast({
+        text: text,
+      })
+
+    } catch (err) {
+
+      console.log("Farcaster share failed, using fallback")
+
+      window.open(
+        `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`,
+        "_blank"
+      )
+    }
+  }
+
   async function saveBoost() {
 
     try {
@@ -117,17 +144,7 @@ export default function Home() {
         throw new Error("Boost save failed")
       }
 
-      const text = `🚀 My post is boosted on Base Post Booster!
-
-Post: ${postLink}
-
-Boost yours 👇
-${MINI_APP_LINK}`
-
-      window.open(
-        `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`,
-        "_blank"
-      )
+      await shareToFarcaster(postLink)
 
       alert("Boost successful 🚀")
 
@@ -146,10 +163,14 @@ ${MINI_APP_LINK}`
     }
   }
 
-  if (txConfirmed && txHash) {
-    saveBoost()
-    setTxHash(undefined)
-  }
+  useEffect(() => {
+
+    if (txConfirmed && txHash) {
+      saveBoost()
+      setTxHash(undefined)
+    }
+
+  }, [txConfirmed])
 
   return (
     <main
@@ -297,4 +318,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-}
+              }
