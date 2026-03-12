@@ -1,28 +1,29 @@
 "use client"
 
 import { useState } from "react"
-import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import Link from "next/link"
-import { useAccount, useConnect, useSendTransaction } from "wagmi"
+import { useAccount, useConnect, useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
 import { parseEther } from "viem"
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
 const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
 const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
 
 export default function Home() {
+
   const [selectedTier, setSelectedTier] = useState(0)
   const [postLink, setPostLink] = useState("")
   const [contract, setContract] = useState("")
   const [loading, setLoading] = useState(false)
-  const [lastBoost, setLastBoost] = useState<string | null>(null)
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
 
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
+
   const { sendTransactionAsync } = useSendTransaction()
+
+  const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash,
+  })
 
   const tiers = [
     {
@@ -30,28 +31,33 @@ export default function Home() {
       price: "0.00001 ETH",
       duration: "24 Hours Boost",
       value: parseEther("0.00001"),
+      eth: "0.00001",
     },
     {
       name: "Pro",
       price: "0.003 ETH",
       duration: "48 Hours Boost",
       value: parseEther("0.003"),
+      eth: "0.003",
     },
     {
       name: "Elite",
       price: "0.005 ETH",
       duration: "72 Hours Boost",
       value: parseEther("0.005"),
+      eth: "0.005",
     },
   ]
 
   async function handleBoost() {
+
     if (!postLink) {
       alert("Paste post link")
       return
     }
 
     if (!isConnected) {
+
       const injectedConnector = connectors.find(
         (connector) => connector.id === "injected"
       )
@@ -61,44 +67,56 @@ export default function Home() {
       } else {
         alert("No wallet found")
       }
+
       return
     }
 
     try {
+
       setLoading(true)
 
-      // ✅ SEND TRANSACTION
-      const txHash = await sendTransactionAsync({
+      const hash = await sendTransactionAsync({
         to: YOUR_WALLET_ADDRESS as `0x${string}`,
         value: tiers[selectedTier].value,
       })
 
-      // ✅ SAFETY CHECK
-      if (!txHash) {
-        throw new Error("Transaction failed")
-      }
+      setTxHash(hash)
 
-      // ✅ SAVE BOOST
-      const saveRes = await fetch("/api/save-boost", {
+    } catch (err: any) {
+
+      console.error(err)
+
+      alert(
+        "Transaction failed: " +
+          (err.shortMessage || err.message || "Unknown error")
+      )
+
+      setLoading(false)
+    }
+  }
+
+  async function saveBoost() {
+
+    try {
+
+      const res = await fetch("/api/save-boost", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           wallet: address,
           postUrl: postLink,
           contract: contract || "",
           txHash: txHash,
-          amount: Number(tiers[selectedTier].value) / 1e18,
+          amount: tiers[selectedTier].eth,
         }),
       })
 
-      if (!saveRes.ok) {
-        const err = await saveRes.text()
-        console.error("Save failed:", err)
-        alert("Boost save failed!")
-        return
+      if (!res.ok) {
+        throw new Error("Boost save failed")
       }
 
-      // ✅ FARCASTER SHARE
       const text = `🚀 My post is boosted on Base Post Booster!
 
 Post: ${postLink}
@@ -111,20 +129,26 @@ ${MINI_APP_LINK}`
         "_blank"
       )
 
-      alert(`Boost successful! Tx hash: ${txHash}`)
+      alert("Boost successful 🚀")
 
-      setLastBoost(postLink)
       setPostLink("")
       setContract("")
-    } catch (err: any) {
+
+    } catch (err) {
+
       console.error(err)
-      alert(
-        "Transaction failed: " +
-          (err.shortMessage || err.message || "Unknown error")
-      )
+      alert("Boost save failed")
+
     } finally {
+
       setLoading(false)
+
     }
+  }
+
+  if (txConfirmed && txHash) {
+    saveBoost()
+    setTxHash(undefined)
   }
 
   return (
@@ -139,6 +163,7 @@ ${MINI_APP_LINK}`
         color: "black",
       }}
     >
+
       <h1
         style={{
           fontSize: 30,
@@ -153,9 +178,9 @@ ${MINI_APP_LINK}`
         Base Post Booster
       </h1>
 
-      {/* Tiers */}
       <div style={{ marginBottom: 30 }}>
         {tiers.map((tier, i) => (
+
           <div
             key={i}
             onClick={() => setSelectedTier(i)}
@@ -165,7 +190,9 @@ ${MINI_APP_LINK}`
                   ? "2px solid black"
                   : "1px solid #999",
               background:
-                selectedTier === i ? "#ffffff" : "#f5f5f5",
+                selectedTier === i
+                  ? "#ffffff"
+                  : "#f5f5f5",
               padding: 16,
               marginBottom: 15,
               cursor: "pointer",
@@ -173,12 +200,21 @@ ${MINI_APP_LINK}`
               transition: "0.3s",
             }}
           >
-            <h3 style={{ marginBottom: 5 }}>{tier.name}</h3>
-            <p style={{ fontWeight: "bold" }}>{tier.price}</p>
-            <p style={{ fontSize: 14, color: "#333" }}>
+
+            <h3 style={{ marginBottom: 5 }}>
+              {tier.name}
+            </h3>
+
+            <p style={{ fontWeight: "bold" }}>
+              {tier.price}
+            </p>
+
+            <p style={{ fontSize: 14 }}>
               {tier.duration}
             </p>
+
           </div>
+
         ))}
       </div>
 
@@ -199,6 +235,7 @@ ${MINI_APP_LINK}`
       />
 
       <div style={{ marginTop: 20 }}>
+
         <button
           onClick={handleBoost}
           disabled={loading}
@@ -214,12 +251,15 @@ ${MINI_APP_LINK}`
             fontSize: 16,
           }}
         >
+
           {loading
             ? "Processing..."
             : isConnected
             ? "Boost Now"
             : "Connect Wallet"}
+
         </button>
+
       </div>
 
       {isConnected && (
@@ -227,10 +267,9 @@ ${MINI_APP_LINK}`
           style={{
             marginTop: 10,
             fontSize: 14,
-            color: "#333",
           }}
         >
-          Connected: {address?.slice(0, 6)}...
+          Connected: {address?.slice(0,6)}...
           {address?.slice(-4)}
         </p>
       )}
@@ -238,11 +277,15 @@ ${MINI_APP_LINK}`
       <div style={{ marginTop: 40 }}>
         <Link
           href="/trending"
-          style={{ color: "black", fontWeight: "bold" }}
+          style={{
+            color: "black",
+            fontWeight: "bold",
+          }}
         >
           View Trending Posts →
         </Link>
       </div>
+
     </main>
   )
 }
