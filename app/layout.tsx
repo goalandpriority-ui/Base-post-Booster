@@ -15,6 +15,7 @@ export default function RootLayout({
 }: {
   children: ReactNode
 }) {
+
   const embedConfig = {
     version: "1",
     imageUrl: "https://base-post-booster.vercel.app/og.png",
@@ -37,13 +38,23 @@ export default function RootLayout({
           name="fc:miniapp"
           content={JSON.stringify(embedConfig)}
         />
+
+        <meta
+          name="fc:frame"
+          content={JSON.stringify(embedConfig)}
+        />
       </head>
 
       <body>
+
         <Providers>
+
           <ClientInit />
+
           {children}
+
         </Providers>
+
       </body>
     </html>
   )
