@@ -6,6 +6,9 @@ export async function GET() {
 
     const leaderboard = await prisma.boost.groupBy({
       by: ["wallet"],
+      _count: {
+        wallet: true,
+      },
       _sum: {
         amount: true,
       },
@@ -20,11 +23,13 @@ export async function GET() {
     return NextResponse.json(leaderboard)
 
   } catch (error) {
+
     console.error("LEADERBOARD ERROR:", error)
 
     return NextResponse.json(
       { error: "Failed to fetch leaderboard" },
       { status: 500 }
     )
+
   }
 }
