@@ -1,30 +1,59 @@
-export const dynamic = "force-dynamic"
+"use client"
 
-import { PrismaClient } from "@prisma/client"
+import { useEffect, useState } from "react"
 
-const prisma = new PrismaClient()
+export default function LeaderboardPage() {
 
-export default async function Leaderboard() {
-  const leaderboard = await prisma.boost.groupBy({
-    by: ["postUrl"],
-    _sum: { amount: true },
-    orderBy: {
-      _sum: {
-        amount: "desc"
-      }
-    }
-  })
+  const [data, setData] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch("/api/leaderboard")
+      .then((res) => res.json())
+      .then((res) => setData(res))
+  }, [])
 
   return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold mb-4">Top Boosted Posts 🏆</h1>
 
-      {leaderboard.map((item, index) => (
-        <div key={index} className="border p-3 mb-2">
-          <p>Post: {item.postUrl}</p>
-          <p>Total Boost: {item._sum.amount} ETH</p>
-        </div>
-      ))}
+    <div className="p-6">
+
+      <h1 className="text-2xl font-bold mb-6">
+        🏆 Top Boosters
+      </h1>
+
+      <div className="space-y-4">
+
+        {data.map((item, index) => (
+
+          <div
+            key={index}
+            className="p-4 bg-gray-900 rounded-xl flex justify-between"
+          >
+
+            <div>
+
+              <p className="font-semibold">
+                #{index + 1}
+              </p>
+
+              <p className="text-sm opacity-70">
+                {item.wallet.slice(0,6)}...
+                {item.wallet.slice(-4)}
+              </p>
+
+            </div>
+
+            <div className="font-bold">
+
+              {item._sum.amount} ETH
+
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
     </div>
   )
 }
