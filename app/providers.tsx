@@ -10,15 +10,20 @@ const queryClient = new QueryClient()
 
 const config = createConfig({
   chains: [base],
+
   connectors: [
-    injected(), // MetaMask / Browser wallets
+    injected(),
     walletConnect({
       projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
     }),
   ],
+
   transports: {
     [base.id]: http(),
   },
+
+  // ✅ WALLET AUTO CONNECT
+  autoConnect: true,
 })
 
 export default function Providers({ children }: { children: ReactNode }) {
