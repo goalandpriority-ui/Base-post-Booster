@@ -3,30 +3,32 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET() {
   try {
-    const leaderboard = await prisma.boost.groupBy({
-      by: ["postUrl", "contract"],
-      _sum: {
-        amount: true,
-      },
-      orderBy: {
-        _sum: {
-          amount: "desc",
-        },
-      },
+    const boosts = await prisma.boost.findMany()
+
+    const map: Record<string, any> = {}
+
+    boosts.forEach((b) => {
+      if (!map[b.postUrl]) {
+        map[b.postUrl] = {
+          id: Object.keys(map).length + 1,
+          content: b.postUrl,
+          contract: b.contract,
+          boost_count: 1,
+        }
+      } else {
+        map[b.postUrl].boost_count += 1
+      }
     })
 
-    const formatted = leaderboard.map((item, index) => ({
-      id: index + 1,
-      content: item.postUrl,
-      contract: item.contract,
-      boost_count: item._sum.amount ?? 0,
-    }))
+    const posts = Object.values(map)
 
-    return NextResponse.json(formatted)
+    return NextResponse.json(posts)
+
   } catch (error) {
     console.error(error)
+
     return NextResponse.json(
-      { error: "Failed to fetch leaderboard" },
+      { error: "Failed to fetch posts" },
       { status: 500 }
     )
   }
