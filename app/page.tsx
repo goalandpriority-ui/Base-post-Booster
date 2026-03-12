@@ -116,23 +116,33 @@ export default function Home() {
 
   async function handleBoost() {
 
-    if (!postLink) {
-      alert("Paste post link")
+    // FIRST CONNECT WALLET
+    if (!isConnected) {
+
+      if (connectors.length > 0) {
+
+        const injectedConnector = connectors.find(
+          (connector) => connector.id === "injected"
+        )
+
+        if (injectedConnector) {
+          await connect({ connector: injectedConnector })
+        } else {
+          await connect({ connector: connectors[0] })
+        }
+
+      } else {
+
+        alert("No wallet found")
+
+      }
+
       return
     }
 
-    if (!isConnected) {
-
-      const injectedConnector = connectors.find(
-        (connector) => connector.id === "injected"
-      )
-
-      if (injectedConnector) {
-        await connect({ connector: injectedConnector })
-      } else {
-        alert("No wallet found")
-      }
-
+    // THEN CHECK POST LINK
+    if (!postLink) {
+      alert("Paste post link")
       return
     }
 
@@ -424,4 +434,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #999",
   background: "#ffffff",
   color: "black",
-              }
+            }
