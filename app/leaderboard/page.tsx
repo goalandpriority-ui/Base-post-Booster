@@ -1,59 +1,83 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
+
+type User = {
+  wallet: string
+  _count: { wallet: number }
+  _sum: { amount: number }
+}
 
 export default function LeaderboardPage() {
 
-  const [data, setData] = useState<any[]>([])
+  const [users, setUsers] = useState<User[]>([])
 
   useEffect(() => {
+
     fetch("/api/leaderboard")
       .then((res) => res.json())
-      .then((res) => setData(res))
+      .then((data) => setUsers(data))
+
   }, [])
 
   return (
 
-    <div className="p-6">
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#E3A6AE",
+        padding: 30,
+        textAlign: "center",
+      }}
+    >
 
-      <h1 className="text-2xl font-bold mb-6">
+      <h1
+        style={{
+          fontSize: 30,
+          fontWeight: "bold",
+          marginBottom: 30,
+        }}
+      >
         🏆 Top Boosters
       </h1>
 
-      <div className="space-y-4">
+      {users.map((user, i) => (
 
-        {data.map((item, index) => (
+        <div
+          key={user.wallet}
+          style={{
+            background: "white",
+            padding: 20,
+            borderRadius: 12,
+            marginBottom: 15,
+          }}
+        >
 
-          <div
-            key={index}
-            className="p-4 bg-gray-900 rounded-xl flex justify-between"
-          >
+          <h3>#{i + 1}</h3>
 
-            <div>
+          <p>
+            {user.wallet.slice(0,6)}...
+            {user.wallet.slice(-4)}
+          </p>
 
-              <p className="font-semibold">
-                #{index + 1}
-              </p>
+          <p>
+            Boosts: {user._count.wallet}
+          </p>
 
-              <p className="text-sm opacity-70">
-                {item.wallet.slice(0,6)}...
-                {item.wallet.slice(-4)}
-              </p>
+          <p>
+            ETH Spent: {user._sum.amount}
+          </p>
 
-            </div>
+        </div>
 
-            <div className="font-bold">
+      ))}
 
-              {item._sum.amount} ETH
+      <Link href="/" style={{ fontWeight: "bold" }}>
+        ← Back
+      </Link>
 
-            </div>
+    </main>
 
-          </div>
-
-        ))}
-
-      </div>
-
-    </div>
   )
 }
