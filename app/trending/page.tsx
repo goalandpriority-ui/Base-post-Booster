@@ -14,15 +14,20 @@ type Post = {
 const MINIAPP_URL = "https://base-post-booster.vercel.app"
 
 export default function TrendingPage() {
+
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [newIds, setNewIds] = useState<string[]>([])
   const [expandedChart, setExpandedChart] = useState<string | null>(null)
+
   const previousIds = useRef<string[]>([])
 
   const fetchPosts = async () => {
+
     try {
+
       const res = await fetch("/api/posts")
+
       const data: Post[] = await res.json()
 
       const sorted = data.sort(
@@ -36,42 +41,68 @@ export default function TrendingPage() {
       )
 
       if (previousIds.current.length > 0 && newlyAdded.length > 0) {
+
         setNewIds(newlyAdded)
+
         setTimeout(() => setNewIds([]), 3000)
+
       }
 
       previousIds.current = currentIds
+
       setPosts(sorted)
+
       setLoading(false)
+
     } catch (err) {
+
       console.error(err)
+
       setLoading(false)
+
     }
+
   }
 
   useEffect(() => {
+
     fetchPosts()
+
     const interval = setInterval(fetchPosts, 5000)
+
     return () => clearInterval(interval)
+
   }, [])
 
   const handleShare = async (post: Post) => {
+
     const shareUrl = `${MINIAPP_URL}/trending`
-    const shareText = `${post.content}\n\nCheck leaderboard:\n${shareUrl}`
+
+    const shareText = `${post.content}
+
+Check leaderboard:
+${shareUrl}`
 
     if (navigator.share) {
+
       await navigator.share({
         title: "Trending Boosted Post",
         text: post.content,
         url: shareUrl,
       })
+
     } else {
+
       await navigator.clipboard.writeText(shareText)
+
       alert("Miniapp link copied!")
+
     }
+
   }
 
   if (loading) {
+
     return (
       <div
         style={{
@@ -86,9 +117,11 @@ export default function TrendingPage() {
         Loading trending posts...
       </div>
     )
+
   }
 
   return (
+
     <div
       style={{
         minHeight: "100vh",
@@ -97,8 +130,9 @@ export default function TrendingPage() {
         color: "black",
       }}
     >
+
       <h1 style={{ fontSize: 30, fontWeight: "bold", marginBottom: 20 }}>
-        Trending Boosted Posts
+        🔥 Trending Boosted Posts
       </h1>
 
       <div style={{ marginBottom: 30 }}>
@@ -111,18 +145,27 @@ export default function TrendingPage() {
         layout
         style={{ display: "flex", flexDirection: "column", gap: 20 }}
       >
+
         <AnimatePresence>
+
           {posts.map((post, index) => {
+
             const isNew = newIds.includes(post.id)
+
             const isExpanded = expandedChart === post.id
 
             return (
+
               <motion.div
                 key={post.id}
                 layout
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 30,
+                }}
                 style={{
                   background: "white",
                   padding: 20,
@@ -130,23 +173,54 @@ export default function TrendingPage() {
                   display: "flex",
                   flexDirection: "column",
                   gap: 12,
-                  border: isNew ? "3px solid #22c55e" : "none",
+                  border: isNew
+                    ? "3px solid #22c55e"
+                    : "none",
                 }}
               >
-                <p style={{ fontWeight: "bold" }}>{post.content}</p>
 
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <p style={{ fontWeight: "bold" }}>
+                  {post.content}
+                </p>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+
                   <div>
-                    <p style={{ fontSize: 12 }}>Boosts</p>
-                    <p style={{ fontSize: 22, fontWeight: "bold" }}>
+
+                    <p style={{ fontSize: 12 }}>
+                      Boosts
+                    </p>
+
+                    <p
+                      style={{
+                        fontSize: 22,
+                        fontWeight: "bold",
+                      }}
+                    >
                       {post.boost_count}
                     </p>
+
                   </div>
 
-                  <div style={{ display: "flex", gap: 10 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                    }}
+                  >
+
                     <button
                       onClick={() =>
-                        setExpandedChart(isExpanded ? null : post.id)
+                        setExpandedChart(
+                          isExpanded
+                            ? null
+                            : post.id
+                        )
                       }
                       style={{
                         padding: "6px 12px",
@@ -157,7 +231,9 @@ export default function TrendingPage() {
                         cursor: "pointer",
                       }}
                     >
-                      {isExpanded ? "Hide Chart" : "View Chart"}
+                      {isExpanded
+                        ? "Hide Chart"
+                        : "View Chart"}
                     </button>
 
                     <button
@@ -174,10 +250,13 @@ export default function TrendingPage() {
                     >
                       Share
                     </button>
+
                   </div>
+
                 </div>
 
                 {isExpanded && (
+
                   <div
                     style={{
                       marginTop: 15,
@@ -187,6 +266,7 @@ export default function TrendingPage() {
                       background: "black",
                     }}
                   >
+
                     <iframe
                       src={`https://dexscreener.com/base/${post.contract}?embed=1&theme=dark`}
                       style={{
@@ -195,13 +275,23 @@ export default function TrendingPage() {
                         border: "none",
                       }}
                     />
+
                   </div>
+
                 )}
+
               </motion.div>
+
             )
+
           })}
+
         </AnimatePresence>
+
       </motion.div>
+
     </div>
+
   )
-}
+
+                        }
