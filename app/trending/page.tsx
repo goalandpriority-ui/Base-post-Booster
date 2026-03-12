@@ -16,9 +16,9 @@ const MINIAPP_URL = "https://base-post-booster.vercel.app"
 export default function TrendingPage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [newIds, setNewIds] = useState<number[]>([])
-  const [expandedChart, setExpandedChart] = useState<number | null>(null)
-  const previousIds = useRef<number[]>([])
+  const [newIds, setNewIds] = useState<string[]>([])
+  const [expandedChart, setExpandedChart] = useState<string | null>(null)
+  const previousIds = useRef<string[]>([])
 
   const fetchPosts = async () => {
     try {
@@ -32,7 +32,7 @@ export default function TrendingPage() {
       const currentIds = sorted.map((p: Post) => p.id)
 
       const newlyAdded = currentIds.filter(
-        (id: number) => !previousIds.current.includes(id)
+        (id: string) => !previousIds.current.includes(id)
       )
 
       if (previousIds.current.length > 0 && newlyAdded.length > 0) {
@@ -107,7 +107,10 @@ export default function TrendingPage() {
         </Link>
       </div>
 
-      <motion.div layout style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <motion.div
+        layout
+        style={{ display: "flex", flexDirection: "column", gap: 20 }}
+      >
         <AnimatePresence>
           {posts.map((post, index) => {
             const isNew = newIds.includes(post.id)
@@ -127,6 +130,7 @@ export default function TrendingPage() {
                   display: "flex",
                   flexDirection: "column",
                   gap: 12,
+                  border: isNew ? "3px solid #22c55e" : "none",
                 }}
               >
                 <p style={{ fontWeight: "bold" }}>{post.content}</p>
@@ -154,6 +158,21 @@ export default function TrendingPage() {
                       }}
                     >
                       {isExpanded ? "Hide Chart" : "View Chart"}
+                    </button>
+
+                    <button
+                      onClick={() => handleShare(post)}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 6,
+                        background: "#6366f1",
+                        color: "white",
+                        border: "none",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Share
                     </button>
                   </div>
                 </div>
@@ -185,4 +204,4 @@ export default function TrendingPage() {
       </motion.div>
     </div>
   )
-        }
+}
