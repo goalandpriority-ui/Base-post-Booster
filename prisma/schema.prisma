@@ -22,41 +22,28 @@ model Boost {
   // transaction hash (must be unique)
   txHash    String   @unique
 
-  // boost payment amount (better precision than Float)
+  // boost payment amount
   amount    Decimal  @db.Decimal(18,6)
 
-  // referral wallet (optional)
+  // trending score (pre-calculated)
+  score     Float    @default(0)
+
+  // referral wallet
   referrer  String?
 
   // timestamp
   createdAt DateTime @default(now())
 
-  /* ---------- INDEXES ---------- */
+  // INDEXES
 
-  // quick lookup for post boosts
   @@index([postUrl])
-
-  // wallet history
   @@index([wallet])
-
-  // token boost lookup
   @@index([contract])
-
-  // time based queries
   @@index([createdAt])
-
-  // referral earnings queries
   @@index([referrer])
 
-  // trending posts calculation
-  @@index([postUrl, createdAt])
-
-  // trending tokens calculation
+  // trending queries
   @@index([contract, createdAt])
-
-  // leaderboard queries
-  @@index([wallet, createdAt])
-
-  // referral earnings calculation
-  @@index([referrer, createdAt])
+  @@index([postUrl, createdAt])
+  @@index([score])
 }
