@@ -18,14 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json()
 
-    const wallet = String(body.wallet || "")
+    const wallet = String(body.wallet || "").toLowerCase()
     const postUrl = String(body.postUrl || "")
-    const contract = body.contract ? String(body.contract) : ""
+    const contract = body.contract ? String(body.contract).toLowerCase() : ""
     const txHash = String(body.txHash || "")
     const amount = Number(body.amount || 0)
     const plan = String(body.plan || "basic")
 
-    const referrer = body.referrer ? String(body.referrer) : null
+    const referrer = body.referrer ? String(body.referrer).toLowerCase() : null
 
     if (!wallet || !postUrl || !txHash) {
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
     if (
       validReferrer &&
-      validReferrer.toLowerCase() === wallet.toLowerCase()
+      validReferrer === wallet
     ) {
       validReferrer = null
     }
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
       )
     }
 
-    if (tx.from.toLowerCase() !== wallet.toLowerCase()) {
+    if (tx.from.toLowerCase() !== wallet) {
       return NextResponse.json(
         { error: "Wallet does not match sender" },
         { status: 400 }
@@ -164,7 +164,7 @@ export async function POST(req: Request) {
     const whale = amount >= 0.05
 
     // -----------------------------
-    // Trending Score
+    // Trending Score (runtime only)
     // -----------------------------
 
     let score = amount * weight
@@ -174,7 +174,7 @@ export async function POST(req: Request) {
     }
 
     // -----------------------------
-    // Save Boost
+    // Save Boost (score removed)
     // -----------------------------
 
     const boost = await prisma.boost.create({
@@ -184,7 +184,6 @@ export async function POST(req: Request) {
         contract,
         txHash,
         amount,
-        score,
         plan,
         durationHours,
         whale,
@@ -194,6 +193,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
+      score,
       boost
     })
 
