@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     const postUrl = String(body.postUrl || "")
     const contract = body.contract ? String(body.contract) : ""
     const txHash = String(body.txHash || "")
-    const amount = body.amount
+    const amount = Number(body.amount || 0)
     const plan = String(body.plan || "basic")
 
     const referrer = body.referrer ? String(body.referrer) : null
@@ -106,6 +106,44 @@ export async function POST(req: Request) {
       )
     }
 
+    // -----------------------------
+    // Anti Spam Protection
+    // -----------------------------
+
+    const lastHour = new Date(Date.now() - 60 * 60 * 1000)
+
+    const walletBoostCount = await prisma.boost.count({
+      where: {
+        wallet,
+        createdAt: { gte: lastHour }
+      }
+    })
+
+    if (walletBoostCount >= 5) {
+      return NextResponse.json(
+        { error: "Boost limit reached. Try later." },
+        { status: 429 }
+      )
+    }
+
+    const postBoostCount = await prisma.boost.count({
+      where: {
+        postUrl,
+        createdAt: { gte: lastHour }
+      }
+    })
+
+    if (postBoostCount >= 3) {
+      return NextResponse.json(
+        { error: "Post boost limit reached." },
+        { status: 429 }
+      )
+    }
+
+    // -----------------------------
+    // Plan Logic
+    // -----------------------------
+
     let durationHours = 24
     let weight = 1
 
@@ -119,7 +157,25 @@ export async function POST(req: Request) {
       weight = 2
     }
 
-    const score = Number(amount) * weight
+    // -----------------------------
+    // Whale Detection
+    // -----------------------------
+
+    const whale = amount >= 0.05
+
+    // -----------------------------
+    // Trending Score
+    // -----------------------------
+
+    let score = amount * weight
+
+    if (whale) {
+      score = score * 3
+    }
+
+    // -----------------------------
+    // Save Boost
+    // -----------------------------
 
     const boost = await prisma.boost.create({
       data: {
@@ -131,6 +187,7 @@ export async function POST(req: Request) {
         score,
         plan,
         durationHours,
+        whale,
         referrer: validReferrer
       }
     })
