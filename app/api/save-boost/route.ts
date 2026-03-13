@@ -2,10 +2,17 @@ export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { createPublicClient, http, parseEther, isAddress, formatEther } from "viem"
+import {
+  createPublicClient,
+  http,
+  parseEther,
+  isAddress,
+  formatEther
+} from "viem"
 import { base } from "viem/chains"
 
-const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
+const YOUR_WALLET_ADDRESS =
+  "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
 
 const client = createPublicClient({
   chain: base,
@@ -22,7 +29,9 @@ export async function POST(req: Request) {
     const postUrl = String(body.postUrl || "")
     const contract = body.contract ? String(body.contract).toLowerCase() : ""
     const txHash = String(body.txHash || "")
-    const referrer = body.referrer ? String(body.referrer).toLowerCase() : null
+    const referrer = body.referrer
+      ? String(body.referrer).toLowerCase()
+      : null
 
     if (!wallet || !postUrl || !txHash) {
       return NextResponse.json(
@@ -44,9 +53,9 @@ export async function POST(req: Request) {
       validReferrer = null
     }
 
-    // --------------------------------
-    // Prevent duplicate transaction
-    // --------------------------------
+    // -----------------------------
+    // Prevent duplicate tx
+    // -----------------------------
 
     const existing = await prisma.boost.findUnique({
       where: { txHash }
@@ -59,9 +68,9 @@ export async function POST(req: Request) {
       })
     }
 
-    // --------------------------------
+    // -----------------------------
     // Verify transaction receipt
-    // --------------------------------
+    // -----------------------------
 
     const receipt = await client.getTransactionReceipt({
       hash: txHash as `0x${string}`
@@ -74,9 +83,9 @@ export async function POST(req: Request) {
       )
     }
 
-    // --------------------------------
+    // -----------------------------
     // Get transaction
-    // --------------------------------
+    // -----------------------------
 
     const tx = await client.getTransaction({
       hash: txHash as `0x${string}`
@@ -89,9 +98,9 @@ export async function POST(req: Request) {
       )
     }
 
-    // --------------------------------
+    // -----------------------------
     // Verify receiver wallet
-    // --------------------------------
+    // -----------------------------
 
     if (!tx.to || tx.to.toLowerCase() !== YOUR_WALLET_ADDRESS.toLowerCase()) {
       return NextResponse.json(
@@ -100,9 +109,9 @@ export async function POST(req: Request) {
       )
     }
 
-    // --------------------------------
+    // -----------------------------
     // Verify sender wallet
-    // --------------------------------
+    // -----------------------------
 
     if (tx.from.toLowerCase() !== wallet) {
       return NextResponse.json(
@@ -111,9 +120,9 @@ export async function POST(req: Request) {
       )
     }
 
-    // --------------------------------
-    // Convert payment amount
-    // --------------------------------
+    // -----------------------------
+    // Convert payment
+    // -----------------------------
 
     const paidEth = Number(formatEther(tx.value))
 
@@ -126,9 +135,9 @@ export async function POST(req: Request) {
       )
     }
 
-    // --------------------------------
-    // Detect Boost Plan
-    // --------------------------------
+    // -----------------------------
+    // Detect Plan
+    // -----------------------------
 
     let plan = "basic"
     let durationHours = 24
@@ -141,9 +150,9 @@ export async function POST(req: Request) {
       durationHours = 48
     }
 
-    // --------------------------------
-    // Anti Spam Protection
-    // --------------------------------
+    // -----------------------------
+    // Anti Spam
+    // -----------------------------
 
     const lastHour = new Date(Date.now() - 60 * 60 * 1000)
 
@@ -175,15 +184,33 @@ export async function POST(req: Request) {
       )
     }
 
-    // --------------------------------
-    // Whale Detection
-    // --------------------------------
+    // -----------------------------
+    // Whale detection
+    // -----------------------------
 
     const whale = paidEth >= 0.05
 
-    // --------------------------------
-    // Save Boost
-    // --------------------------------
+    // -----------------------------
+    // Referral reward
+    // -----------------------------
+
+    let referralReward = 0
+
+    if (validReferrer) {
+      referralReward = paidEth * 0.05
+    }
+
+    // -----------------------------
+    // Expiry time
+    // -----------------------------
+
+    const expiresAt = new Date(
+      Date.now() + durationHours * 60 * 60 * 1000
+    )
+
+    // -----------------------------
+    // Save boost
+    // -----------------------------
 
     const boost = await prisma.boost.create({
       data: {
@@ -195,7 +222,9 @@ export async function POST(req: Request) {
         plan,
         durationHours,
         whale,
-        referrer: validReferrer
+        referrer: validReferrer,
+        referralReward,
+        expiresAt
       }
     })
 
