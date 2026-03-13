@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { createPublicClient, http, parseEther, isAddress } from "viem"
+import { createPublicClient, http, parseEther, isAddress, formatEther } from "viem"
 import { base } from "viem/chains"
 
 const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
@@ -22,8 +22,6 @@ export async function POST(req: Request) {
     const postUrl = String(body.postUrl || "")
     const contract = body.contract ? String(body.contract).toLowerCase() : ""
     const txHash = String(body.txHash || "")
-    const amount = Number(body.amount || 0)
-
     const referrer = body.referrer ? String(body.referrer).toLowerCase() : null
 
     if (!wallet || !postUrl || !txHash) {
@@ -46,6 +44,10 @@ export async function POST(req: Request) {
       validReferrer = null
     }
 
+    // --------------------------------
+    // Prevent duplicate transaction
+    // --------------------------------
+
     const existing = await prisma.boost.findUnique({
       where: { txHash }
     })
@@ -56,6 +58,10 @@ export async function POST(req: Request) {
         message: "Transaction already processed"
       })
     }
+
+    // --------------------------------
+    // Verify transaction receipt
+    // --------------------------------
 
     const receipt = await client.getTransactionReceipt({
       hash: txHash as `0x${string}`
@@ -68,6 +74,10 @@ export async function POST(req: Request) {
       )
     }
 
+    // --------------------------------
+    // Get transaction
+    // --------------------------------
+
     const tx = await client.getTransaction({
       hash: txHash as `0x${string}`
     })
@@ -79,12 +89,20 @@ export async function POST(req: Request) {
       )
     }
 
+    // --------------------------------
+    // Verify receiver wallet
+    // --------------------------------
+
     if (!tx.to || tx.to.toLowerCase() !== YOUR_WALLET_ADDRESS.toLowerCase()) {
       return NextResponse.json(
         { error: "Invalid payment receiver" },
         { status: 400 }
       )
     }
+
+    // --------------------------------
+    // Verify sender wallet
+    // --------------------------------
 
     if (tx.from.toLowerCase() !== wallet) {
       return NextResponse.json(
@@ -93,18 +111,39 @@ export async function POST(req: Request) {
       )
     }
 
-    const minPayment = parseEther("0.00001")
+    // --------------------------------
+    // Convert payment amount
+    // --------------------------------
 
-    if (tx.value < minPayment) {
+    const paidEth = Number(formatEther(tx.value))
+
+    const minPayment = 0.00001
+
+    if (paidEth < minPayment) {
       return NextResponse.json(
         { error: "Insufficient payment" },
         { status: 400 }
       )
     }
 
-    // -----------------------------
+    // --------------------------------
+    // Detect Boost Plan
+    // --------------------------------
+
+    let plan = "basic"
+    let durationHours = 24
+
+    if (paidEth >= 0.005) {
+      plan = "elite"
+      durationHours = 72
+    } else if (paidEth >= 0.003) {
+      plan = "pro"
+      durationHours = 48
+    }
+
+    // --------------------------------
     // Anti Spam Protection
-    // -----------------------------
+    // --------------------------------
 
     const lastHour = new Date(Date.now() - 60 * 60 * 1000)
 
@@ -136,21 +175,15 @@ export async function POST(req: Request) {
       )
     }
 
-    // -----------------------------
+    // --------------------------------
     // Whale Detection
-    // -----------------------------
+    // --------------------------------
 
-    const whale = amount >= 0.05
+    const whale = paidEth >= 0.05
 
-    // -----------------------------
-    // Duration
-    // -----------------------------
-
-    const durationHours = 24
-
-    // -----------------------------
+    // --------------------------------
     // Save Boost
-    // -----------------------------
+    // --------------------------------
 
     const boost = await prisma.boost.create({
       data: {
@@ -158,7 +191,8 @@ export async function POST(req: Request) {
         postUrl,
         contract,
         txHash,
-        amount,
+        amount: paidEth,
+        plan,
         durationHours,
         whale,
         referrer: validReferrer
@@ -181,4 +215,4 @@ export async function POST(req: Request) {
 
   }
 
-      }
+}
