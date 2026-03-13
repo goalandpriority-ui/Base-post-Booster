@@ -1,27 +1,52 @@
-import { PrismaClient } from "@prisma/client"
 import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 
-const prisma = new PrismaClient()
+export async function GET(req: Request) {
 
-export async function POST(req:Request){
+  try {
 
-const body = await req.json()
+    const { searchParams } = new URL(req.url)
 
-const boosts = await prisma.boost.findMany({
-where:{
-referrer:body.wallet
-}
-})
+    const wallet = searchParams.get("wallet")
 
-let total = 0
+    if (!wallet) {
+      return NextResponse.json(
+        { error: "Wallet required" },
+        { status: 400 }
+      )
+    }
 
-boosts.forEach(b=>{
-total+=b.amount
-})
+    const referrals = await prisma.boost.findMany({
+      where: {
+        referrer: wallet
+      }
+    })
 
-return NextResponse.json({
-count:boosts.length,
-earned:total*0.05
-})
+    const totalBoosts = referrals.length
+
+    const totalVolume = referrals.reduce(
+      (sum, r) => sum + (r.amount || 0),
+      0
+    )
+
+    const earnings = totalVolume * 0.1   // 10% referral earnings
+
+    return NextResponse.json({
+      wallet,
+      totalBoosts,
+      totalVolume,
+      earnings
+    })
+
+  } catch (error) {
+
+    console.error("REFERRAL API ERROR:", error)
+
+    return NextResponse.json(
+      { error: "Failed to load referrals" },
+      { status: 500 }
+    )
+
+  }
 
 }
