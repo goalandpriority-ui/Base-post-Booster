@@ -26,7 +26,7 @@ export default function TrendingPage() {
 
     try {
 
-      const res = await fetch("/api/posts")
+      const res = await fetch("/api/trending")
 
       const data: Post[] = await res.json()
 
