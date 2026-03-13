@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const postUrl = String(body.postUrl || "")
     const contract = body.contract ? String(body.contract) : ""
     const txHash = String(body.txHash || "")
-    const amount = Number(body.amount || 0)
+    const amount = parseFloat(body.amount || "0")
 
     if (!wallet || !postUrl || !txHash) {
       return NextResponse.json(
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       )
     }
 
-    // 🚫 Prevent duplicate boost using same tx
+    // prevent duplicate tx
     const existing = await prisma.boost.findUnique({
       where: { txHash },
     })
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       )
     }
 
-    // 🔍 Fetch transaction receipt
+    // get receipt
     const receipt = await client.getTransactionReceipt({
       hash: txHash as `0x${string}`,
     })
@@ -52,12 +52,11 @@ export async function POST(req: Request) {
       )
     }
 
-    // 🔍 Fetch transaction data
+    // get tx
     const tx = await client.getTransaction({
       hash: txHash as `0x${string}`,
     })
 
-    // ❌ Wrong receiver
     if (!tx.to || tx.to.toLowerCase() !== YOUR_WALLET_ADDRESS.toLowerCase()) {
       return NextResponse.json(
         { error: "Invalid payment receiver" },
@@ -65,7 +64,6 @@ export async function POST(req: Request) {
       )
     }
 
-    // ❌ Amount mismatch protection
     const minPayment = parseEther("0.00001")
 
     if (tx.value < minPayment) {
@@ -75,7 +73,7 @@ export async function POST(req: Request) {
       )
     }
 
-    // ✅ Save boost
+    // SAVE BOOST
     const boost = await prisma.boost.create({
       data: {
         wallet,
@@ -85,6 +83,8 @@ export async function POST(req: Request) {
         amount,
       },
     })
+
+    console.log("BOOST SAVED:", boost)
 
     return NextResponse.json(boost)
 
@@ -96,5 +96,6 @@ export async function POST(req: Request) {
       { error: "Failed to save boost" },
       { status: 500 }
     )
+
   }
-      }
+}
