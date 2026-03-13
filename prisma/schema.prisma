@@ -37,6 +37,12 @@ model Boost {
   // referral wallet
   referrer  String?
 
+  // referral earnings (5%)
+  referralReward Decimal @db.Decimal(18,6) @default(0)
+
+  // expiry time
+  expiresAt DateTime?
+
   // timestamp
   createdAt DateTime @default(now())
 
