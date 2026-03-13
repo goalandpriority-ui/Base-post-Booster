@@ -5,6 +5,8 @@ export async function GET() {
 
   try {
 
+    const now = Date.now()
+
     const posts = await prisma.boost.groupBy({
       by: ["postUrl", "contract"],
       _count: {
@@ -30,28 +32,44 @@ export async function GET() {
       let hoursOld = 0
 
       if (latestBoost) {
-        hoursOld =
-          (Date.now() - new Date(latestBoost).getTime()) / 3600000
+        hoursOld = (now - new Date(latestBoost).getTime()) / 3600000
       }
 
+      // Prisma Decimal → Number conversion
+      const totalAmount = Number(post._sum.amount || 0)
+
+      // Boost count
+      const boostCount = post._count.postUrl
+
+      // Whale detection
+      const whaleBoost = totalAmount >= 0.05 ? 5 : 0
+
+      // Reddit-style decay
+      const decay = Math.pow(hoursOld + 2, 1.5)
+
+      // Final ranking score
       const trendingScore =
-        (post._count.postUrl * 10) +
-        ((post._sum.amount || 0) * 100) -
-        hoursOld
+        ((boostCount * 10) + (totalAmount * 120) + whaleBoost) / decay
 
       return {
         id: `${index}-${post.postUrl}`,
         content: post.postUrl,
         contract: post.contract,
-        boost_count: post._count.postUrl,
-        total_boost_eth: post._sum.amount || 0,
+        boost_count: boostCount,
+        total_boost_eth: totalAmount,
         latest_boost: latestBoost,
+        hours_old: hoursOld,
         score: trendingScore,
       }
 
     })
 
-    return NextResponse.json(formatted)
+    // Sort by score
+    const ranked = formatted
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 50)
+
+    return NextResponse.json(ranked)
 
   } catch (error) {
 
@@ -64,4 +82,4 @@ export async function GET() {
 
   }
 
-}
+      }
