@@ -39,7 +39,7 @@ const { connect, connectors } = useConnect()
 const { sendTransactionAsync } = useSendTransaction()
 
 const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
-hash: txHash as `0x${string}` | undefined,
+hash: txHash as "0x${string}" | undefined,
 })
 
 useEffect(() => {
@@ -74,7 +74,7 @@ eth: "0.005",
 
 async function detectCoinFromBaseLink(link: string) {
 
-if (!link.includes("base.app/content")) return
+if (!link.includes("/content/")) return
 
 try {
 
@@ -165,7 +165,7 @@ try {
 setLoading(true)
 
 const hash = await sendTransactionAsync({
-to: YOUR_WALLET_ADDRESS as `0x${string}`,
+to: YOUR_WALLET_ADDRESS as "0x${string}",
 value: tiers[selectedTier].value,
 })
 
@@ -188,7 +188,7 @@ setLoading(false)
 
 async function shareToFarcaster(postUrl: string) {
 
-const referralLink = `${MINI_APP_LINK}?ref=${address}`
+const referralLink = "${MINI_APP_LINK}?ref=${address}"
 
 const text = `🚀 I just boosted this post on Base Post Booster!
 
@@ -265,6 +265,7 @@ setTxHash(undefined)
 }, [txConfirmed, txHash])
 
 return (
+
 <main style={{
 minHeight: "100vh",
 background: "#E3A6AE",
@@ -273,9 +274,7 @@ textAlign: "center",
 maxWidth: 500,
 margin: "0 auto",
 color: "black"
-}}>
-
-<h1 style={{
+}}><h1 style={{
 fontSize: 30,
 marginBottom: 30,
 fontWeight: "bold",
@@ -285,15 +284,44 @@ padding: "10px 20px",
 borderRadius: 12
 }}>
 Base Post Booster
-</h1>
+</h1>{referrer && (
 
-{referrer && (
 <p style={{ marginBottom: 20, fontWeight: "bold" }}>
 Referred by: {referrer.slice(0,6)}...{referrer.slice(-4)}
 </p>
-)}
+)}{address && (
 
-<input
+<div style={{
+background:"#ffffff",
+padding:12,
+borderRadius:8,
+marginBottom:20
+}}><p>Your referral link</p><p style={{
+fontSize:12,
+wordBreak:"break-all"
+}}>
+{MINI_APP_LINK}?ref={address}
+</p><button
+onClick={()=>{
+navigator.clipboard.writeText("${MINI_APP_LINK}?ref=${address}")
+alert("Referral link copied")
+}}
+style={{
+marginTop:8,
+padding:"6px 12px",
+background:"#3b82f6",
+border:"none",
+borderRadius:6,
+color:"white"
+}}
+
+«»
+
+Copy Link
+</button>
+
+</div>
+)}<input
 type="text"
 placeholder="Paste Base post link"
 value={postLink}
@@ -305,60 +333,32 @@ detectCoinFromBaseLink(value)
 style={inputStyle}
 />
 
-{/* TOKEN AUTO DETECT DISPLAY */}
-
 {coinLoading && (
-<p style={{ marginTop:10 }}>Detecting token...</p>
-)}
 
-{contract && (
+<p style={{ marginTop:10 }}>Detecting token...</p>
+)}{contract && (
 
 <div style={{
 background:"#ffffff",
 padding:15,
 borderRadius:10,
 marginTop:15
-}}>
-
-<p><b>Contract:</b></p>
-
-<p style={{
+}}><p><b>Contract:</b></p><p style={{
 wordBreak:"break-all",
 fontSize:13
 }}>
 {contract}
-</p>
-
-</div>
-
-)}
-
-{coinData && (
+</p></div>
+)}{coinData && (
 
 <div style={{
 background:"#ffffff",
 padding:15,
 borderRadius:10,
 marginTop:15
-}}>
+}}><h3>{coinData.name}</h3><p><b>Symbol:</b> {coinData.symbol}</p><p><b>Price:</b> ${coinData.price}</p><p><b>Market Cap:</b> ${coinData.marketCap}</p></div>
+)}<div style={{ marginTop:30 }}>{tiers.map((tier,index)=>(
 
-<h3>{coinData.name}</h3>
-
-<p><b>Symbol:</b> {coinData.symbol}</p>
-
-<p><b>Price:</b> ${coinData.price}</p>
-
-<p><b>Market Cap:</b> ${coinData.marketCap}</p>
-
-</div>
-
-)}
-
-{/* BOOST TIERS */}
-
-<div style={{ marginTop:30 }}>
-
-{tiers.map((tier,index)=>(
 <div
 key={index}
 onClick={()=>setSelectedTier(index)}
@@ -370,20 +370,8 @@ marginBottom:15,
 cursor:"pointer",
 border:selectedTier===index?"2px solid green":"1px solid #ccc"
 }}
->
-
-<h2>{tier.name}</h2>
-
-<h3>{tier.price}</h3>
-
-<p>{tier.duration}</p>
-
-</div>
-))}
-
-</div>
-
-<button
+><h2>{tier.name}</h2><h3>{tier.price}</h3><p>{tier.duration}</p></div>
+))}</div><button
 onClick={handleBoost}
 disabled={loading}
 style={{
@@ -397,7 +385,8 @@ borderRadius:10,
 width:"100%",
 fontSize:16
 }}
->
+
+«»
 
 {loading
 ? "Processing..."
@@ -405,25 +394,19 @@ fontSize:16
 ? "Boost Now"
 : "Connect Wallet"}
 
-</button>
-
-<div style={{ marginTop: 40 }}>
+</button><div style={{ marginTop: 40 }}>
 <Link href="/trending">View Trending Posts →</Link>
-</div>
-
-<div style={{ marginTop: 20 }}>
+</div><div style={{ marginTop: 20 }}>
 <Link href="/leaderboard">View Leaderboard →</Link>
-</div>
-
-</main>
+</div><div style={{ marginTop: 20 }}>
+<Link href="/referrals">Referral Earnings →</Link>
+</div></main>
 )
-}
-
-const inputStyle: React.CSSProperties = {
+}const inputStyle: React.CSSProperties = {
 padding:12,
 width:"100%",
 borderRadius:10,
 border:"1px solid #999",
 background:"#ffffff",
 color:"black"
-               }
+  }
