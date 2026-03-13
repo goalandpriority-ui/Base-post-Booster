@@ -31,14 +31,17 @@ const [contract, setContract] = useState("")
 const [coinData, setCoinData] = useState<any>(null)
 const [coinLoading, setCoinLoading] = useState(false)
 const [loading, setLoading] = useState(false)
-const [txHash, setTxHash] = useState<"0x${string}" | undefined>(undefined)
+
+/* ✅ FIXED */
+const [txHash, setTxHash] = useState<string | undefined>(undefined)
 
 const { address, isConnected } = useAccount()
 const { connect, connectors } = useConnect()
 const { sendTransactionAsync } = useSendTransaction()
 
+/* ✅ FIXED */
 const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
-hash: txHash,
+hash: txHash as `0x${string}` | undefined,
 })
 
 useEffect(() => {
@@ -149,7 +152,8 @@ try {
     value: tiers[selectedTier].value,
   })
 
-  setTxHash(hash as `0x${string}`)
+  /* ✅ FIXED */
+  setTxHash(hash)
 
 } catch (err: any) {
 
@@ -328,4 +332,4 @@ borderRadius:10,
 border:"1px solid #999",
 background:"#ffffff",
 color:"black"
-}
+  }
