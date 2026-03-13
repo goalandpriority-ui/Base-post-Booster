@@ -117,7 +117,13 @@ export default function Home() {
 
     if (!isConnected) {
 
-      if (connectors.length > 0) {
+      const injectedConnector = connectors.find(
+        (connector) => connector.id === "injected"
+      )
+
+      if (injectedConnector) {
+        await connect({ connector: injectedConnector })
+      } else if (connectors.length > 0) {
         await connect({ connector: connectors[0] })
       } else {
         alert("No wallet available")
@@ -230,8 +236,6 @@ ${MINI_APP_LINK}`
     if (txConfirmed && txHash) {
 
       saveBoost()
-
-      // prevent duplicate trigger
       setTxHash(undefined)
 
     }
