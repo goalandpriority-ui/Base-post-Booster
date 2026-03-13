@@ -25,6 +25,9 @@ model Boost {
   // boost payment amount
   amount    Float
 
+  // referral wallet (optional)
+  referrer  String?
+
   // timestamp
   createdAt DateTime @default(now())
 
@@ -33,6 +36,7 @@ model Boost {
   @@index([wallet])
   @@index([contract])
   @@index([createdAt])
+  @@index([referrer])
 
   // useful for trending calculations
   @@index([postUrl, createdAt])
