@@ -5,280 +5,378 @@ import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 
 type Post = {
-  id: string
-  content: string
-  contract: string
-  boost_count: number
+id: string
+content: string
+contract: string
+boost_count: number
+}
+
+type PumpToken = {
+contract: string
+boosts: number
+wallets: number
+posts: number
+whale: boolean
+score: number
+status: string
 }
 
 const MINIAPP_URL = "https://base-post-booster.vercel.app"
 
 export default function TrendingPage() {
 
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
-  const [newIds, setNewIds] = useState<string[]>([])
-  const [expandedChart, setExpandedChart] = useState<string | null>(null)
+const [posts, setPosts] = useState<Post[]>([])
+const [pumpTokens, setPumpTokens] = useState<PumpToken[]>([])
+const [loading, setLoading] = useState(true)
+const [newIds, setNewIds] = useState<string[]>([])
+const [expandedChart, setExpandedChart] = useState<string | null>(null)
 
-  const previousIds = useRef<string[]>([])
+const previousIds = useRef<string[]>([])
 
-  const fetchPosts = async () => {
+const fetchPosts = async () => {
 
-    try {
+try {
 
-      const res = await fetch("/api/trending")
+  const res = await fetch("/api/trending")
 
-      const data: Post[] = await res.json()
+  const data: Post[] = await res.json()
 
-      const sorted = data.sort(
-        (a, b) => b.boost_count - a.boost_count
-      )
+  const sorted = data.sort(
+    (a, b) => b.boost_count - a.boost_count
+  )
 
-      const currentIds = sorted.map((p) => p.id)
+  const currentIds = sorted.map((p) => p.id)
 
-      const newlyAdded = currentIds.filter(
-        (id) => !previousIds.current.includes(id)
-      )
+  const newlyAdded = currentIds.filter(
+    (id) => !previousIds.current.includes(id)
+  )
 
-      if (previousIds.current.length > 0 && newlyAdded.length > 0) {
+  if (previousIds.current.length > 0 && newlyAdded.length > 0) {
 
-        setNewIds(newlyAdded)
+    setNewIds(newlyAdded)
 
-        setTimeout(() => setNewIds([]), 3000)
-
-      }
-
-      previousIds.current = currentIds
-
-      setPosts(sorted)
-
-      setLoading(false)
-
-    } catch (err) {
-
-      console.error(err)
-
-      setLoading(false)
-
-    }
+    setTimeout(() => setNewIds([]), 3000)
 
   }
 
-  useEffect(() => {
+  previousIds.current = currentIds
 
-    fetchPosts()
+  setPosts(sorted)
 
-    const interval = setInterval(fetchPosts, 5000)
+  setLoading(false)
 
-    return () => clearInterval(interval)
+} catch (err) {
 
-  }, [])
+  console.error(err)
 
-  const handleShare = async (post: Post) => {
+  setLoading(false)
 
-    const shareUrl = `${MINIAPP_URL}/trending`
+}
 
-    const shareText = `${post.content}
+}
+
+const fetchPump = async () => {
+
+try {
+
+  const res = await fetch("/api/pump-detection")
+
+  const data = await res.json()
+
+  if (data.success) {
+    setPumpTokens(data.data)
+  }
+
+} catch (err) {
+
+  console.error("Pump detection fetch failed", err)
+
+}
+
+}
+
+useEffect(() => {
+
+fetchPosts()
+fetchPump()
+
+const interval = setInterval(() => {
+
+  fetchPosts()
+  fetchPump()
+
+}, 5000)
+
+return () => clearInterval(interval)
+
+}, [])
+
+const handleShare = async (post: Post) => {
+
+const shareUrl = `${MINIAPP_URL}/trending`
+
+const shareText = `${post.content}
 
 Check leaderboard:
 ${shareUrl}`
 
-    if (navigator.share) {
+if (navigator.share) {
 
-      await navigator.share({
-        title: "Trending Boosted Post",
-        text: post.content,
-        url: shareUrl,
-      })
+  await navigator.share({
+    title: "Trending Boosted Post",
+    text: post.content,
+    url: shareUrl,
+  })
 
-    } else {
+} else {
 
-      await navigator.clipboard.writeText(shareText)
+  await navigator.clipboard.writeText(shareText)
 
-      alert("Miniapp link copied!")
+  alert("Miniapp link copied!")
 
-    }
+}
 
-  }
+}
 
-  if (loading) {
+if (loading) {
 
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          background: "#E3A6AE",
-          color: "black",
-        }}
-      >
-        Loading trending posts...
-      </div>
-    )
+return (
+  <div
+    style={{
+      minHeight: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      background: "#E3A6AE",
+      color: "black",
+    }}
+  >
+    Loading trending posts...
+  </div>
+)
 
-  }
+}
 
-  return (
+return (
+
+<div
+  style={{
+    minHeight: "100vh",
+    background: "#E3A6AE",
+    padding: 30,
+    color: "black",
+  }}
+>
+
+  <h1 style={{ fontSize: 30, fontWeight: "bold", marginBottom: 20 }}>
+    🔥 Trending Boosted Posts
+  </h1>
+
+  <div style={{ marginBottom: 30 }}>
+    <Link href="/" style={{ fontWeight: "bold", color: "black" }}>
+      ← Back to Home
+    </Link>
+  </div>
+
+  {pumpTokens.length > 0 && (
 
     <div
       style={{
-        minHeight: "100vh",
-        background: "#E3A6AE",
-        padding: 30,
-        color: "black",
+        background: "white",
+        padding: 20,
+        borderRadius: 12,
+        marginBottom: 30
       }}
     >
 
-      <h1 style={{ fontSize: 30, fontWeight: "bold", marginBottom: 20 }}>
-        🔥 Trending Boosted Posts
-      </h1>
+      <h2 style={{ marginBottom: 20 }}>
+        🚀 Auto Pump Detection
+      </h2>
 
-      <div style={{ marginBottom: 30 }}>
-        <Link href="/" style={{ fontWeight: "bold", color: "black" }}>
-          ← Back to Home
-        </Link>
-      </div>
+      {pumpTokens.slice(0,5).map((token,index)=>{
 
-      <motion.div
-        layout
-        style={{ display: "flex", flexDirection: "column", gap: 20 }}
-      >
+        let badge = ""
 
-        <AnimatePresence>
+        if(token.status==="trending") badge="🚀 TRENDING"
+        else if(token.status==="hot") badge="🔥 HOT"
+        else if(token.status==="pumping") badge="📈 PUMPING"
+        else badge="NORMAL"
 
-          {posts.map((post) => {
+        return(
 
-            const isNew = newIds.includes(post.id)
+          <div
+            key={index}
+            style={{
+              padding:10,
+              borderBottom:"1px solid #eee"
+            }}
+          >
 
-            const isExpanded = expandedChart === post.id
+            <p style={{ fontWeight:"bold" }}>
+              {badge}
+            </p>
 
-            return (
+            <p
+              style={{
+                fontSize:12,
+                wordBreak:"break-all"
+              }}
+            >
+              {token.contract}
+            </p>
 
-              <motion.div
-                key={post.id}
-                layout
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                style={{
-                  background: "white",
-                  padding: 20,
-                  borderRadius: 12,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                  border: isNew ? "3px solid #22c55e" : "none",
-                  boxShadow: isNew
-                    ? "0 0 20px rgba(34,197,94,0.6)"
-                    : "none",
-                }}
-              >
+            <p style={{ fontSize:13 }}>
+              Boosts: {token.boosts} | Wallets: {token.wallets}
+            </p>
 
-                <p style={{ fontWeight: "bold" }}>
-                  {post.content}
-                </p>
+          </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
+        )
 
-                  <div>
-
-                    <p style={{ fontSize: 12 }}>
-                      Boosts
-                    </p>
-
-                    <motion.p
-                      key={post.boost_count}
-                      initial={{ scale: 1.4 }}
-                      animate={{ scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        fontSize: 22,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {post.boost_count}
-                    </motion.p>
-
-                  </div>
-
-                  <div style={{ display: "flex", gap: 10 }}>
-
-                    <button
-                      onClick={() =>
-                        setExpandedChart(
-                          isExpanded ? null : post.id
-                        )
-                      }
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: 6,
-                        background: "#fbbf24",
-                        border: "none",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {isExpanded ? "Hide Chart" : "View Chart"}
-                    </button>
-
-                    <button
-                      onClick={() => handleShare(post)}
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: 6,
-                        background: "#6366f1",
-                        color: "white",
-                        border: "none",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Share
-                    </button>
-
-                  </div>
-
-                </div>
-
-                {isExpanded && (
-
-                  <div
-                    style={{
-                      marginTop: 15,
-                      height: 450,
-                      borderRadius: 12,
-                      overflow: "hidden",
-                      background: "black",
-                    }}
-                  >
-
-                    <iframe
-                      src={`https://dexscreener.com/base/${post.contract}?embed=1&theme=dark`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        border: "none",
-                      }}
-                    />
-
-                  </div>
-
-                )}
-
-              </motion.div>
-
-            )
-
-          })}
-
-        </AnimatePresence>
-
-      </motion.div>
+      })}
 
     </div>
 
-  )
+  )}
 
-}
+  <motion.div
+    layout
+    style={{ display: "flex", flexDirection: "column", gap: 20 }}
+  >
+
+    <AnimatePresence>
+
+      {posts.map((post) => {
+
+        const isNew = newIds.includes(post.id)
+
+        const isExpanded = expandedChart === post.id
+
+        return (
+
+          <motion.div
+            key={post.id}
+            layout
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            style={{
+              background: "white",
+              padding: 20,
+              borderRadius: 12,
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              border: isNew ? "3px solid #22c55e" : "none",
+              boxShadow: isNew
+                ? "0 0 20px rgba(34,197,94,0.6)"
+                : "none",
+            }}
+          >
+
+            <p style={{ fontWeight: "bold" }}>
+              {post.content}
+            </p>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+
+              <div>
+
+                <p style={{ fontSize: 12 }}>
+                  Boosts
+                </p>
+
+                <motion.p
+                  key={post.boost_count}
+                  initial={{ scale: 1.4 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    fontSize: 22,
+                    fontWeight: "bold",
+                  }}
+                >
+                  {post.boost_count}
+                </motion.p>
+
+              </div>
+
+              <div style={{ display: "flex", gap: 10 }}>
+
+                <button
+                  onClick={() =>
+                    setExpandedChart(
+                      isExpanded ? null : post.id
+                    )
+                  }
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: 6,
+                    background: "#fbbf24",
+                    border: "none",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                  }}
+                >
+                  {isExpanded ? "Hide Chart" : "View Chart"}
+                </button>
+
+                <button
+                  onClick={() => handleShare(post)}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: 6,
+                    background: "#6366f1",
+                    color: "white",
+                    border: "none",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                  }}
+                >
+                  Share
+                </button>
+
+              </div>
+
+            </div>
+
+            {isExpanded && (
+
+              <div
+                style={{
+                  marginTop: 15,
+                  height: 450,
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  background: "black",
+                }}
+              >
+
+                <iframe
+                  src={`https://dexscreener.com/base/${post.contract}?embed=1&theme=dark`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    border: "none",
+                  }}
+                />
+
+              </div>
+
+            )}
+
+          </motion.div>
+
+        )
+
+      })}
+
+    </AnimatePresence>
+
+  </motion.div>
+
+</div>
+
+)
+
+                    }
