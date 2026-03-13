@@ -34,6 +34,9 @@ model Boost {
   // boost duration
   durationHours Int  @default(24)
 
+  // whale boost detection
+  whale Boolean @default(false)
+
   // referral wallet
   referrer  String?
 
