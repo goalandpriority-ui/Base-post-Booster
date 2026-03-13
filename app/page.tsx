@@ -276,48 +276,44 @@ return (
   }}>
     Base Post Booster
   </h1>{referrer && (
+
 <p style={{ marginBottom: 20, fontWeight: "bold" }}>
 Referred by: {referrer.slice(0,6)}...{referrer.slice(-4)}
 </p>
-)}
+)}{address && (
 
-{address && (
 <div style={{
 background:"#ffffff",
 padding:12,
 borderRadius:8,
 marginBottom:20
 }}>
-<p>Your referral link</p>
+<p>Your referral link</p><p style={{
+fontSize:12,
+wordBreak:"break-all"
+}}>
+{MINI_APP_LINK}?ref={address}
+</p><button
+onClick={()=>{
+navigator.clipboard.writeText("${MINI_APP_LINK}?ref=${address}")
+alert("Referral link copied")
+}}
+style={{
+marginTop:8,
+padding:"6px 12px",
+background:"#3b82f6",
+border:"none",
+borderRadius:6,
+color:"white"
+}}
 
-  <p style={{
-    fontSize:12,
-    wordBreak:"break-all"
-  }}>
-    {MINI_APP_LINK}?ref={address}
-  </p>
+«»
 
-  <button
-    onClick={()=>{
-      navigator.clipboard.writeText(`${MINI_APP_LINK}?ref=${address}`)
-      alert("Referral link copied")
-    }}
-    style={{
-      marginTop:8,
-      padding:"6px 12px",
-      background:"#3b82f6",
-      border:"none",
-      borderRadius:6,
-      color:"white"
-    }}
-  >
-    Copy Link
-  </button>
+Copy Link
+</button>
+
 </div>
-
-)}
-
-<input
+)}<input
 type="text"
 placeholder="Paste Base post link"
 value={postLink}
@@ -330,10 +326,10 @@ style={inputStyle}
 />
 
 {coinLoading && (
-<p style={{ marginTop:10 }}>Detecting token...</p>
-)}
 
-{contract && (
+<p style={{ marginTop:10 }}>Detecting token...</p>
+)}{contract && (
+
 <div style={{
 background:"#ffffff",
 padding:15,
@@ -348,9 +344,8 @@ fontSize:13
 {contract}
 </p>
 </div>
-)}
+)}{coinData && (
 
-{coinData && (
 <div style={{
 background:"#ffffff",
 padding:15,
@@ -362,28 +357,26 @@ marginTop:15
 <p><b>Price:</b> ${coinData.price}</p>
 <p><b>Market Cap:</b> ${coinData.marketCap}</p>
 </div>
-)}
-
-  <div style={{ marginTop:30 }}>
-    {tiers.map((tier,index)=>(
-      <div
-        key={index}
-        onClick={()=>setSelectedTier(index)}
-        style={{
-          background:selectedTier===index ? "#d1fae5":"#ffffff",
-          padding:20,
-          borderRadius:12,
-          marginBottom:15,
-          cursor:"pointer",
-          border:selectedTier===index?"2px solid green":"1px solid #ccc"
-        }}
-      >
-        <h2>{tier.name}</h2>
-        <h3>{tier.price}</h3>
-        <p>{tier.duration}</p>
-      </div>
-    ))}
-  </div><button
+)}<div style={{ marginTop:30 }}>
+{tiers.map((tier,index)=>(
+<div
+key={index}
+onClick={()=>setSelectedTier(index)}
+style={{
+background:selectedTier===index ? "#d1fae5":"#ffffff",
+padding:20,
+borderRadius:12,
+marginBottom:15,
+cursor:"pointer",
+border:selectedTier===index?"2px solid green":"1px solid #ccc"
+}}
+>
+<h2>{tier.name}</h2>
+<h3>{tier.price}</h3>
+<p>{tier.duration}</p>
+</div>
+))}
+</div><button
 onClick={handleBoost}
 disabled={loading}
 style={{
@@ -401,23 +394,24 @@ fontSize:16
 «»
 
 {loading
-  ? "Processing..."
-  : isConnected
-  ? "Boost Now"
-  : "Connect Wallet"}
+? "Processing..."
+: isConnected
+? "Boost Now"
+: "Connect Wallet"}
+</button>
 
-  </button>  <div style={{ marginTop: 40 }}>
-    <Link href="/trending">View Trending Posts →</Link>
-  </div>  <div style={{ marginTop: 20 }}>
-    <Link href="/leaderboard">View Leaderboard →</Link>
-  </div>  <div style={{ marginTop: 20 }}>
-    <Link href="/referrals">Referral Earnings →</Link>
-  </div>  <div style={{ marginTop: 20 }}>
-    <Link href="/wars">⚔️ Token Wars</Link>
-  </div></main>)
-}
-
-const inputStyle: React.CSSProperties = {
+<div style={{ marginTop: 40 }}>
+<Link href="/trending">View Trending Posts →</Link>
+</div><div style={{ marginTop: 20 }}>
+<Link href="/leaderboard">View Leaderboard →</Link>
+</div><div style={{ marginTop: 20 }}>
+<Link href="/referrals">Referral Earnings →</Link>
+</div><div style={{ marginTop: 20 }}>
+<Link href="/referral-leaderboard">🏆 Referral Leaderboard</Link>
+</div><div style={{ marginTop: 20 }}>
+<Link href="/wars">⚔️ Token Wars</Link>
+</div></main>)
+}const inputStyle: React.CSSProperties = {
 padding:12,
 width:"100%",
 borderRadius:10,
