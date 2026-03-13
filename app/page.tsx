@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useAccount, useConnect, useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
 import { parseEther } from "viem"
 import { sdk } from "@farcaster/miniapp-sdk"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
 const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
@@ -14,6 +14,12 @@ export default function Home() {
 
 const router = useRouter()
 
+/* 🔥 referral detection */
+const searchParams = useSearchParams()
+const referralParam = searchParams.get("ref")
+
+const [referrer,setReferrer] = useState<string | null>(null)
+
 const [selectedTier, setSelectedTier] = useState(0)
 const [postLink, setPostLink] = useState("")
 const [contract, setContract] = useState("")
@@ -21,7 +27,6 @@ const [coinData, setCoinData] = useState<any>(null)
 const [coinLoading, setCoinLoading] = useState(false)
 const [loading, setLoading] = useState(false)
 
-/* ✅ FIXED TYPE */
 const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined)
 
 const { address, isConnected } = useAccount()
@@ -31,6 +36,17 @@ const { sendTransactionAsync } = useSendTransaction()
 const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
 hash: txHash,
 })
+
+/* store referral */
+useEffect(()=>{
+
+if(referralParam){
+
+setReferrer(referralParam)
+
+}
+
+},[referralParam])
 
 const tiers = [
 {
@@ -150,7 +166,6 @@ try {
     value: tiers[selectedTier].value,
   })
 
-  /* ✅ FIX */
   setTxHash(hash)
 
 } catch (err: any) {
@@ -169,12 +184,14 @@ try {
 
 async function shareToFarcaster(postUrl: string) {
 
+const referralLink = `${MINI_APP_LINK}?ref=${address}`
+
 const text = `🚀 I just boosted this post on Base Post Booster!
 
 ${postUrl}
 
 Boost yours 👇
-${MINI_APP_LINK}`
+${referralLink}`
 
 try {
 
@@ -212,6 +229,7 @@ try {
       contract: contract || "",
       txHash: String(txHash),
       amount: Number(tiers[selectedTier].eth),
+      referrer: referrer || ""
     }),
   })
 
@@ -282,6 +300,12 @@ color: "black",
     Base Post Booster
   </h1>
 
+  {referrer && (
+    <p style={{marginBottom:20,fontWeight:"bold"}}>
+      Referred by: {referrer.slice(0,6)}...{referrer.slice(-4)}
+    </p>
+  )}
+
   <div style={{ marginBottom: 30 }}>
     {tiers.map((tier, i) => (
 
@@ -339,50 +363,6 @@ color: "black",
     style={{ ...inputStyle, marginTop: 10 }}
   />
 
-  {coinLoading && (
-    <p style={{ marginTop: 10 }}>Loading coin data...</p>
-  )}
-
-  {coinData && (
-
-    <div
-      style={{
-        background: "#ffffff",
-        padding: 15,
-        marginTop: 15,
-        borderRadius: 12
-      }}
-    >
-
-      <h3>
-        {coinData.name} ({coinData.symbol})
-      </h3>
-
-      <p>Price: ${coinData.price}</p>
-      <p>Market Cap: ${coinData.marketcap}</p>
-      <p>24H Volume: ${coinData.volume24h}</p>
-      <p>Liquidity: ${coinData.liquidity}</p>
-
-      <div style={{ marginTop: 15 }}>
-
-        <h4 style={{ marginBottom: 10 }}>Live Chart</h4>
-
-        <iframe
-          src={`https://dexscreener.com/base/${contract}?embed=1&theme=dark`}
-          width="100%"
-          height="420"
-          style={{
-            border: "none",
-            borderRadius: 12
-          }}
-        />
-
-      </div>
-
-    </div>
-
-  )}
-
   <div style={{ marginTop: 20 }}>
 
     <button
@@ -409,13 +389,6 @@ color: "black",
     </button>
 
   </div>
-
-  {isConnected && (
-    <p style={{ marginTop: 10, fontSize: 14 }}>
-      Connected: {address?.slice(0,6)}...
-      {address?.slice(-4)}
-    </p>
-  )}
 
   <div style={{ marginTop: 40 }}>
     <Link href="/trending" style={{ fontWeight: "bold" }}>
