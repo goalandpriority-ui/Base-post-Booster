@@ -5,48 +5,39 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
 
-  try {
+try {
 
-    const boosts = await prisma.boost.findMany({
-      orderBy: {
-        createdAt: "desc"
-      }
-    })
+const result = await prisma.boost.groupBy({
+  by: ["postUrl", "contract"],
+  _count: {
+    postUrl: true
+  },
+  orderBy: {
+    _count: {
+      postUrl: "desc"
+    }
+  },
+  take: 20
+})
 
-    const posts: any = {}
+const posts = result.map((r) => ({
+  id: r.postUrl,
+  content: r.postUrl,
+  contract: r.contract,
+  boost_count: r._count.postUrl
+}))
 
-    boosts.forEach((b) => {
+return NextResponse.json(posts)
 
-      if (!posts[b.postUrl]) {
+} catch (error) {
 
-        posts[b.postUrl] = {
-          id: b.postUrl,
-          content: b.postUrl,
-          contract: b.contract,
-          boost_count: 0
-        }
+console.error("TRENDING ERROR:", error)
 
-      }
+return NextResponse.json(
+  { error: "Failed to fetch trending posts" },
+  { status: 500 }
+)
 
-      posts[b.postUrl].boost_count += 1
-
-    })
-
-    const result = Object.values(posts)
-
-    result.sort((a: any, b: any) => b.boost_count - a.boost_count)
-
-    return NextResponse.json(result.slice(0, 20))
-
-  } catch (error) {
-
-    console.error("TRENDING ERROR:", error)
-
-    return NextResponse.json(
-      { error: "Failed to fetch trending posts" },
-      { status: 500 }
-    )
-
-  }
+}
 
 }
