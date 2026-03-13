@@ -3,84 +3,141 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 
-type War = {
-  contract: string
-  _count: {
-    contract: number
-  }
+type WarCoin = {
+contract: string
+name: string
+symbol: string
+marketCap: number
+boosts: number
 }
 
-export default function WarsPage() {
+export default function TokenWars() {
 
-  const [wars, setWars] = useState<War[]>([])
+const [coins, setCoins] = useState<WarCoin[]>([])
+const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+useEffect(() => {
+fetchWars()
+}, [])
 
-    fetch("/api/wars")
-      .then((res) => res.json())
-      .then((data) => setWars(data))
+async function fetchWars() {
 
-  }, [])
+try {
 
-  return (
+  const res = await fetch("/api/token-wars")
 
-    <main
+  const data = await res.json()
+
+  setCoins(data)
+
+} catch (err) {
+
+  console.error("wars fetch failed", err)
+
+} finally {
+
+  setLoading(false)
+
+}
+
+}
+
+return (
+
+<main style={{
+  minHeight: "100vh",
+  background: "#E3A6AE",
+  padding: 20,
+  maxWidth: 500,
+  margin: "0 auto"
+}}>
+
+  <h1 style={{
+    fontSize: 30,
+    textAlign: "center",
+    fontWeight: "bold",
+    color: "white",
+    background: "#ef4444",
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 20
+  }}>
+    ⚔️ Token Wars
+  </h1>
+
+  <p style={{
+    textAlign: "center",
+    marginBottom: 20
+  }}>
+    Boost your coin and push it to the top 🚀
+  </p>
+
+  {loading && (
+    <p style={{ textAlign: "center" }}>Loading wars...</p>
+  )}
+
+  {!loading && coins.length === 0 && (
+    <p style={{ textAlign: "center" }}>No battles yet</p>
+  )}
+
+  {coins.map((coin, index) => (
+
+    <div
+      key={coin.contract}
       style={{
-        minHeight: "100vh",
-        background: "#E3A6AE",
-        padding: 30,
-        textAlign: "center"
+        background: "white",
+        padding: 15,
+        borderRadius: 12,
+        marginBottom: 15
       }}
     >
 
-      <h1
+      <h2>
+        #{index + 1} {coin.name} ({coin.symbol})
+      </h2>
+
+      <p>
+        Boosts: <b>{coin.boosts}</b>
+      </p>
+
+      <p>
+        Market Cap: ${coin.marketCap}
+      </p>
+
+      <p
         style={{
-          fontSize: 30,
-          fontWeight: "bold",
-          marginBottom: 30
+          fontSize: 12,
+          wordBreak: "break-all"
         }}
       >
-        🔥 Token Boost Wars
-      </h1>
+        {coin.contract}
+      </p>
 
-      {wars.map((token, i) => (
-
-        <div
-          key={i}
-          style={{
-            background: "white",
-            padding: 20,
-            borderRadius: 12,
-            marginBottom: 15
-          }}
-        >
-
-          <p>
-            Token
-          </p>
-
-          <h3>
-            {token.contract.slice(0,8)}...
-          </h3>
-
-          <p>
-            Boosts
-          </p>
-
-          <h2>
-            {token._count.contract}
-          </h2>
-
-        </div>
-
-      ))}
-
-      <Link href="/" style={{ fontWeight: "bold" }}>
-        ← Back
+      <Link
+        href="/"
+        style={{
+          display: "inline-block",
+          marginTop: 10,
+          background: "black",
+          color: "white",
+          padding: "6px 12px",
+          borderRadius: 6,
+          textDecoration: "none"
+        }}
+      >
+        Boost this coin
       </Link>
 
-    </main>
+    </div>
 
-  )
+  ))}
+
+  <div style={{ textAlign: "center", marginTop: 30 }}>
+    <Link href="/">← Back to Boost</Link>
+  </div>
+
+</main>
+
+)
 
 }
