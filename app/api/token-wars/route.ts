@@ -3,51 +3,95 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET() {
 
-try {
+  try {
 
-const boosts = await prisma.boost.findMany({
-  where: {
-    contract: {
-      not: "unknown"
+    const boosts = await prisma.boost.findMany({
+      where: {
+        contract: {
+          not: "unknown"
+        }
+      }
+    })
+
+    const map: Record<string, any> = {}
+
+    const now = Date.now()
+
+    for (const boost of boosts) {
+
+      const contract = boost.contract || "unknown"
+
+      if (!map[contract]) {
+
+        map[contract] = {
+          contract: contract,
+          name: contract.slice(0,6),
+          symbol: "TOKEN",
+          boosts: 0,
+          whales: 0,
+          volume: 0,
+          lastBoost: boost.createdAt
+        }
+
+      }
+
+      const amount = Number(boost.amount || 0)
+
+      map[contract].boosts += 1
+      map[contract].volume += amount
+
+      // whale detection
+      if (amount >= 0.05) {
+        map[contract].whales += 1
+      }
+
+      // latest boost tracking
+      if (boost.createdAt > map[contract].lastBoost) {
+        map[contract].lastBoost = boost.createdAt
+      }
+
     }
+
+    const tokens = Object.values(map).map((token: any) => {
+
+      const hoursOld =
+        (now - new Date(token.lastBoost).getTime()) / 3600000
+
+      // momentum score
+      const score =
+        (token.boosts * 10) +
+        (token.volume * 150) +
+        (token.whales * 25) -
+        hoursOld
+
+      return {
+        contract: token.contract,
+        name: token.name,
+        symbol: token.symbol,
+        boosts: token.boosts,
+        whales: token.whales,
+        volume: token.volume,
+        lastBoost: token.lastBoost,
+        score: score
+      }
+
+    })
+
+    const ranked = tokens
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 20)
+
+    return NextResponse.json(ranked)
+
+  } catch (err) {
+
+    console.error("TOKEN WARS ERROR:", err)
+
+    return NextResponse.json(
+      { error: "wars failed" },
+      { status: 500 }
+    )
+
   }
-})
-
-const map: any = {}
-
-for (const boost of boosts) {
-
-  if (!map[boost.contract]) {
-
-    map[boost.contract] = {
-      contract: boost.contract,
-      name: boost.contract.slice(0,6),
-      symbol: "TOKEN",
-      marketCap: 0,
-      boosts: 0
-    }
-
-  }
-
-  map[boost.contract].boosts += 1
-
-}
-
-const result = Object.values(map)
-  .sort((a: any, b: any) => b.boosts - a.boosts)
-  .slice(0, 20)
-
-return NextResponse.json(result)
-
-} catch (err) {
-
-console.error(err)
-
-return NextResponse.json(
-  { error: "wars failed" },
-  { status: 500 }
-)
-
-}
 
 }
