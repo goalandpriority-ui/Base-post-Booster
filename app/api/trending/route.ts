@@ -43,16 +43,12 @@ export async function GET() {
         (now.getTime() - new Date(boost.createdAt).getTime()) /
         (1000 * 60 * 60)
 
-      // Reddit style time decay
       const decay = Math.pow(hoursOld + 2, 1.5)
 
-      // -----------------------------
-      // Runtime Score Calculation
-      // -----------------------------
+      // safe amount conversion
+      const amount = parseFloat(boost.amount.toString())
 
-      let weight = 1
-
-      let score = Number(boost.amount) * weight
+      let score = amount
 
       if (boost.whale) {
         score = score * 3
@@ -60,12 +56,8 @@ export async function GET() {
 
       const weightedScore = score / decay
 
-      // -----------------------------
-      // Aggregate Stats
-      // -----------------------------
-
       contractMap[key].boosts += 1
-      contractMap[key].totalAmount += Number(boost.amount)
+      contractMap[key].totalAmount += amount
       contractMap[key].score += weightedScore
 
       if (boost.whale) {
