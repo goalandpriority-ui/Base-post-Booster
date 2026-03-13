@@ -1,44 +1,109 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
-import { useEffect,useState } from "react"
+import Link from "next/link"
 
-export default function Referrals(){
+type ReferralStats = {
+  wallet: string
+  totalBoosts: number
+  totalVolume: number
+  earnings: number
+}
 
-const {address} = useAccount()
+export default function ReferralPage() {
 
-const [data,setData] = useState<any>(null)
+  const { address } = useAccount()
 
-useEffect(()=>{
+  const [stats, setStats] = useState<ReferralStats | null>(null)
 
-if(!address) return
+  useEffect(() => {
 
-fetch("/api/referrals",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({wallet:address})
-})
-.then(res=>res.json())
-.then(setData)
+    if (!address) return
 
-},[address])
+    fetch(`/api/referrals?wallet=${address}`)
+      .then((res) => res.json())
+      .then((data) => setStats(data))
 
-if(!data) return <div>Loading...</div>
+  }, [address])
 
-return(
+  if (!address) {
+    return (
+      <main style={{ padding: 40 }}>
+        <h2>Connect wallet to view referrals</h2>
+      </main>
+    )
+  }
 
-<div style={{padding:20}}>
+  return (
 
-<h1>👥 Referral Dashboard</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#E3A6AE",
+        padding: 30,
+        textAlign: "center"
+      }}
+    >
 
-<p>Boosts from referrals: {data.count}</p>
+      <h1 style={{ fontSize: 30, fontWeight: "bold", marginBottom: 20 }}>
+        💰 Referral Dashboard
+      </h1>
 
-<p>Earnings: {data.earned} ETH</p>
+      <div
+        style={{
+          background: "white",
+          padding: 25,
+          borderRadius: 12,
+          maxWidth: 500,
+          margin: "auto"
+        }}
+      >
 
-</div>
+        <p>
+          <b>Your wallet</b>
+        </p>
 
-)
+        <p>
+          {address.slice(0,6)}...{address.slice(-4)}
+        </p>
+
+        <hr style={{ margin: "20px 0" }} />
+
+        <p>
+          Total Referral Boosts
+        </p>
+
+        <h2>
+          {stats?.totalBoosts || 0}
+        </h2>
+
+        <p>
+          Total Volume
+        </p>
+
+        <h2>
+          {stats?.totalVolume || 0} ETH
+        </h2>
+
+        <p>
+          Your Earnings (10%)
+        </p>
+
+        <h2>
+          {stats?.earnings || 0} ETH
+        </h2>
+
+      </div>
+
+      <br/>
+
+      <Link href="/" style={{ fontWeight: "bold" }}>
+        ← Back
+      </Link>
+
+    </main>
+
+  )
 
 }
