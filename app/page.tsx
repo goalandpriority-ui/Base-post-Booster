@@ -24,6 +24,8 @@ const router = useRouter()
 const searchParams = useSearchParams()
 const referralParam = searchParams.get("ref")
 
+const [menuOpen,setMenuOpen]=useState(false)
+
 const [referrer, setReferrer] = useState<string | null>(null)
 const [selectedTier, setSelectedTier] = useState(0)
 const [postLink, setPostLink] = useState("")
@@ -39,7 +41,7 @@ const { connect, connectors } = useConnect()
 const { sendTransactionAsync } = useSendTransaction()
 
 const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
-hash: txHash as "0x${string}" | undefined,
+hash: txHash as `0x${string}` | undefined,
 })
 
 useEffect(() => {
@@ -152,7 +154,7 @@ try {
 setLoading(true)
 
 const hash = await sendTransactionAsync({
-to: YOUR_WALLET_ADDRESS as "0x${string}",
+to: YOUR_WALLET_ADDRESS as `0x${string}`,
 value: tiers[selectedTier].value,
 })
 
@@ -174,7 +176,7 @@ setLoading(false)
 
 async function shareToFarcaster(postUrl: string) {
 
-const referralLink = "${MINI_APP_LINK}?ref=${address}"
+const referralLink = `${MINI_APP_LINK}?ref=${address}`
 
 const text = `🚀 I just boosted this post on Base Post Booster!
 
@@ -258,29 +260,80 @@ saveBoost()
 return (
 
 <main style={{
-  minHeight: "100vh",
-  background: "#E3A6AE",
-  padding: 20,
-  textAlign: "center",
-  maxWidth: 500,
-  margin: "0 auto",
-  color: "black"
-}}>  <h1 style={{
-    fontSize: 30,
-    marginBottom: 30,
-    fontWeight: "bold",
-    color: "#ffffff",
-    background: "#3b82f6",
-    padding: "10px 20px",
-    borderRadius: 12
-  }}>
-    Base Post Booster
-  </h1>{referrer && (
+minHeight: "100vh",
+background: "#E3A6AE",
+padding: 20,
+textAlign: "center",
+maxWidth: 500,
+margin: "0 auto",
+color: "black"
+}}>
+
+{/* HEADER */}
+
+<div style={{
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+marginBottom:20
+}}>
+
+<h1 style={{
+fontSize:24,
+fontWeight:"bold",
+color:"#ffffff",
+background:"#3b82f6",
+padding:"10px 20px",
+borderRadius:12
+}}>
+Base Post Booster
+</h1>
+
+<button
+onClick={()=>setMenuOpen(!menuOpen)}
+style={{
+fontSize:24,
+background:"none",
+border:"none",
+cursor:"pointer"
+}}
+>
+☰
+</button>
+
+</div>
+
+{/* MENU */}
+
+{menuOpen && (
+
+<div style={{
+background:"#ffffff",
+padding:15,
+borderRadius:12,
+marginBottom:20,
+textAlign:"left"
+}}>
+
+<p><Link href="/trending">🔥 Trending Posts</Link></p>
+<p><Link href="/leaderboard">🏆 Leaderboard</Link></p>
+<p><Link href="/referrals">💰 Referral Earnings</Link></p>
+<p><Link href="/referral-leaderboard">👑 Referral Leaderboard</Link></p>
+<p><Link href="/wars">⚔️ Token Wars</Link></p>
+
+</div>
+
+)}
+
+{referrer && (
 
 <p style={{ marginBottom: 20, fontWeight: "bold" }}>
 Referred by: {referrer.slice(0,6)}...{referrer.slice(-4)}
 </p>
-)}{address && (
+
+)}
+
+{address && (
 
 <div style={{
 background:"#ffffff",
@@ -288,14 +341,19 @@ padding:12,
 borderRadius:8,
 marginBottom:20
 }}>
-<p>Your referral link</p><p style={{
+
+<p>Your referral link</p>
+
+<p style={{
 fontSize:12,
 wordBreak:"break-all"
 }}>
 {MINI_APP_LINK}?ref={address}
-</p><button
+</p>
+
+<button
 onClick={()=>{
-navigator.clipboard.writeText("${MINI_APP_LINK}?ref=${address}")
+navigator.clipboard.writeText(`${MINI_APP_LINK}?ref=${address}`)
 alert("Referral link copied")
 }}
 style={{
@@ -306,14 +364,15 @@ border:"none",
 borderRadius:6,
 color:"white"
 }}
-
-«»
-
+>
 Copy Link
 </button>
 
 </div>
-)}<input
+
+)}
+
+<input
 type="text"
 placeholder="Paste Base post link"
 value={postLink}
@@ -325,10 +384,9 @@ detectCoinFromBaseLink(value)
 style={inputStyle}
 />
 
-{coinLoading && (
+{coinLoading && <p style={{ marginTop:10 }}>Detecting token...</p>}
 
-<p style={{ marginTop:10 }}>Detecting token...</p>
-)}{contract && (
+{contract && (
 
 <div style={{
 background:"#ffffff",
@@ -337,14 +395,14 @@ borderRadius:10,
 marginTop:15
 }}>
 <p><b>Contract:</b></p>
-<p style={{
-wordBreak:"break-all",
-fontSize:13
-}}>
+<p style={{wordBreak:"break-all",fontSize:13}}>
 {contract}
 </p>
 </div>
-)}{coinData && (
+
+)}
+
+{coinData && (
 
 <div style={{
 background:"#ffffff",
@@ -357,7 +415,11 @@ marginTop:15
 <p><b>Price:</b> ${coinData.price}</p>
 <p><b>Market Cap:</b> ${coinData.marketCap}</p>
 </div>
-)}<div style={{ marginTop:30 }}>
+
+)}
+
+<div style={{ marginTop:30 }}>
+
 {tiers.map((tier,index)=>(
 <div
 key={index}
@@ -376,7 +438,10 @@ border:selectedTier===index?"2px solid green":"1px solid #ccc"
 <p>{tier.duration}</p>
 </div>
 ))}
-</div><button
+
+</div>
+
+<button
 onClick={handleBoost}
 disabled={loading}
 style={{
@@ -390,9 +455,7 @@ borderRadius:10,
 width:"100%",
 fontSize:16
 }}
-
-«»
-
+>
 {loading
 ? "Processing..."
 : isConnected
@@ -400,18 +463,13 @@ fontSize:16
 : "Connect Wallet"}
 </button>
 
-<div style={{ marginTop: 40 }}>
-<Link href="/trending">View Trending Posts →</Link>
-</div><div style={{ marginTop: 20 }}>
-<Link href="/leaderboard">View Leaderboard →</Link>
-</div><div style={{ marginTop: 20 }}>
-<Link href="/referrals">Referral Earnings →</Link>
-</div><div style={{ marginTop: 20 }}>
-<Link href="/referral-leaderboard">🏆 Referral Leaderboard</Link>
-</div><div style={{ marginTop: 20 }}>
-<Link href="/wars">⚔️ Token Wars</Link>
-</div></main>)
-}const inputStyle: React.CSSProperties = {
+</main>
+
+)
+
+}
+
+const inputStyle: React.CSSProperties = {
 padding:12,
 width:"100%",
 borderRadius:10,
