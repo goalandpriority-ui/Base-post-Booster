@@ -20,7 +20,9 @@ const [contract, setContract] = useState("")
 const [coinData, setCoinData] = useState<any>(null)
 const [coinLoading, setCoinLoading] = useState(false)
 const [loading, setLoading] = useState(false)
-const [txHash, setTxHash] = useState<"0x${string}" | undefined>()
+
+/* ✅ FIXED TYPE */
+const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined)
 
 const { address, isConnected } = useAccount()
 const { connect, connectors } = useConnect()
@@ -148,7 +150,8 @@ try {
     value: tiers[selectedTier].value,
   })
 
-  setTxHash(hash as `0x${string}`)
+  /* ✅ FIX */
+  setTxHash(hash)
 
 } catch (err: any) {
 
@@ -438,4 +441,4 @@ borderRadius: 10,
 border: "1px solid #999",
 background: "#ffffff",
 color: "black",
-}
+  }
