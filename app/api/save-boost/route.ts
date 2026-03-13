@@ -13,7 +13,6 @@ const client = createPublicClient({
 })
 
 export async function POST(req: Request) {
-
   try {
 
     const body = await req.json()
@@ -22,10 +21,8 @@ export async function POST(req: Request) {
     const postUrl = String(body.postUrl || "")
     const contract = body.contract ? String(body.contract) : ""
     const txHash = String(body.txHash || "")
-    const amount = parseFloat(body.amount || "0")
+    const amount = body.amount
     const referrer = body.referrer ? String(body.referrer) : null
-
-    /* REQUIRED FIELD CHECK */
 
     if (!wallet || !postUrl || !txHash) {
       return NextResponse.json(
@@ -34,23 +31,12 @@ export async function POST(req: Request) {
       )
     }
 
-    /* WALLET VALIDATION */
-
     if (!isAddress(wallet)) {
       return NextResponse.json(
         { error: "Invalid wallet address" },
         { status: 400 }
       )
     }
-
-    if (contract && !isAddress(contract)) {
-      return NextResponse.json(
-        { error: "Invalid contract address" },
-        { status: 400 }
-      )
-    }
-
-    /* PREVENT SELF REFERRAL */
 
     let validReferrer = referrer
 
@@ -60,8 +46,6 @@ export async function POST(req: Request) {
     ) {
       validReferrer = null
     }
-
-    /* DUPLICATE CHECK */
 
     const existing = await prisma.boost.findUnique({
       where: { txHash }
@@ -74,8 +58,6 @@ export async function POST(req: Request) {
       })
     }
 
-    /* VERIFY TRANSACTION RECEIPT */
-
     const receipt = await client.getTransactionReceipt({
       hash: txHash as `0x${string}`
     })
@@ -87,12 +69,67 @@ export async function POST(req: Request) {
       )
     }
 
-    /* FETCH TRANSACTION */
-
     const tx = await client.getTransaction({
       hash: txHash as `0x${string}`
     })
 
     if (!tx) {
       return NextResponse.json(
-        { error: "Transaction not found"
+        { error: "Transaction not found" },
+        { status: 400 }
+      )
+    }
+
+    if (!tx.to || tx.to.toLowerCase() !== YOUR_WALLET_ADDRESS.toLowerCase()) {
+      return NextResponse.json(
+        { error: "Invalid payment receiver" },
+        { status: 400 }
+      )
+    }
+
+    if (tx.from.toLowerCase() !== wallet.toLowerCase()) {
+      return NextResponse.json(
+        { error: "Wallet does not match sender" },
+        { status: 400 }
+      )
+    }
+
+    const minPayment = parseEther("0.00001")
+
+    if (tx.value < minPayment) {
+      return NextResponse.json(
+        { error: "Insufficient payment" },
+        { status: 400 }
+      )
+    }
+
+    const score = Number(amount) * 2
+
+    const boost = await prisma.boost.create({
+      data: {
+        wallet,
+        postUrl,
+        contract,
+        txHash,
+        amount,
+        score,
+        referrer: validReferrer
+      }
+    })
+
+    return NextResponse.json({
+      success: true,
+      boost
+    })
+
+  } catch (error) {
+
+    console.error("SAVE BOOST ERROR:", error)
+
+    return NextResponse.json(
+      { error: "Failed to save boost" },
+      { status: 500 }
+    )
+
+  }
+}
