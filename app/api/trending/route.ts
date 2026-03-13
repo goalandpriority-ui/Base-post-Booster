@@ -52,14 +52,6 @@ export async function GET() {
 
       let weight = 1
 
-      if (boost.plan === "pro") {
-        weight = 1.5
-      }
-
-      if (boost.plan === "elite") {
-        weight = 2
-      }
-
       let score = Number(boost.amount) * weight
 
       if (boost.whale) {
