@@ -223,7 +223,7 @@ headers: {
 body: JSON.stringify({
 wallet: address || "",
 postUrl: postLink || "",
-contract: contract || "",
+contract: contract || "unknown",
 txHash: String(txHash),
 amount: Number(tiers[selectedTier].eth),
 referrer: referrer || ""
