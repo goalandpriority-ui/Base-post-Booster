@@ -1,43 +1,40 @@
-import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { PrismaClient } from "@prisma/client"
 
-export const dynamic = "force-dynamic"
+const prisma = new PrismaClient()
 
 export async function GET() {
+  try {
+    const last72 = new Date(Date.now() - 72 * 60 * 60 * 1000)
 
-try {
+    const data = await prisma.boost.groupBy({
+      by: ["contract"],
+      where: {
+        createdAt: {
+          gte: last72
+        }
+      },
+      _count: {
+        contract: true
+      },
+      _sum: {
+        amount: true
+      }
+    })
 
-const result = await prisma.boost.groupBy({
-  by: ["postUrl", "contract"],
-  _count: {
-    postUrl: true
-  },
-  orderBy: {
-    _count: {
-      postUrl: "desc"
-    }
-  },
-  take: 20
-})
+    const ranked = data
+      .map((item) => ({
+        contract: item.contract,
+        boosts: item._count.contract,
+        totalAmount: Number(item._sum.amount || 0),
+        score: item._count.contract * 2 + Number(item._sum.amount || 0)
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 20)
 
-const posts = result.map((r) => ({
-  id: r.postUrl,
-  content: r.postUrl,
-  contract: r.contract,
-  boost_count: r._count.postUrl
-}))
-
-return NextResponse.json(posts)
-
-} catch (error) {
-
-console.error("TRENDING ERROR:", error)
-
-return NextResponse.json(
-  { error: "Failed to fetch trending posts" },
-  { status: 500 }
-)
-
-}
-
+    return NextResponse.json(ranked)
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ error: "Trending error" }, { status: 500 })
+  }
 }
