@@ -4,37 +4,83 @@ import { PrismaClient } from "@prisma/client"
 const prisma = new PrismaClient()
 
 export async function GET() {
+
   try {
+
+    const now = new Date()
+
     const last72 = new Date(Date.now() - 72 * 60 * 60 * 1000)
 
-    const data = await prisma.boost.groupBy({
-      by: ["contract"],
+    const boosts = await prisma.boost.findMany({
       where: {
         createdAt: {
           gte: last72
         }
       },
-      _count: {
-        contract: true
-      },
-      _sum: {
-        amount: true
+      orderBy: {
+        createdAt: "desc"
       }
     })
 
-    const ranked = data
-      .map((item) => ({
-        contract: item.contract,
-        boosts: item._count.contract,
-        totalAmount: Number(item._sum.amount || 0),
-        score: item._count.contract * 2 + Number(item._sum.amount || 0)
-      }))
-      .sort((a, b) => b.score - a.score)
+    const contractMap: Record<string, any> = {}
+
+    for (const boost of boosts) {
+
+      const key = boost.contract || "unknown"
+
+      if (!contractMap[key]) {
+        contractMap[key] = {
+          contract: key,
+          boosts: 0,
+          whales: 0,
+          totalAmount: 0,
+          score: 0,
+          lastBoost: boost.createdAt
+        }
+      }
+
+      const hoursOld =
+        (now.getTime() - new Date(boost.createdAt).getTime()) /
+        (1000 * 60 * 60)
+
+      // Reddit style time decay
+      const decay = Math.pow(hoursOld + 2, 1.5)
+
+      const weightedScore = boost.score / decay
+
+      contractMap[key].boosts += 1
+      contractMap[key].totalAmount += Number(boost.amount)
+      contractMap[key].score += weightedScore
+
+      if (boost.whale) {
+        contractMap[key].whales += 1
+        contractMap[key].score += 2
+      }
+
+      if (boost.createdAt > contractMap[key].lastBoost) {
+        contractMap[key].lastBoost = boost.createdAt
+      }
+
+    }
+
+    const ranked = Object.values(contractMap)
+      .sort((a: any, b: any) => b.score - a.score)
       .slice(0, 20)
 
-    return NextResponse.json(ranked)
+    return NextResponse.json({
+      success: true,
+      tokens: ranked
+    })
+
   } catch (err) {
-    console.error(err)
-    return NextResponse.json({ error: "Trending error" }, { status: 500 })
+
+    console.error("TRENDING ERROR:", err)
+
+    return NextResponse.json(
+      { error: "Trending error" },
+      { status: 500 }
+    )
+
   }
+
 }
