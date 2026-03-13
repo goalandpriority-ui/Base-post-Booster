@@ -12,14 +12,69 @@ type User = {
 export default function LeaderboardPage() {
 
   const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const loadLeaderboard = async () => {
+
+    try {
+
+      const res = await fetch("/api/leaderboard")
+
+      const data = await res.json()
+
+      setUsers(data)
+
+      setLoading(false)
+
+    } catch (err) {
+
+      console.error(err)
+
+      setLoading(false)
+
+    }
+
+  }
 
   useEffect(() => {
 
-    fetch("/api/leaderboard")
-      .then((res) => res.json())
-      .then((data) => setUsers(data))
+    loadLeaderboard()
+
+    const interval = setInterval(loadLeaderboard, 10000)
+
+    return () => clearInterval(interval)
 
   }, [])
+
+  const getRankIcon = (rank: number) => {
+
+    if (rank === 0) return "🥇"
+    if (rank === 1) return "🥈"
+    if (rank === 2) return "🥉"
+
+    return `#${rank + 1}`
+
+  }
+
+  if (loading) {
+
+    return (
+
+      <main
+        style={{
+          minHeight: "100vh",
+          background: "#E3A6AE",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        Loading leaderboard...
+      </main>
+
+    )
+
+  }
 
   return (
 
@@ -34,7 +89,7 @@ export default function LeaderboardPage() {
 
       <h1
         style={{
-          fontSize: 30,
+          fontSize: 32,
           fontWeight: "bold",
           marginBottom: 30,
         }}
@@ -51,12 +106,25 @@ export default function LeaderboardPage() {
             padding: 20,
             borderRadius: 12,
             marginBottom: 15,
+            boxShadow: "0 5px 10px rgba(0,0,0,0.1)"
           }}
         >
 
-          <h3>#{i + 1}</h3>
+          <h3
+            style={{
+              fontSize: 20,
+              marginBottom: 10
+            }}
+          >
+            {getRankIcon(i)}
+          </h3>
 
-          <p>
+          <p
+            style={{
+              fontWeight: "bold",
+              fontSize: 16
+            }}
+          >
             {user.wallet.slice(0,6)}...
             {user.wallet.slice(-4)}
           </p>
@@ -65,7 +133,12 @@ export default function LeaderboardPage() {
             Boosts: {user._count.wallet}
           </p>
 
-          <p>
+          <p
+            style={{
+              fontWeight: "bold",
+              color: "#16a34a"
+            }}
+          >
             ETH Spent: {user._sum.amount}
           </p>
 
@@ -73,11 +146,22 @@ export default function LeaderboardPage() {
 
       ))}
 
-      <Link href="/" style={{ fontWeight: "bold" }}>
-        ← Back
-      </Link>
+      <div style={{ marginTop: 40 }}>
+
+        <Link
+          href="/"
+          style={{
+            fontWeight: "bold",
+            fontSize: 18
+          }}
+        >
+          ← Back
+        </Link>
+
+      </div>
 
     </main>
 
   )
+
 }
