@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server"
 
+export const dynamic = "force-dynamic"
+
 export async function POST(req: Request) {
 
   try {
 
-    const { contract } = await req.json()
+    const body = await req.json()
+
+    const contract = body.contract
 
     if (!contract) {
-      return NextResponse.json({ error: "No contract" })
+
+      return NextResponse.json(
+        { error: "No contract provided" },
+        { status: 400 }
+      )
+
     }
 
     const res = await fetch(
@@ -19,24 +28,35 @@ export async function POST(req: Request) {
     const pair = data.pairs?.[0]
 
     if (!pair) {
-      return NextResponse.json({ error: "No data found" })
+
+      return NextResponse.json(
+        { error: "Token not found" },
+        { status: 404 }
+      )
+
     }
 
     return NextResponse.json({
+
       name: pair.baseToken.name,
+
       symbol: pair.baseToken.symbol,
+
       price: pair.priceUsd,
-      marketcap: pair.marketCap,
-      volume24h: pair.volume.h24,
-      liquidity: pair.liquidity.usd,
-      chart: pair.url
+
+      marketCap: pair.fdv
+
     })
 
-  } catch (err) {
+  } catch (error) {
 
-    return NextResponse.json({
-      error: "Coin fetch failed"
-    })
+    console.error("COIN DATA ERROR:", error)
+
+    return NextResponse.json(
+      { error: "Coin fetch failed" },
+      { status: 500 }
+    )
 
   }
+
 }
