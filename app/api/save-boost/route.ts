@@ -13,6 +13,7 @@ const client = createPublicClient({
 })
 
 export async function POST(req: Request) {
+
   try {
 
     const body = await req.json()
@@ -22,6 +23,8 @@ export async function POST(req: Request) {
     const contract = body.contract ? String(body.contract) : ""
     const txHash = String(body.txHash || "")
     const amount = body.amount
+    const plan = String(body.plan || "basic")
+
     const referrer = body.referrer ? String(body.referrer) : null
 
     if (!wallet || !postUrl || !txHash) {
@@ -103,7 +106,20 @@ export async function POST(req: Request) {
       )
     }
 
-    const score = Number(amount) * 2
+    let durationHours = 24
+    let weight = 1
+
+    if (plan === "pro") {
+      durationHours = 48
+      weight = 1.5
+    }
+
+    if (plan === "elite") {
+      durationHours = 72
+      weight = 2
+    }
+
+    const score = Number(amount) * weight
 
     const boost = await prisma.boost.create({
       data: {
@@ -113,6 +129,8 @@ export async function POST(req: Request) {
         txHash,
         amount,
         score,
+        plan,
+        durationHours,
         referrer: validReferrer
       }
     })
@@ -132,4 +150,5 @@ export async function POST(req: Request) {
     )
 
   }
+
 }
