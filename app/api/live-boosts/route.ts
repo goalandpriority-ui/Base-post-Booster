@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server"
 
 export async function GET() {
 
@@ -9,18 +9,20 @@ export async function GET() {
       orderBy: {
         createdAt: "desc"
       },
-      take: 20
+      take: 30
     })
 
     return NextResponse.json(boosts)
 
-  } catch (err) {
+  } catch (error) {
 
-    console.error(err)
+    console.error("LIVE BOOST ERROR:", error)
 
     return NextResponse.json(
       { error: "Failed to load boosts" },
       { status: 500 }
     )
+
   }
+
 }
