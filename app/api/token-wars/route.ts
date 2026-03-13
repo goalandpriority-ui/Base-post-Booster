@@ -6,6 +6,11 @@ export async function GET() {
   try {
 
     const boosts = await prisma.boost.findMany({
+      select: {
+        contract: true,
+        amount: true,
+        createdAt: true
+      },
       where: {
         contract: {
           not: "unknown"
@@ -40,12 +45,10 @@ export async function GET() {
       map[contract].boosts += 1
       map[contract].volume += amount
 
-      // whale detection
       if (amount >= 0.05) {
         map[contract].whales += 1
       }
 
-      // latest boost tracking
       if (boost.createdAt > map[contract].lastBoost) {
         map[contract].lastBoost = boost.createdAt
       }
@@ -57,7 +60,6 @@ export async function GET() {
       const hoursOld =
         (now - new Date(token.lastBoost).getTime()) / 3600000
 
-      // momentum score
       const score =
         (token.boosts * 10) +
         (token.volume * 150) +
