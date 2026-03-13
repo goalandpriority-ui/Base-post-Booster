@@ -21,19 +21,16 @@ return (
 function Home() {
 
 const router = useRouter()
-
 const searchParams = useSearchParams()
 const referralParam = searchParams.get("ref")
 
-const [referrer,setReferrer] = useState<string | null>(null)
-
+const [referrer, setReferrer] = useState<string | null>(null)
 const [selectedTier, setSelectedTier] = useState(0)
 const [postLink, setPostLink] = useState("")
 const [contract, setContract] = useState("")
 const [coinData, setCoinData] = useState<any>(null)
 const [coinLoading, setCoinLoading] = useState(false)
 const [loading, setLoading] = useState(false)
-
 const [txHash, setTxHash] = useState<"0x${string}" | undefined>(undefined)
 
 const { address, isConnected } = useAccount()
@@ -44,15 +41,11 @@ const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
 hash: txHash,
 })
 
-useEffect(()=>{
-
-if(referralParam){
-
+useEffect(() => {
+if (referralParam) {
 setReferrer(referralParam)
-
 }
-
-},[referralParam])
+}, [referralParam])
 
 const tiers = [
 {
@@ -79,62 +72,46 @@ eth: "0.005",
 ]
 
 async function detectCoinFromBaseLink(link: string) {
-
 if (!link.includes("base.app/content")) return
 
 try {
+  const res = await fetch("/api/detectCoin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ link }),
+  })
 
-const res = await fetch("/api/detectCoin", {
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-},
-body: JSON.stringify({ link }),
-})
+  const data = await res.json()
 
-const data = await res.json()
-
-if (data.contract) {
-setContract(data.contract)
-fetchCoinData(data.contract)
-}
-
+  if (data.contract) {
+    setContract(data.contract)
+    fetchCoinData(data.contract)
+  }
 } catch (err) {
-
-console.error("Coin detect failed", err)
-
+  console.error("Coin detect failed", err)
 }
 
 }
 
 async function fetchCoinData(contract: string) {
-
 try {
-
 setCoinLoading(true)
 
-const res = await fetch("/api/coinData", {
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
-body: JSON.stringify({ contract })
-})
+  const res = await fetch("/api/coinData", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contract }),
+  })
 
-const data = await res.json()
+  const data = await res.json()
 
-if (!data.error) {
-setCoinData(data)
-}
-
-} catch (err) {
-
-console.error("Coin data fetch failed")
-
+  if (!data.error) {
+    setCoinData(data)
+  }
+} catch {
+  console.error("Coin data fetch failed")
 } finally {
-
-setCoinLoading(false)
-
+  setCoinLoading(false)
 }
 
 }
@@ -143,54 +120,54 @@ async function handleBoost() {
 
 if (!isConnected) {
 
-const injectedConnector = connectors.find(
-(connector) => connector.id === "injected"
-)
+  const injectedConnector = connectors.find(
+    (connector) => connector.id === "injected"
+  )
 
-if (injectedConnector) {
-await connect({ connector: injectedConnector })
-} else if (connectors.length > 0) {
-await connect({ connector: connectors[0] })
-} else {
-alert("No wallet available")
-}
+  if (injectedConnector) {
+    await connect({ connector: injectedConnector })
+  } else if (connectors.length > 0) {
+    await connect({ connector: connectors[0] })
+  } else {
+    alert("No wallet available")
+  }
 
-return
+  return
 }
 
 if (!postLink) {
-alert("Paste post link")
-return
+  alert("Paste post link")
+  return
 }
 
 try {
 
-setLoading(true)
+  setLoading(true)
 
-const hash = await sendTransactionAsync({
-to: YOUR_WALLET_ADDRESS as "0x${string}",
-value: tiers[selectedTier].value,
-})
+  const hash = await sendTransactionAsync({
+    to: YOUR_WALLET_ADDRESS as `0x${string}`,
+    value: tiers[selectedTier].value,
+  })
 
-setTxHash(hash)
+  setTxHash(hash)
 
 } catch (err: any) {
 
-console.error(err)
+  console.error(err)
 
-alert(
-"Transaction failed: " +
-(err.shortMessage || err.message || "Unknown error")
-)
+  alert(
+    "Transaction failed: " +
+    (err.shortMessage || err.message || "Unknown error")
+  )
 
-setLoading(false)
+  setLoading(false)
 }
 
 }
 
 async function shareToFarcaster(postUrl: string) {
 
-const referralLink = "${MINI_APP_LINK}?ref=${address}"
+const referralLink = `${MINI_APP_LINK}?ref=${address}`
 
 const text = `🚀 I just boosted this post on Base Post Booster!
 
@@ -200,184 +177,149 @@ Boost yours 👇
 ${referralLink}`
 
 try {
-
-await sdk.actions.composeCast({
-text: text,
-})
-
-} catch (err) {
-
-window.open(
-"https://warpcast.com/~/compose?text=" + encodeURIComponent(text),
-"_blank"
-)
+  await sdk.actions.composeCast({ text })
+} catch {
+  window.open(
+    "https://warpcast.com/~/compose?text=" +
+    encodeURIComponent(text),
+    "_blank"
+  )
 }
 
 }
 
 async function saveBoost() {
 
-if (!txHash) {
-console.error("TX hash missing")
-return
-}
+if (!txHash) return
 
 try {
 
-const res = await fetch("/api/save-boost", {
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-},
-body: JSON.stringify({
-wallet: address || "",
-postUrl: postLink || "",
-contract: contract || "",
-txHash: String(txHash),
-amount: Number(tiers[selectedTier].eth),
-referrer: referrer || ""
-}),
-})
+  const res = await fetch("/api/save-boost", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      wallet: address || "",
+      postUrl: postLink || "",
+      contract: contract || "",
+      txHash: String(txHash),
+      amount: Number(tiers[selectedTier].eth),
+      referrer: referrer || ""
+    })
+  })
 
-if (!res.ok) {
-throw new Error("Boost save failed")
-}
+  if (!res.ok) throw new Error("Boost save failed")
 
-await shareToFarcaster(postLink)
+  await shareToFarcaster(postLink)
 
-alert("Boost successful 🚀")
+  alert("Boost successful 🚀")
 
-setPostLink("")
-setContract("")
-setCoinData(null)
+  setPostLink("")
+  setContract("")
+  setCoinData(null)
 
-setTimeout(() => {
-router.push("/trending")
-}, 1500)
+  setTimeout(() => {
+    router.push("/trending")
+  }, 1500)
 
 } catch (err) {
 
-console.error(err)
-alert("Boost save failed")
+  console.error(err)
+  alert("Boost save failed")
 
 } finally {
 
-setLoading(false)
+  setLoading(false)
 
 }
 
 }
 
 useEffect(() => {
-
 if (txConfirmed && txHash) {
-
 saveBoost()
 setTxHash(undefined)
-
 }
-
 }, [txConfirmed, txHash])
 
 return (
-
-<main
-style={{
+<main style={{
 minHeight: "100vh",
 background: "#E3A6AE",
 padding: 20,
 textAlign: "center",
 maxWidth: 500,
 margin: "0 auto",
-color: "black",
-}}
-><h1
-style={{
-fontSize: 30,
-marginBottom: 30,
-fontWeight: "bold",
-color: "#ffffff",
-background: "#3b82f6",
-padding: "10px 20px",
-borderRadius: 12,
-}}
->
-Base Post Booster
-</h1>{referrer && (
+color: "black"
+}}>
 
-<p style={{marginBottom:20,fontWeight:"bold"}}>
-Referred by: {referrer.slice(0,6)}...{referrer.slice(-4)}
-</p>
-)}<div style={{ marginBottom: 30 }}>
-{tiers.map((tier, i) => (<div
-key={i}
-onClick={() => setSelectedTier(i)}
-style={{
-border:selectedTier === i ? "2px solid black" : "1px solid #999",
-background:selectedTier === i ? "#ffffff" : "#f5f5f5",
-padding:16,
-marginBottom:15,
-cursor:"pointer",
-borderRadius:12,
-}}
-><h3>{tier.name}</h3><p style={{ fontWeight: "bold" }}>
-{tier.price}
-</p><p style={{ fontSize: 14 }}>
-{tier.duration}
-</p></div>))}
+  <h1 style={{
+    fontSize: 30,
+    marginBottom: 30,
+    fontWeight: "bold",
+    color: "#ffffff",
+    background: "#3b82f6",
+    padding: "10px 20px",
+    borderRadius: 12
+  }}>
+    Base Post Booster
+  </h1>
 
-</div><input
-type="text"
-placeholder="Paste Base post link"
-value={postLink}
-onChange={(e)=>{
-const value=e.target.value
-setPostLink(value)
-detectCoinFromBaseLink(value)
-}}
-style={inputStyle}
-/>
+  {referrer && (
+    <p style={{ marginBottom: 20, fontWeight: "bold" }}>
+      Referred by: {referrer.slice(0,6)}...{referrer.slice(-4)}
+    </p>
+  )}
 
-<input
-type="text"
-placeholder="Coin Contract Address"
-value={contract}
-onChange={(e)=>setContract(e.target.value)}
-style={{...inputStyle,marginTop:10}}
-/>
+  <input
+    type="text"
+    placeholder="Paste Base post link"
+    value={postLink}
+    onChange={(e)=>{
+      const value=e.target.value
+      setPostLink(value)
+      detectCoinFromBaseLink(value)
+    }}
+    style={inputStyle}
+  />
 
-<div style={{ marginTop: 20 }}><button
-onClick={handleBoost}
-disabled={loading}
-style={{
-padding:"14px 20px",
-background:"black",
-border:"none",
-color:"white",
-fontWeight:"bold",
-borderRadius:10,
-width:"100%",
-fontSize:16,
-}}
+  <button
+    onClick={handleBoost}
+    disabled={loading}
+    style={{
+      marginTop:20,
+      padding:"14px 20px",
+      background:"black",
+      border:"none",
+      color:"white",
+      fontWeight:"bold",
+      borderRadius:10,
+      width:"100%",
+      fontSize:16
+    }}
+  >
 
-«»
+    {loading
+      ? "Processing..."
+      : isConnected
+      ? "Boost Now"
+      : "Connect Wallet"}
 
-{loading
-? "Processing..."
-: isConnected
-? "Boost Now"
-: "Connect Wallet"}
+  </button>
 
-</button></div><div style={{ marginTop: 40 }}>
-<Link href="/trending" style={{ fontWeight: "bold" }}>
-View Trending Posts →
-</Link>
-</div><div style={{ marginTop: 20 }}>
-<Link href="/leaderboard" style={{ fontWeight: "bold" }}>
-View Leaderboard →
-</Link>
-</div></main>
-)}
+  <div style={{ marginTop: 40 }}>
+    <Link href="/trending">View Trending Posts →</Link>
+  </div>
+
+  <div style={{ marginTop: 20 }}>
+    <Link href="/leaderboard">View Leaderboard →</Link>
+  </div>
+
+</main>
+
+)
+}
 
 const inputStyle: React.CSSProperties = {
 padding:12,
@@ -385,5 +327,5 @@ width:"100%",
 borderRadius:10,
 border:"1px solid #999",
 background:"#ffffff",
-color:"black",
-                     }
+color:"black"
+}
