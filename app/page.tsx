@@ -11,11 +11,11 @@ const YOUR_WALLET_ADDRESS = "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
 const MINI_APP_LINK = "https://base-post-booster.vercel.app/"
 
 export default function Page() {
-return (
-<Suspense fallback={<div>Loading...</div>}>
-<Home />
-</Suspense>
-)
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Home />
+    </Suspense>
+  )
 }
 
 function Home() {
@@ -32,19 +32,20 @@ const [coinData, setCoinData] = useState<any>(null)
 const [coinLoading, setCoinLoading] = useState(false)
 const [loading, setLoading] = useState(false)
 const [txHash, setTxHash] = useState<string | undefined>(undefined)
+const [savingBoost,setSavingBoost]=useState(false)
 
 const { address, isConnected } = useAccount()
 const { connect, connectors } = useConnect()
 const { sendTransactionAsync } = useSendTransaction()
 
 const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
-hash: txHash as "0x${string}" | undefined,
+  hash: txHash as `0x${string}` | undefined,
 })
 
 useEffect(() => {
-if (referralParam) {
-setReferrer(referralParam)
-}
+  if (referralParam) {
+    setReferrer(referralParam)
+  }
 }, [referralParam])
 
 const tiers = [
@@ -196,7 +197,9 @@ try {
 
 async function saveBoost() {
 
-if (!txHash) return
+if (!txHash || savingBoost) return
+
+setSavingBoost(true)
 
 try {
 
@@ -209,13 +212,17 @@ try {
       wallet: address || "",
       postUrl: postLink || "",
       contract: contract || "unknown",
-      txHash: String(txHash),
+      txHash: txHash,
       amount: Number(tiers[selectedTier].eth),
       referrer: referrer || ""
     })
   })
 
-  if (!res.ok) throw new Error("Boost save failed")
+  const data = await res.json()
+
+  if (!res.ok || data.error) {
+    throw new Error(data.error || "Boost save failed")
+  }
 
   await shareToFarcaster(postLink)
 
@@ -237,6 +244,7 @@ try {
 } finally {
 
   setLoading(false)
+  setSavingBoost(false)
 
 }
 
@@ -245,9 +253,8 @@ try {
 useEffect(() => {
 if (txConfirmed && txHash) {
 saveBoost()
-setTxHash(undefined)
 }
-}, [txConfirmed, txHash])
+}, [txConfirmed])
 
 return (
 
