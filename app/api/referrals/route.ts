@@ -24,12 +24,14 @@ export async function GET(req: Request) {
 
     const totalBoosts = referrals.length
 
-    const totalVolume = referrals.reduce(
-      (sum, r) => sum + (r.amount || 0),
-      0
-    )
+    // Convert Prisma Decimal → Number
+    const totalVolume = referrals.reduce((sum, r) => {
+      const amount = Number(r.amount || 0)
+      return sum + amount
+    }, 0)
 
-    const earnings = totalVolume * 0.1   // 10% referral earnings
+    // 10% referral earnings
+    const earnings = totalVolume * 0.1
 
     return NextResponse.json({
       wallet,
