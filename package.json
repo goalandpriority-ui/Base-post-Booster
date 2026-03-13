@@ -1,41 +1,41 @@
 {
-  "name": "base-post-booster",
-  "version": "1.0.0",
-  "private": true,
-  "engines": {
-    "node": "20.x"
-  },
-  "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "next": "14.2.5",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "wagmi": "2.12.0",
-    "viem": "2.21.0",
-    "@tanstack/react-query": "5.28.0",
-    "@farcaster/miniapp-sdk": "0.1.0",
-    "@prisma/client": "5.22.0",
-    "@supabase/supabase-js": "2.27.0",
-    "react-hot-toast": "2.4.1",
-    "react-chartjs-2": "5.2.0",
-    "chart.js": "4.3.0",
-    "axios": "1.6.0",
-    "framer-motion": "11.0.0",
-    "pino-pretty": "10.3.0"
-  },
-  "devDependencies": {
-    "prisma": "5.22.0",
-    "typescript": "5.2.2",
-    "@types/react": "18.2.21",
-    "@types/node": "20.6.1"
-  },
-  "overrides": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
-  }
+"name": "base-post-booster",
+"version": "1.0.0",
+"private": true,
+"engines": {
+"node": "20.x"
+},
+"scripts": {
+"dev": "next dev",
+"build": "prisma generate && prisma migrate deploy && next build",
+"start": "next start",
+"lint": "next lint"
+},
+"dependencies": {
+"next": "14.2.5",
+"react": "18.2.0",
+"react-dom": "18.2.0",
+"wagmi": "2.12.0",
+"viem": "2.21.0",
+"@tanstack/react-query": "5.28.0",
+"@farcaster/miniapp-sdk": "0.1.0",
+"@prisma/client": "5.22.0",
+"@supabase/supabase-js": "2.27.0",
+"react-hot-toast": "2.4.1",
+"react-chartjs-2": "5.2.0",
+"chart.js": "4.3.0",
+"axios": "1.6.0",
+"framer-motion": "11.0.0",
+"pino-pretty": "10.3.0"
+},
+"devDependencies": {
+"prisma": "5.22.0",
+"typescript": "5.2.2",
+"@types/react": "18.2.21",
+"@types/node": "20.6.1"
+},
+"overrides": {
+"react": "18.2.0",
+"react-dom": "18.2.0"
+}
 }
