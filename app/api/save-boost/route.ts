@@ -19,15 +19,28 @@ const body = await req.json()
 
 const wallet = String(body.wallet || "")
 const postUrl = String(body.postUrl || "")
-const contract = String(body.contract || "")   // FIXED
+const contract = body.contract ? String(body.contract) : null
 const txHash = String(body.txHash || "")
 const amount = parseFloat(body.amount || "0")
+
+/* NEW REFERRAL FIELD */
+const referrer = body.referrer ? String(body.referrer) : null
 
 if (!wallet || !postUrl || !txHash) {
   return NextResponse.json(
     { error: "Missing required fields" },
     { status: 400 }
   )
+}
+
+/* PREVENT SELF REFERRAL */
+let validReferrer = referrer
+
+if (
+  validReferrer &&
+  validReferrer.toLowerCase() === wallet.toLowerCase()
+) {
+  validReferrer = null
 }
 
 // prevent duplicate transaction
@@ -75,7 +88,7 @@ if (tx.value < minPayment) {
   )
 }
 
-// SAVE BOOST
+// SAVE BOOST (WITH REFERRAL)
 const boost = await prisma.boost.create({
   data: {
     wallet,
@@ -83,6 +96,7 @@ const boost = await prisma.boost.create({
     contract,
     txHash,
     amount,
+    referrer: validReferrer
   },
 })
 
