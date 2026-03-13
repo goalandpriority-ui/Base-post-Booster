@@ -4,68 +4,80 @@ export const dynamic = "force-dynamic"
 
 export async function POST(req: Request) {
 
-  try {
+try {
 
-    const body = await req.json()
+const body = await req.json()
 
-    const link = body.link
+const link = body.link
 
-    if (!link) {
-      return NextResponse.json(
-        { error: "No link provided" },
-        { status: 400 }
-      )
-    }
+if (!link) {
+  return NextResponse.json(
+    { error: "No link provided" },
+    { status: 400 }
+  )
+}
 
-    if (!link.includes("/content/")) {
-      return NextResponse.json(
-        { error: "Invalid Base link" },
-        { status: 400 }
-      )
-    }
+/* SUPPORT MULTIPLE FARCASTER LINKS */
 
-    const encoded = link.split("/content/")[1]
+if (
+  !link.includes("warpcast.com") &&
+  !link.includes("farcaster.xyz") &&
+  !link.includes("/content/")
+) {
+  return NextResponse.json(
+    { error: "Invalid Farcaster link" },
+    { status: 400 }
+  )
+}
 
-    if (!encoded) {
-      return NextResponse.json(
-        { error: "Invalid encoded content" },
-        { status: 400 }
-      )
-    }
+/* EXTRACT BASE64 CONTENT */
 
-    /* BASE64 DECODE */
+let encoded = ""
 
-    const decoded = Buffer.from(encoded, "base64").toString("utf8")
+if (link.includes("/content/")) {
+  encoded = link.split("/content/")[1]
+}
 
-    /* FIND CONTRACT */
+if (!encoded) {
+  return NextResponse.json({
+    contract: null,
+    decoded: null
+  })
+}
 
-    const match = decoded.match(/0x[a-fA-F0-9]{40}/)
+/* BASE64 DECODE */
 
-    if (!match) {
+const decoded = Buffer.from(encoded, "base64").toString("utf8")
 
-      return NextResponse.json({
-        contract: null,
-        decoded
-      })
+/* FIND CONTRACT ADDRESS */
 
-    }
+const match = decoded.match(/0x[a-fA-F0-9]{40}/)
 
-    const contract = match[0]
+if (!match) {
 
-    return NextResponse.json({
-      contract,
-      decoded
-    })
+  return NextResponse.json({
+    contract: null,
+    decoded
+  })
 
-  } catch (error) {
+}
 
-    console.error("DETECT COIN ERROR:", error)
+const contract = match[0]
 
-    return NextResponse.json(
-      { error: "Decode failed" },
-      { status: 500 }
-    )
+return NextResponse.json({
+  contract,
+  decoded
+})
 
-  }
+} catch (error) {
+
+console.error("DETECT COIN ERROR:", error)
+
+return NextResponse.json(
+  { error: "Decode failed" },
+  { status: 500 }
+)
+
+}
 
 }
