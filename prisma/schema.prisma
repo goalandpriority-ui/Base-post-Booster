@@ -17,13 +17,13 @@ model Boost {
   postUrl   String
 
   // token contract address (Base chain)
-  contract  String
+  contract  String?
 
   // transaction hash (must be unique)
   txHash    String   @unique
 
-  // boost payment amount
-  amount    Float
+  // boost payment amount (better precision than Float)
+  amount    Decimal  @db.Decimal(18,6)
 
   // referral wallet (optional)
   referrer  String?
@@ -31,13 +31,32 @@ model Boost {
   // timestamp
   createdAt DateTime @default(now())
 
-  // indexes for faster queries
+  /* ---------- INDEXES ---------- */
+
+  // quick lookup for post boosts
   @@index([postUrl])
+
+  // wallet history
   @@index([wallet])
+
+  // token boost lookup
   @@index([contract])
+
+  // time based queries
   @@index([createdAt])
+
+  // referral earnings queries
   @@index([referrer])
 
-  // useful for trending calculations
+  // trending posts calculation
   @@index([postUrl, createdAt])
+
+  // trending tokens calculation
+  @@index([contract, createdAt])
+
+  // leaderboard queries
+  @@index([wallet, createdAt])
+
+  // referral earnings calculation
+  @@index([referrer, createdAt])
 }
