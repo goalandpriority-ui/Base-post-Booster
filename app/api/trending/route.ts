@@ -1,35 +1,44 @@
+import prisma from "@/lib/prisma"
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 
 export async function GET() {
 
-  try {
+const boosts = await prisma.boost.findMany()
 
-    const posts = await prisma.boost.groupBy({
-      by: ["postUrl"],
-      _sum: {
-        amount: true,
-      },
-      _count: {
-        postUrl: true,
-      },
-      orderBy: {
-        _sum: {
-          amount: "desc",
-        },
-      },
-      take: 20,
-    })
+const posts: any = {}
 
-    return NextResponse.json(posts)
+boosts.forEach((b)=>{
 
-  } catch (error) {
+if(!posts[b.postUrl]){
 
-    console.error("TRENDING ERROR:", error)
+posts[b.postUrl] = {
+postUrl:b.postUrl,
+total:0,
+count:0,
+latest:b.createdAt
+}
 
-    return NextResponse.json(
-      { error: "Failed to fetch trending posts" },
-      { status: 500 }
-    )
-  }
+}
+
+posts[b.postUrl].total += b.amount
+posts[b.postUrl].count += 1
+
+})
+
+const result = Object.values(posts).map((p:any)=>{
+
+const hoursOld =
+(Date.now() - new Date(p.latest).getTime()) / 3600000
+
+const score =
+p.total * 100 + p.count * 10 - hoursOld
+
+return {...p,score}
+
+})
+
+result.sort((a,b)=>b.score-a.score)
+
+return NextResponse.json(result.slice(0,20))
+
 }
