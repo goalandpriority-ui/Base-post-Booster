@@ -28,6 +28,12 @@ model Boost {
   // trending score (pre-calculated)
   score     Float    @default(0)
 
+  // boost plan (basic / pro / elite)
+  plan      String   @default("basic")
+
+  // boost duration
+  durationHours Int  @default(24)
+
   // referral wallet
   referrer  String?
 
