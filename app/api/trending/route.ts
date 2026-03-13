@@ -46,7 +46,31 @@ export async function GET() {
       // Reddit style time decay
       const decay = Math.pow(hoursOld + 2, 1.5)
 
-      const weightedScore = boost.score / decay
+      // -----------------------------
+      // Runtime Score Calculation
+      // -----------------------------
+
+      let weight = 1
+
+      if (boost.plan === "pro") {
+        weight = 1.5
+      }
+
+      if (boost.plan === "elite") {
+        weight = 2
+      }
+
+      let score = Number(boost.amount) * weight
+
+      if (boost.whale) {
+        score = score * 3
+      }
+
+      const weightedScore = score / decay
+
+      // -----------------------------
+      // Aggregate Stats
+      // -----------------------------
 
       contractMap[key].boosts += 1
       contractMap[key].totalAmount += Number(boost.amount)
