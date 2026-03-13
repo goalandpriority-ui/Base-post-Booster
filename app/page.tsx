@@ -149,7 +149,7 @@ try {
     value: tiers[selectedTier].value,
   })
 
-  setTxHash(hash)
+  setTxHash(hash as `0x${string}`)
 
 } catch (err: any) {
 
