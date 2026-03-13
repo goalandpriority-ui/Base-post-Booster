@@ -86,13 +86,20 @@ body: JSON.stringify({ link }),
 
 const data = await res.json()
 
+console.log("DETECT RESULT:", data)
+
 if (data.contract) {
+
 setContract(data.contract)
+
 fetchCoinData(data.contract)
+
 }
 
 } catch (err) {
+
 console.error("Coin detect failed", err)
+
 }
 
 }
@@ -110,6 +117,8 @@ body: JSON.stringify({ contract }),
 })
 
 const data = await res.json()
+
+console.log("COIN DATA:", data)
 
 if (!data.error) {
 setCoinData(data)
@@ -302,17 +311,47 @@ style={inputStyle}
 <p style={{ marginTop:10 }}>Detecting token...</p>
 )}
 
-{coinData && (
+{contract && (
+
 <div style={{
 background:"#ffffff",
 padding:15,
 borderRadius:10,
 marginTop:15
 }}>
-<h3>{coinData.name}</h3>
-<p>{coinData.symbol}</p>
-<p>Price: ${coinData.price}</p>
+
+<p><b>Contract:</b></p>
+
+<p style={{
+wordBreak:"break-all",
+fontSize:13
+}}>
+{contract}
+</p>
+
 </div>
+
+)}
+
+{coinData && (
+
+<div style={{
+background:"#ffffff",
+padding:15,
+borderRadius:10,
+marginTop:15
+}}>
+
+<h3>{coinData.name}</h3>
+
+<p><b>Symbol:</b> {coinData.symbol}</p>
+
+<p><b>Price:</b> ${coinData.price}</p>
+
+<p><b>Market Cap:</b> ${coinData.marketCap}</p>
+
+</div>
+
 )}
 
 {/* BOOST TIERS */}
@@ -387,4 +426,4 @@ borderRadius:10,
 border:"1px solid #999",
 background:"#ffffff",
 color:"black"
-  }
+               }
