@@ -23,7 +23,6 @@ export async function POST(req: Request) {
     const contract = body.contract ? String(body.contract).toLowerCase() : ""
     const txHash = String(body.txHash || "")
     const amount = Number(body.amount || 0)
-    const plan = String(body.plan || "basic")
 
     const referrer = body.referrer ? String(body.referrer).toLowerCase() : null
 
@@ -43,10 +42,7 @@ export async function POST(req: Request) {
 
     let validReferrer = referrer
 
-    if (
-      validReferrer &&
-      validReferrer === wallet
-    ) {
+    if (validReferrer && validReferrer === wallet) {
       validReferrer = null
     }
 
@@ -141,40 +137,19 @@ export async function POST(req: Request) {
     }
 
     // -----------------------------
-    // Plan Logic
-    // -----------------------------
-
-    let durationHours = 24
-    let weight = 1
-
-    if (plan === "pro") {
-      durationHours = 48
-      weight = 1.5
-    }
-
-    if (plan === "elite") {
-      durationHours = 72
-      weight = 2
-    }
-
-    // -----------------------------
     // Whale Detection
     // -----------------------------
 
     const whale = amount >= 0.05
 
     // -----------------------------
-    // Trending Score (runtime only)
+    // Duration
     // -----------------------------
 
-    let score = amount * weight
-
-    if (whale) {
-      score = score * 3
-    }
+    const durationHours = 24
 
     // -----------------------------
-    // Save Boost (score removed)
+    // Save Boost
     // -----------------------------
 
     const boost = await prisma.boost.create({
@@ -184,7 +159,6 @@ export async function POST(req: Request) {
         contract,
         txHash,
         amount,
-        plan,
         durationHours,
         whale,
         referrer: validReferrer
@@ -193,7 +167,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      score,
       boost
     })
 
@@ -208,4 +181,4 @@ export async function POST(req: Request) {
 
   }
 
-}
+      }
