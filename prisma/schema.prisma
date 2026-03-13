@@ -1,58 +1,58 @@
 generator client {
-  provider = "prisma-client-js"
+provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+provider = "postgresql"
+url      = env("DATABASE_URL")
 }
 
 model Boost {
-  id        String   @id @default(cuid())
+id        String   @id @default(cuid())
 
-  // user wallet address
-  wallet    String
+// user wallet address
+wallet    String
 
-  // boosted post URL
-  postUrl   String
+// boosted post URL
+postUrl   String
 
-  // token contract address (Base chain)
-  contract  String?
+// token contract address (Base chain)
+contract  String?
 
-  // transaction hash (must be unique)
-  txHash    String   @unique
+// transaction hash (must be unique)
+txHash    String   @unique
 
-  // boost payment amount
-  amount    Decimal  @db.Decimal(18,6)
+// boost payment amount
+amount    Decimal  @db.Decimal(18,8)
 
-  // boost plan
-  plan      String   @default("basic")
+// boost plan
+plan      String   @default("basic")
 
-  // boost duration
-  durationHours Int  @default(24)
+// boost duration
+durationHours Int  @default(24)
 
-  // whale boost detection
-  whale Boolean @default(false)
+// whale boost detection
+whale Boolean @default(false)
 
-  // referral wallet
-  referrer  String?
+// referral wallet
+referrer  String?
 
-  // referral earnings (5%)
-  referralReward Decimal @db.Decimal(18,6) @default(0)
+// referral earnings (5%)
+referralReward Decimal @db.Decimal(18,8) @default(0)
 
-  // expiry time
-  expiresAt DateTime?
+// expiry time
+expiresAt DateTime
 
-  // timestamp
-  createdAt DateTime @default(now())
+// timestamp
+createdAt DateTime @default(now())
 
-  @@index([postUrl])
-  @@index([wallet])
-  @@index([contract])
-  @@index([createdAt])
-  @@index([referrer])
+@@index([postUrl])
+@@index([wallet])
+@@index([contract])
+@@index([createdAt])
+@@index([referrer])
 
-  // trending queries
-  @@index([contract, createdAt])
-  @@index([postUrl, createdAt])
+// trending queries
+@@index([contract, createdAt])
+@@index([postUrl, createdAt])
 }
