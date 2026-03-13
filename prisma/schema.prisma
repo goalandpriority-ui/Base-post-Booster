@@ -25,9 +25,6 @@ model Boost {
   // boost payment amount
   amount    Decimal  @db.Decimal(18,6)
 
-  // trending score (pre-calculated)
-  score     Float    @default(0)
-
   // boost plan (basic / pro / elite)
   plan      String   @default("basic")
 
@@ -54,5 +51,4 @@ model Boost {
   // trending queries
   @@index([contract, createdAt])
   @@index([postUrl, createdAt])
-  @@index([score])
 }
