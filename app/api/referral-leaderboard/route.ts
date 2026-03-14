@@ -11,7 +11,7 @@ const referrals = await prisma.boost.groupBy({
     referrer: true
   },
   _sum: {
-    amount: true
+    referralReward: true
   },
   where: {
     referrer: {
@@ -28,14 +28,15 @@ const referrals = await prisma.boost.groupBy({
 
 const leaderboard = referrals.map((r, index) => {
 
-  const volume = parseFloat(r._sum.amount?.toString() || "0")
+  const earnings = Number(
+    r._sum.referralReward?.toString() || "0"
+  )
 
   return {
     rank: index + 1,
     wallet: r.referrer,
     totalBoosts: r._count.referrer,
-    totalVolume: volume,
-    earnings: volume * 0.05
+    earnings
   }
 
 })
