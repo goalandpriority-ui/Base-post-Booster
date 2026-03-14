@@ -27,11 +27,18 @@ const body = await req.json()
 
 const wallet = String(body.wallet || "").toLowerCase()
 const postUrl = String(body.postUrl || "")
-const contract = body.contract ? String(body.contract).toLowerCase() : ""
+const contract = body.contract
+  ? String(body.contract).toLowerCase()
+  : null
+
 const txHash = String(body.txHash || "")
 const referrer = body.referrer
   ? String(body.referrer).toLowerCase()
   : null
+
+/* ---------------------------
+BASIC VALIDATION
+--------------------------- */
 
 if (!wallet || !postUrl || !txHash) {
   return NextResponse.json(
@@ -47,8 +54,15 @@ if (!isAddress(wallet)) {
   )
 }
 
+if (contract && !isAddress(contract)) {
+  return NextResponse.json(
+    { error: "Invalid contract address" },
+    { status: 400 }
+  )
+}
+
 /* ---------------------------
-REFERRER VALIDATION FIX
+REFERRER VALIDATION
 --------------------------- */
 
 let validReferrer: string | null = null
@@ -241,4 +255,4 @@ return NextResponse.json(
 
 }
 
-}
+                         }
