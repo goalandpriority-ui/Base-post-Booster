@@ -267,7 +267,9 @@ REFERRAL REWARD
 let referralReward = 0
 
 if (validReferrer) {
-  referralReward = paidEth * 0.05
+
+  referralReward = Number((paidEth * 0.05).toFixed(8))
+
 }
 
 /* ---------------------------
