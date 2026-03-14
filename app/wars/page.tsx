@@ -9,6 +9,10 @@ name: string
 symbol: string
 marketCap: number
 boosts: number
+whales: number
+volume: number
+score: number
+lastBoost: string
 }
 
 export default function TokenWars() {
@@ -17,7 +21,15 @@ const [coins, setCoins] = useState<WarCoin[]>([])
 const [loading, setLoading] = useState(true)
 
 useEffect(() => {
+
 fetchWars()
+
+const interval = setInterval(() => {
+fetchWars()
+}, 10000)
+
+return () => clearInterval(interval)
+
 }, [])
 
 async function fetchWars() {
@@ -39,6 +51,15 @@ try {
   setLoading(false)
 
 }
+
+}
+
+function isTrending(lastBoost:string){
+
+const diff =
+(Date.now() - new Date(lastBoost).getTime()) / 60000
+
+return diff < 30
 
 }
 
@@ -80,7 +101,11 @@ return (
     <p style={{ textAlign: "center" }}>No battles yet</p>
   )}
 
-  {coins.map((coin, index) => (
+  {coins.map((coin, index) => {
+
+  const trending = isTrending(coin.lastBoost)
+
+  return (
 
     <div
       key={coin.contract}
@@ -94,6 +119,7 @@ return (
 
       <h2>
         #{index + 1} {coin.name} ({coin.symbol})
+        {trending && " 🔥"}
       </h2>
 
       <p>
@@ -101,7 +127,19 @@ return (
       </p>
 
       <p>
-        Market Cap: ${coin.marketCap}
+        Whale Boosts: 🐋 <b>{coin.whales}</b>
+      </p>
+
+      <p>
+        Volume: Ξ {coin.volume.toFixed(4)}
+      </p>
+
+      <p>
+        Score: <b>{Math.round(coin.score)}</b>
+      </p>
+
+      <p>
+        Market Cap: ${coin.marketCap || "Unknown"}
       </p>
 
       <p
@@ -130,7 +168,9 @@ return (
 
     </div>
 
-  ))}
+  )
+
+  })}
 
   <div style={{ textAlign: "center", marginTop: 30 }}>
     <Link href="/">← Back to Boost</Link>
