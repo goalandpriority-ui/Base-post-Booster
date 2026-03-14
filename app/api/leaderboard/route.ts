@@ -11,7 +11,9 @@ export async function GET() {
       select: {
         wallet: true,
         amount: true,
-        whale: true
+        whale: true,
+        referrer: true,
+        referralReward: true
       }
     })
 
@@ -20,6 +22,7 @@ export async function GET() {
       totalBoosts: number
       totalSpent: number
       whaleBoosts: number
+      referralEarnings: number
     }> = {}
 
     for (const b of boosts) {
@@ -27,12 +30,15 @@ export async function GET() {
       const wallet = b.wallet.toLowerCase()
 
       if (!map[wallet]) {
+
         map[wallet] = {
           wallet,
           totalBoosts: 0,
           totalSpent: 0,
-          whaleBoosts: 0
+          whaleBoosts: 0,
+          referralEarnings: 0
         }
+
       }
 
       map[wallet].totalBoosts += 1
@@ -40,6 +46,12 @@ export async function GET() {
 
       if (b.whale) {
         map[wallet].whaleBoosts += 1
+      }
+
+      if (b.referrer && map[b.referrer]) {
+
+        map[b.referrer].referralEarnings += Number(b.referralReward)
+
       }
 
     }
@@ -54,7 +66,8 @@ export async function GET() {
       walletShort: `${u.wallet.slice(0,6)}...${u.wallet.slice(-4)}`,
       totalBoosts: u.totalBoosts,
       totalSpent: Number(u.totalSpent.toFixed(6)),
-      whaleBoosts: u.whaleBoosts
+      whaleBoosts: u.whaleBoosts,
+      referralEarnings: Number(u.referralEarnings.toFixed(6))
     }))
 
     return NextResponse.json(result)
