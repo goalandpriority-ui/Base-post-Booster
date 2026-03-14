@@ -4,10 +4,10 @@ export const runtime = "nodejs"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import {
-createPublicClient,
-http,
-isAddress,
-formatEther
+  createPublicClient,
+  http,
+  isAddress,
+  formatEther
 } from "viem"
 import { base } from "viem/chains"
 
@@ -15,8 +15,8 @@ const YOUR_WALLET_ADDRESS =
 "0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
 
 const client = createPublicClient({
-chain: base,
-transport: http(),
+  chain: base,
+  transport: http(),
 })
 
 export async function POST(req: Request) {
@@ -47,11 +47,23 @@ if (!isAddress(wallet)) {
   )
 }
 
-let validReferrer = referrer
+/* ---------------------------
+REFERRER VALIDATION FIX
+--------------------------- */
 
-if (validReferrer && validReferrer === wallet) {
-  validReferrer = null
+let validReferrer: string | null = null
+
+if (referrer && isAddress(referrer)) {
+
+  if (referrer !== wallet) {
+    validReferrer = referrer
+  }
+
 }
+
+/* ---------------------------
+TX DUPLICATE CHECK
+--------------------------- */
 
 const existing = await prisma.boost.findUnique({
   where: { txHash }
@@ -63,6 +75,10 @@ if (existing) {
     message: "Transaction already processed"
   })
 }
+
+/* ---------------------------
+BLOCKCHAIN VERIFY
+--------------------------- */
 
 const receipt = await client.getTransactionReceipt({
   hash: txHash as `0x${string}`
@@ -100,6 +116,10 @@ if (tx.from.toLowerCase() !== wallet) {
   )
 }
 
+/* ---------------------------
+PAYMENT VALIDATION
+--------------------------- */
+
 const paidEth = Number(formatEther(tx.value))
 
 const minPayment = 0.00001
@@ -111,16 +131,25 @@ if (paidEth < minPayment) {
   )
 }
 
+/* ---------------------------
+PLAN CALCULATION
+--------------------------- */
+
 let plan = "basic"
 let durationHours = 24
 
 if (paidEth >= 0.005) {
   plan = "elite"
   durationHours = 72
-} else if (paidEth >= 0.003) {
+}
+else if (paidEth >= 0.003) {
   plan = "pro"
   durationHours = 48
 }
+
+/* ---------------------------
+RATE LIMIT
+--------------------------- */
 
 const lastHour = new Date(Date.now() - 60 * 60 * 1000)
 
@@ -152,16 +181,33 @@ if (postBoostCount >= 3) {
   )
 }
 
+/* ---------------------------
+WHALE DETECTION
+--------------------------- */
+
 const whale = paidEth >= 0.05
 
+/* ---------------------------
+REFERRAL REWARD
+--------------------------- */
+
 let referralReward = 0
+
 if (validReferrer) {
   referralReward = paidEth * 0.05
 }
 
+/* ---------------------------
+BOOST EXPIRY
+--------------------------- */
+
 const expiresAt = new Date(
   Date.now() + durationHours * 60 * 60 * 1000
 )
+
+/* ---------------------------
+SAVE BOOST
+--------------------------- */
 
 const boost = await prisma.boost.create({
   data: {
