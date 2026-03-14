@@ -33,7 +33,8 @@ export async function GET() {
       return {
         id: b.id,
 
-        wallet: b.wallet,
+        wallet: b.wallet || "unknown",
+
         walletShort: b.wallet
           ? `${b.wallet.slice(0,6)}...${b.wallet.slice(-4)}`
           : "unknown",
@@ -41,17 +42,18 @@ export async function GET() {
         postUrl: b.postUrl,
 
         contract: b.contract,
+
         contractShort: b.contract
           ? `${b.contract.slice(0,6)}...${b.contract.slice(-4)}`
           : "unknown",
 
-        amount: amount,
+        amount,
 
         txHash: b.txHash,
 
         createdAt: b.createdAt,
 
-        boostType: boostType
+        boostType
       }
 
     })
