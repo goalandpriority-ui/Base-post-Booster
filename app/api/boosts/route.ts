@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 
-const prisma = new PrismaClient()
+export const dynamic = "force-dynamic"
+export const runtime = "nodejs"
 
 export async function GET() {
 
   try {
 
     const boosts = await prisma.boost.findMany({
+      where: {
+        expiresAt: {
+          gt: new Date()
+        }
+      },
       select: {
         id: true,
         wallet: true,
