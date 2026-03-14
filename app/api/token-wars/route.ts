@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic"
+export const runtime = "nodejs"
+
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
@@ -35,7 +38,8 @@ export async function GET() {
           boosts: 0,
           whales: 0,
           volume: 0,
-          lastBoost: boost.createdAt
+          lastBoost: boost.createdAt,
+          marketCap: 0
         }
 
       }
@@ -73,6 +77,7 @@ export async function GET() {
         boosts: token.boosts,
         whales: token.whales,
         volume: token.volume,
+        marketCap: token.marketCap,
         lastBoost: token.lastBoost,
         score: score
       }
