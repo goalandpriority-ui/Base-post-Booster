@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { prisma } from "@/lib/prisma"
 
 export async function GET() {
-
   try {
 
     const now = new Date()
-
     const last72 = new Date(Date.now() - 72 * 60 * 60 * 1000)
 
     const boosts = await prisma.boost.findMany({
       where: {
         createdAt: {
           gte: last72
+        },
+        expiresAt: {
+          gt: now
         }
       },
       orderBy: {
@@ -26,7 +25,7 @@ export async function GET() {
 
     for (const boost of boosts) {
 
-      const key = boost.contract || "unknown"
+      const key = boost.contract ? boost.contract.toLowerCase() : "unknown"
 
       if (!contractMap[key]) {
         contractMap[key] = {
@@ -45,8 +44,7 @@ export async function GET() {
 
       const decay = Math.pow(hoursOld + 2, 1.5)
 
-      // safe amount conversion
-      const amount = parseFloat(boost.amount.toString())
+      const amount = Number(boost.amount)
 
       let score = amount
 
@@ -90,5 +88,4 @@ export async function GET() {
     )
 
   }
-
 }
