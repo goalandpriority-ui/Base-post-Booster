@@ -29,7 +29,7 @@ const [menuOpen,setMenuOpen]=useState(false)
 const [referrer, setReferrer] = useState<string | null>(null)
 const [selectedTier, setSelectedTier] = useState(0)
 const [postLink, setPostLink] = useState("")
-const [contract, setContract] = useState("")
+const [contract, setContract] = useState<string | null>(null)
 const [coinData, setCoinData] = useState<any>(null)
 const [coinLoading, setCoinLoading] = useState(false)
 const [loading, setLoading] = useState(false)
@@ -213,7 +213,7 @@ headers: {
 body: JSON.stringify({
 wallet: address || "",
 postUrl: postLink || "",
-contract: contract || "",
+contract: contract || null,
 txHash: txHash,
 referrer: referrer || null
 })
@@ -230,7 +230,7 @@ await shareToFarcaster(postLink)
 alert("Boost successful 🚀")
 
 setPostLink("")
-setContract("")
+setContract(null)
 setCoinData(null)
 
 setTimeout(() => {
@@ -255,7 +255,7 @@ useEffect(() => {
 if (txConfirmed && txHash) {
 saveBoost()
 }
-}, [txConfirmed])
+}, [txConfirmed, txHash])
 
 return (
 
@@ -476,4 +476,4 @@ borderRadius:10,
 border:"1px solid #999",
 background:"#ffffff",
 color:"black"
-}
+  }
