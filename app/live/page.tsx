@@ -7,7 +7,7 @@ type Boost = {
   id: string
   wallet: string
   postUrl: string
-  amount: string
+  amount: number
   createdAt: string
 }
 
@@ -17,10 +17,18 @@ export default function LivePage() {
 
   async function loadBoosts() {
 
-    const res = await fetch("/api/live-boosts")
-    const data = await res.json()
+    try {
 
-    setBoosts(data)
+      const res = await fetch("/api/boost-feed")
+
+      const data = await res.json()
+
+      setBoosts(data)
+
+    } catch (err) {
+      console.error("Live feed error", err)
+    }
+
   }
 
   useEffect(() => {
@@ -85,4 +93,5 @@ export default function LivePage() {
     </main>
 
   )
+
 }
