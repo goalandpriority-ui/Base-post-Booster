@@ -51,6 +51,7 @@ createdAt DateTime @default(now())
 @@index([contract])
 @@index([createdAt])
 @@index([referrer])
+@@index([expiresAt])
 
 // trending queries
 @@index([contract, createdAt])
