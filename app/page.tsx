@@ -176,7 +176,7 @@ setLoading(false)
 
 async function shareToFarcaster(postUrl: string) {
 
-
+const referralLink = `${MINI_APP_LINK}?ref=${address}`
 
 const text = `🚀 I just boosted this post on Base Post Booster!
 
