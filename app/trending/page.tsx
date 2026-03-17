@@ -169,7 +169,7 @@ return (
 >
 
   <h1 style={{ fontSize: 30, fontWeight: "bold", marginBottom: 20 }}>
-    🔥 Trending Boosted Posts
+     Trending Boosted Posts
   </h1>
 
   <div style={{ marginBottom: 30 }}>
