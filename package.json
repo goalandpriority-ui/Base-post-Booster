@@ -26,7 +26,8 @@
     "chart.js": "4.3.0",
     "axios": "1.6.0",
     "framer-motion": "11.0.0",
-    "pino-pretty": "10.3.0"
+    "pino-pretty": "10.3.0",
+    "canvas-confetti": "^1.9.3"
   },
   "devDependencies": {
     "prisma": "5.22.0",
