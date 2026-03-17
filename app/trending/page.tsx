@@ -39,9 +39,20 @@ try {
 
   const res = await fetch("/api/trending")
 
-  const data: Post[] = await res.json()
+  const raw = await res.json() // ✅ FIX
 
-  const sorted = data.sort(
+  // ✅ FIX: handle correct structure
+  const data = raw.posts || []
+
+  // ✅ FIX: map to your UI format (VERY IMPORTANT)
+  const mapped: Post[] = data.map((p: any) => ({
+    id: p.postUrl,
+    content: p.postUrl,
+    contract: p.contract || "",
+    boost_count: p.boosts || 0
+  }))
+
+  const sorted = mapped.sort(
     (a, b) => b.boost_count - a.boost_count
   )
 
@@ -169,7 +180,7 @@ return (
 >
 
   <h1 style={{ fontSize: 30, fontWeight: "bold", marginBottom: 20 }}>
-     Trending Boosted Posts
+    🔥 Trending Boosted Posts
   </h1>
 
   <div style={{ marginBottom: 30 }}>
@@ -379,4 +390,4 @@ return (
 
 )
 
-                    }
+}
