@@ -39,12 +39,10 @@ try {
 
   const res = await fetch("/api/trending")
 
-  const raw = await res.json() // ✅ FIX
+  const raw = await res.json()
 
-  // ✅ FIX: handle correct structure
   const data = raw.posts || []
 
-  // ✅ FIX: map to your UI format (VERY IMPORTANT)
   const mapped: Post[] = data.map((p: any) => ({
     id: p.postUrl,
     content: p.postUrl,
@@ -152,16 +150,7 @@ if (navigator.share) {
 if (loading) {
 
 return (
-  <div
-    style={{
-      minHeight: "100vh",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      background: "#E3A6AE",
-      color: "black",
-    }}
-  >
+  <div style={loadingStyle}>
     Loading trending posts...
   </div>
 )
@@ -170,224 +159,245 @@ return (
 
 return (
 
-<div
-  style={{
-    minHeight: "100vh",
-    background: "#E3A6AE",
-    padding: 30,
-    color: "black",
-  }}
+<div style={mainStyle}>
+
+<h1 style={titleStyle}>
+🔥 Trending Boosts
+</h1>
+
+<div style={{ marginBottom: 30 }}>
+<Link href="/" style={backBtn}>
+← Back to Home
+</Link>
+</div>
+
+{/* PUMP SECTION */}
+
+{pumpTokens.length > 0 && (
+
+<div style={glassCard}>
+
+<h2 style={{ marginBottom: 20 }}>
+🚀 Auto Pump Detection
+</h2>
+
+{pumpTokens.slice(0,5).map((token,index)=>{
+
+let badge = ""
+
+if(token.status==="trending") badge="🚀 TRENDING"
+else if(token.status==="hot") badge="🔥 HOT"
+else if(token.status==="pumping") badge="📈 PUMPING"
+else badge="NORMAL"
+
+return(
+
+<div key={index} style={pumpItem}>
+
+<p style={{ fontWeight:"bold", color:"#22c55e" }}>
+{badge}
+</p>
+
+<p style={contractText}>
+{token.contract || "unknown"}
+</p>
+
+<p style={{ fontSize:13 }}>
+Boosts: {token.boosts} | Wallets: {token.wallets}
+</p>
+
+</div>
+
+)
+
+})}
+
+</div>
+
+)}
+
+{/* POSTS */}
+
+<motion.div layout style={{ display:"flex", flexDirection:"column", gap:20 }}>
+
+<AnimatePresence>
+
+{posts.map((post) => {
+
+const isNew = newIds.includes(post.id)
+const isExpanded = expandedChart === post.id
+
+return (
+
+<motion.div
+key={post.id}
+layout
+initial={{ opacity:0, y:40 }}
+animate={{ opacity:1, y:0 }}
+transition={{ type:"spring", stiffness:400, damping:30 }}
+style={{
+...glassCard,
+border: isNew ? "2px solid #22c55e" : "1px solid rgba(255,255,255,0.1)",
+boxShadow: isNew ? "0 0 25px rgba(34,197,94,0.6)" : "none"
+}}
 >
 
-  <h1 style={{ fontSize: 30, fontWeight: "bold", marginBottom: 20 }}>
-    🔥 Trending Boosted Posts
-  </h1>
+<p style={{ fontWeight:"bold", wordBreak:"break-all" }}>
+{post.content}
+</p>
 
-  <div style={{ marginBottom: 30 }}>
-    <Link href="/" style={{ fontWeight: "bold", color: "black" }}>
-      ← Back to Home
-    </Link>
-  </div>
+<div style={{ display:"flex", justifyContent:"space-between" }}>
 
-  {pumpTokens.length > 0 && (
+<div>
 
-    <div
-      style={{
-        background: "white",
-        padding: 20,
-        borderRadius: 12,
-        marginBottom: 30
-      }}
-    >
+<p style={{ fontSize:12 }}>
+Boosts
+</p>
 
-      <h2 style={{ marginBottom: 20 }}>
-        🚀 Auto Pump Detection
-      </h2>
+<motion.p
+key={post.boost_count}
+initial={{ scale:1.4 }}
+animate={{ scale:1 }}
+transition={{ duration:0.3 }}
+style={{
+fontSize:22,
+fontWeight:"bold",
+color:"#22c55e"
+}}
+>
+{post.boost_count}
+</motion.p>
 
-      {pumpTokens.slice(0,5).map((token,index)=>{
+</div>
 
-        let badge = ""
+<div style={{ display:"flex", gap:10 }}>
 
-        if(token.status==="trending") badge="🚀 TRENDING"
-        else if(token.status==="hot") badge="🔥 HOT"
-        else if(token.status==="pumping") badge="📈 PUMPING"
-        else badge="NORMAL"
+<button
+onClick={() =>
+setExpandedChart(isExpanded ? null : post.id)
+}
+style={chartBtn}
+>
+{isExpanded ? "Hide" : "Chart"}
+</button>
 
-        return(
+<button
+onClick={() => handleShare(post)}
+style={shareBtn}
+>
+Share
+</button>
 
-          <div
-            key={index}
-            style={{
-              padding:10,
-              borderBottom:"1px solid #eee"
-            }}
-          >
+</div>
 
-            <p style={{ fontWeight:"bold" }}>
-              {badge}
-            </p>
+</div>
 
-            <p
-              style={{
-                fontSize:12,
-                wordBreak:"break-all"
-              }}
-            >
-              {token.contract}
-            </p>
+{isExpanded && (
 
-            <p style={{ fontSize:13 }}>
-              Boosts: {token.boosts} | Wallets: {token.wallets}
-            </p>
+<div style={chartContainer}>
 
-          </div>
+<iframe
+src={`https://dexscreener.com/base/${post.contract}?embed=1&theme=dark`}
+style={{
+width:"100%",
+height:"100%",
+border:"none"
+}}
+/>
 
-        )
+</div>
 
-      })}
+)}
 
-    </div>
+</motion.div>
 
-  )}
+)
 
-  <motion.div
-    layout
-    style={{ display: "flex", flexDirection: "column", gap: 20 }}
-  >
+})}
 
-    <AnimatePresence>
+</AnimatePresence>
 
-      {posts.map((post) => {
-
-        const isNew = newIds.includes(post.id)
-
-        const isExpanded = expandedChart === post.id
-
-        return (
-
-          <motion.div
-            key={post.id}
-            layout
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            style={{
-              background: "white",
-              padding: 20,
-              borderRadius: 12,
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              border: isNew ? "3px solid #22c55e" : "none",
-              boxShadow: isNew
-                ? "0 0 20px rgba(34,197,94,0.6)"
-                : "none",
-            }}
-          >
-
-            <p style={{ fontWeight: "bold" }}>
-              {post.content}
-            </p>
-
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-
-              <div>
-
-                <p style={{ fontSize: 12 }}>
-                  Boosts
-                </p>
-
-                <motion.p
-                  key={post.boost_count}
-                  initial={{ scale: 1.4 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    fontSize: 22,
-                    fontWeight: "bold",
-                  }}
-                >
-                  {post.boost_count}
-                </motion.p>
-
-              </div>
-
-              <div style={{ display: "flex", gap: 10 }}>
-
-                <button
-                  onClick={() =>
-                    setExpandedChart(
-                      isExpanded ? null : post.id
-                    )
-                  }
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    background: "#fbbf24",
-                    border: "none",
-                    fontWeight: "bold",
-                    cursor: "pointer",
-                  }}
-                >
-                  {isExpanded ? "Hide Chart" : "View Chart"}
-                </button>
-
-                <button
-                  onClick={() => handleShare(post)}
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    background: "#6366f1",
-                    color: "white",
-                    border: "none",
-                    fontWeight: "bold",
-                    cursor: "pointer",
-                  }}
-                >
-                  Share
-                </button>
-
-              </div>
-
-            </div>
-
-            {isExpanded && (
-
-              <div
-                style={{
-                  marginTop: 15,
-                  height: 450,
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  background: "black",
-                }}
-              >
-
-                <iframe
-                  src={`https://dexscreener.com/base/${post.contract}?embed=1&theme=dark`}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    border: "none",
-                  }}
-                />
-
-              </div>
-
-            )}
-
-          </motion.div>
-
-        )
-
-      })}
-
-    </AnimatePresence>
-
-  </motion.div>
+</motion.div>
 
 </div>
 
 )
 
 }
+
+/* ---------------- STYLES ---------------- */
+
+const mainStyle: React.CSSProperties = {
+minHeight:"100vh",
+background:"#0f172a",
+padding:30,
+color:"white"
+}
+
+const loadingStyle: React.CSSProperties = {
+minHeight:"100vh",
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+background:"#0f172a",
+color:"white"
+}
+
+const titleStyle: React.CSSProperties = {
+fontSize:30,
+fontWeight:"bold",
+marginBottom:20,
+background:"linear-gradient(90deg,#6366f1,#22c55e)",
+WebkitBackgroundClip:"text",
+color:"transparent"
+}
+
+const backBtn: React.CSSProperties = {
+fontWeight:"bold",
+color:"#22c55e"
+}
+
+const glassCard: React.CSSProperties = {
+background:"rgba(255,255,255,0.05)",
+backdropFilter:"blur(10px)",
+padding:20,
+borderRadius:16,
+marginBottom:20
+}
+
+const pumpItem: React.CSSProperties = {
+padding:10,
+borderBottom:"1px solid rgba(255,255,255,0.1)"
+}
+
+const contractText: React.CSSProperties = {
+fontSize:12,
+wordBreak:"break-all"
+}
+
+const chartBtn: React.CSSProperties = {
+padding:"6px 12px",
+borderRadius:8,
+background:"#fbbf24",
+border:"none",
+fontWeight:"bold",
+cursor:"pointer"
+}
+
+const shareBtn: React.CSSProperties = {
+padding:"6px 12px",
+borderRadius:8,
+background:"#6366f1",
+color:"white",
+border:"none",
+fontWeight:"bold",
+cursor:"pointer"
+}
+
+const chartContainer: React.CSSProperties = {
+marginTop:15,
+height:400,
+borderRadius:12,
+overflow:"hidden",
+background:"black"
+  }
