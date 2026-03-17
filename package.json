@@ -33,7 +33,8 @@
     "prisma": "5.22.0",
     "typescript": "5.2.2",
     "@types/react": "18.2.21",
-    "@types/node": "20.6.1"
+    "@types/node": "20.6.1",
+    "@types/canvas-confetti": "^1.6.4"
   },
   "overrides": {
     "react": "18.2.0",
