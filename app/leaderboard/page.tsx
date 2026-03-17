@@ -20,7 +20,18 @@ export default function LeaderboardPage() {
 
       const res = await fetch("/api/leaderboard")
 
-      const data = await res.json()
+      const raw = await res.json()
+
+      // ✅ FIX: convert API → UI format (IMPORTANT)
+      const data: User[] = raw.map((u: any) => ({
+        wallet: u.wallet,
+        _count: {
+          wallet: u.totalBoosts
+        },
+        _sum: {
+          amount: u.totalSpent
+        }
+      }))
 
       setUsers(data)
 
