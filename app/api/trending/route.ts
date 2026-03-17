@@ -73,9 +73,20 @@ export async function GET() {
       .sort((a: any, b: any) => b.score - a.score)
       .slice(0, 20)
 
+    /* ----------------------------------------
+       🔥 FRONTEND COMPATIBILITY FIX
+    ---------------------------------------- */
+
+    const posts = ranked.map((token: any) => ({
+      postUrl: token.contract, // temporary mapping
+      contract: token.contract,
+      boosts: token.boosts
+    }))
+
     return NextResponse.json({
       success: true,
-      tokens: ranked
+      tokens: ranked,   // keep original
+      posts: posts      // 🔥 ADD THIS (IMPORTANT)
     })
 
   } catch (err) {
