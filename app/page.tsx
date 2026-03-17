@@ -58,9 +58,9 @@ setReferrer(referralParam.toLowerCase())
 const tiers = [
 {
 name: "Basic",
-price: "0.00001 ETH",
+price: "0.001 ETH",
 duration: "24 Hours Boost",
-value: parseEther("0.00001"),
+value: parseEther("0.001"),
 },
 {
 name: "Pro",
