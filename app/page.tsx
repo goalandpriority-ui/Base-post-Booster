@@ -56,21 +56,18 @@ name: "Basic",
 price: "0.00001 ETH",
 duration: "24 Hours Boost",
 value: parseEther("0.00001"),
-eth: "0.00001",
 },
 {
 name: "Pro",
 price: "0.003 ETH",
 duration: "48 Hours Boost",
 value: parseEther("0.003"),
-eth: "0.003",
 },
 {
 name: "Elite",
 price: "0.005 ETH",
 duration: "72 Hours Boost",
 value: parseEther("0.005"),
-eth: "0.005",
 },
 ]
 
@@ -259,45 +256,17 @@ saveBoost()
 
 return (
 
-<main style={{
-minHeight: "100vh",
-background: "#E3A6AE",
-padding: 20,
-textAlign: "center",
-maxWidth: 500,
-margin: "0 auto",
-color: "black"
-}}>
+<main style={mainStyle}>
 
 {/* HEADER */}
 
-<div style={{
-display:"flex",
-justifyContent:"space-between",
-alignItems:"center",
-marginBottom:20
-}}>
+<div style={headerStyle}>
 
-<h1 style={{
-fontSize:24,
-fontWeight:"bold",
-color:"#ffffff",
-background:"#3b82f6",
-padding:"10px 20px",
-borderRadius:12
-}}>
-Base Post Booster
+<h1 style={titleStyle}>
+🚀 Base Booster
 </h1>
 
-<button
-onClick={()=>setMenuOpen(!menuOpen)}
-style={{
-fontSize:24,
-background:"none",
-border:"none",
-cursor:"pointer"
-}}
->
+<button onClick={()=>setMenuOpen(!menuOpen)} style={menuBtn}>
 ☰
 </button>
 
@@ -306,48 +275,31 @@ cursor:"pointer"
 {/* MENU */}
 
 {menuOpen && (
-
-<div style={{
-background:"#ffffff",
-padding:15,
-borderRadius:12,
-marginBottom:20,
-textAlign:"left"
-}}>
-
+<div style={card}>
 <p><Link href="/trending">🔥 Trending Posts</Link></p>
 <p><Link href="/leaderboard">🏆 Leaderboard</Link></p>
 <p><Link href="/referrals">💰 Referral Earnings</Link></p>
 <p><Link href="/referral-leaderboard">👑 Referral Leaderboard</Link></p>
 <p><Link href="/wars">⚔️ Token Wars</Link></p>
-
 </div>
-
 )}
+
+{/* REFERRER */}
 
 {referrer && (
-
-<p style={{ marginBottom: 20, fontWeight: "bold" }}>
-Referred by: {referrer.slice(0,6)}...{referrer.slice(-4)}
+<p style={{ marginBottom: 20 }}>
+🎯 Referred by: {referrer.slice(0,6)}...{referrer.slice(-4)}
 </p>
-
 )}
 
+{/* WALLET */}
+
 {address && (
+<div style={card}>
+<p>🟢 Wallet Connected</p>
+<p>{address.slice(0,6)}...{address.slice(-4)}</p>
 
-<div style={{
-background:"#ffffff",
-padding:12,
-borderRadius:8,
-marginBottom:20
-}}>
-
-<p>Your referral link</p>
-
-<p style={{
-fontSize:12,
-wordBreak:"break-all"
-}}>
+<p style={{fontSize:12,marginTop:10}}>
 {MINI_APP_LINK}?ref={address}
 </p>
 
@@ -356,21 +308,15 @@ onClick={()=>{
 navigator.clipboard.writeText(`${MINI_APP_LINK}?ref=${address}`)
 alert("Referral link copied")
 }}
-style={{
-marginTop:8,
-padding:"6px 12px",
-background:"#3b82f6",
-border:"none",
-borderRadius:6,
-color:"white"
-}}
+style={copyBtn}
 >
 Copy Link
 </button>
 
 </div>
-
 )}
+
+{/* INPUT */}
 
 <input
 type="text"
@@ -387,36 +333,24 @@ style={inputStyle}
 {coinLoading && <p style={{ marginTop:10 }}>Detecting token...</p>}
 
 {contract && (
-
-<div style={{
-background:"#ffffff",
-padding:15,
-borderRadius:10,
-marginTop:15
-}}>
-<p><b>Contract:</b></p>
-<p style={{wordBreak:"break-all",fontSize:13}}>
+<div style={card}>
+<p>📜 Contract</p>
+<p style={{wordBreak:"break-all",fontSize:12}}>
 {contract}
 </p>
 </div>
-
 )}
 
 {coinData && (
-
-<div style={{
-background:"#ffffff",
-padding:15,
-borderRadius:10,
-marginTop:15
-}}>
+<div style={card}>
 <h3>{coinData.name}</h3>
-<p><b>Symbol:</b> {coinData.symbol}</p>
-<p><b>Price:</b> ${coinData.price}</p>
-<p><b>Market Cap:</b> ${coinData.marketCap}</p>
+<p>{coinData.symbol}</p>
+<p>${coinData.price}</p>
+<p>MC: ${coinData.marketCap}</p>
 </div>
-
 )}
+
+{/* TIERS */}
 
 <div style={{ marginTop:30 }}>
 
@@ -425,12 +359,10 @@ marginTop:15
 key={index}
 onClick={()=>setSelectedTier(index)}
 style={{
-background:selectedTier===index ? "#d1fae5":"#ffffff",
-padding:20,
-borderRadius:12,
-marginBottom:15,
-cursor:"pointer",
-border:selectedTier===index?"2px solid green":"1px solid #ccc"
+...card,
+border:selectedTier===index
+? "2px solid #22c55e"
+: "1px solid rgba(255,255,255,0.1)"
 }}
 >
 <h2>{tier.name}</h2>
@@ -441,25 +373,17 @@ border:selectedTier===index?"2px solid green":"1px solid #ccc"
 
 </div>
 
+{/* BUTTON */}
+
 <button
 onClick={handleBoost}
 disabled={loading}
-style={{
-marginTop:20,
-padding:"14px 20px",
-background:"black",
-border:"none",
-color:"white",
-fontWeight:"bold",
-borderRadius:10,
-width:"100%",
-fontSize:16
-}}
+style={boostBtn}
 >
 {loading
 ? "Processing..."
 : isConnected
-? "Boost Now"
+? "🚀 Boost Now"
 : "Connect Wallet"}
 </button>
 
@@ -469,11 +393,71 @@ fontSize:16
 
 }
 
+/* ---------------- STYLES ---------------- */
+
+const mainStyle: React.CSSProperties = {
+minHeight:"100vh",
+background:"#0f172a",
+color:"white",
+padding:20,
+maxWidth:500,
+margin:"0 auto"
+}
+
+const headerStyle: React.CSSProperties = {
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+marginBottom:20
+}
+
+const titleStyle: React.CSSProperties = {
+background:"linear-gradient(90deg,#6366f1,#22c55e)",
+padding:"10px 20px",
+borderRadius:12
+}
+
+const menuBtn: React.CSSProperties = {
+fontSize:22,
+background:"none",
+border:"none",
+color:"white"
+}
+
+const card: React.CSSProperties = {
+background:"rgba(255,255,255,0.05)",
+backdropFilter:"blur(10px)",
+padding:15,
+borderRadius:12,
+marginBottom:15
+}
+
 const inputStyle: React.CSSProperties = {
 padding:12,
 width:"100%",
 borderRadius:10,
-border:"1px solid #999",
-background:"#ffffff",
-color:"black"
+border:"1px solid rgba(255,255,255,0.1)",
+background:"#1e293b",
+color:"white"
+}
+
+const boostBtn: React.CSSProperties = {
+marginTop:20,
+padding:"14px",
+width:"100%",
+borderRadius:12,
+background:"linear-gradient(90deg,#22c55e,#4ade80)",
+color:"black",
+fontWeight:"bold",
+border:"none",
+boxShadow:"0 0 20px rgba(34,197,94,0.6)"
+}
+
+const copyBtn: React.CSSProperties = {
+marginTop:10,
+padding:"6px 12px",
+background:"#6366f1",
+border:"none",
+borderRadius:6,
+color:"white"
   }
