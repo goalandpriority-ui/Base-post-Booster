@@ -53,7 +53,7 @@ try {
 const body = await req.json()
 
 const wallet = String(body.wallet || "").toLowerCase()
-const postUrl = String(body.postUrl || "")
+const rawPostUrl = String(body.postUrl || "")
 const contract = body.contract
   ? String(body.contract).toLowerCase()
   : null
@@ -62,6 +62,13 @@ const txHash = String(body.txHash || "")
 const referrer = body.referrer
   ? String(body.referrer).toLowerCase()
   : null
+
+/* ---------------------------
+URL NORMALIZATION
+--------------------------- */
+
+// ✅ FIX: remove query params (VERY IMPORTANT)
+const postUrl = rawPostUrl.split("?")[0]
 
 /* ---------------------------
 BASIC VALIDATION
@@ -281,14 +288,14 @@ const expiresAt = new Date(
 )
 
 /* ---------------------------
-SAVE BOOST
+SAVE BOOST (SAFE)
 --------------------------- */
 
 const boost = await prisma.boost.create({
 
   data: {
     wallet,
-    postUrl,
+    postUrl, // ✅ FIXED URL
     contract,
     txHash,
     amount: paidEth,
@@ -307,7 +314,15 @@ return NextResponse.json({
   boost
 })
 
-} catch (error) {
+} catch (error: any) {
+
+// ✅ FIX: handle duplicate safely
+if (error.code === "P2002") {
+  return NextResponse.json({
+    success: true,
+    message: "Already saved"
+  })
+}
 
 console.error("SAVE BOOST ERROR:", error)
 
@@ -318,4 +333,4 @@ return NextResponse.json(
 
 }
 
-}
+    }
