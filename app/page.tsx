@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect } from "react"
 import Link from "next/link"
+import { motion, AnimatePresence } from "framer-motion"
 import { useAccount, useConnect, useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
 import { parseEther } from "viem"
 import { sdk } from "@farcaster/miniapp-sdk"
@@ -263,7 +264,7 @@ return (
 <div style={headerStyle}>
 
 <h1 style={titleStyle}>
-🚀 Base Booster
+Base Post Booster
 </h1>
 
 <button onClick={()=>setMenuOpen(!menuOpen)} style={menuBtn}>
@@ -274,15 +275,27 @@ return (
 
 {/* MENU */}
 
+<AnimatePresence>
 {menuOpen && (
-<div style={card}>
-<p><Link href="/trending">🔥 Trending Posts</Link></p>
-<p><Link href="/leaderboard">🏆 Leaderboard</Link></p>
-<p><Link href="/referrals">💰 Referral Earnings</Link></p>
-<p><Link href="/referral-leaderboard">👑 Referral Leaderboard</Link></p>
-<p><Link href="/wars">⚔️ Token Wars</Link></p>
-</div>
+
+<motion.div
+initial={{ opacity: 0, y: -20 }}
+animate={{ opacity: 1, y: 0 }}
+exit={{ opacity: 0, y: -20 }}
+transition={{ duration: 0.25 }}
+style={card}
+>
+
+<MenuItem href="/trending" label="🔥 Trending Posts" />
+<MenuItem href="/leaderboard" label="🏆 Leaderboard" />
+<MenuItem href="/referrals" label="💰 Referral Earnings" />
+<MenuItem href="/referral-leaderboard" label="👑 Referral Leaderboard" />
+<MenuItem href="/wars" label="⚔️ Token Wars" />
+
+</motion.div>
+
 )}
+</AnimatePresence>
 
 {/* REFERRER */}
 
@@ -393,6 +406,35 @@ style={boostBtn}
 
 }
 
+/* ---------------- MENU ITEM ---------------- */
+
+function MenuItem({ href, label }: any) {
+
+return (
+
+<Link href={href} style={{ textDecoration: "none" }}>
+
+<div
+style={{
+padding: "10px 12px",
+borderRadius: 10,
+marginBottom: 6,
+color: "white",
+background: "rgba(255,255,255,0.05)",
+transition: "0.2s"
+}}
+>
+
+{label}
+
+</div>
+
+</Link>
+
+)
+
+}
+
 /* ---------------- STYLES ---------------- */
 
 const mainStyle: React.CSSProperties = {
@@ -460,4 +502,4 @@ background:"#6366f1",
 border:"none",
 borderRadius:6,
 color:"white"
-  }
+}
