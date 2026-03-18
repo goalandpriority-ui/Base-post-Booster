@@ -58,12 +58,9 @@ try {
     (a, b) => b.boost_count - a.boost_count
   )
 
-  // 🔥 TOKEN FETCH (STABLE VERSION)
+  // TOKEN FETCH
   sorted.forEach(async (p)=>{
-    if(
-      p.contract &&
-      !fetchingContracts.current.has(p.contract)
-    ){
+    if(p.contract && !fetchingContracts.current.has(p.contract)){
       fetchingContracts.current.add(p.contract)
 
       try{
@@ -97,17 +94,12 @@ try {
           }))
         }
 
-        if(price){
-          setTokenPrices(prev => ({
-            ...prev,
-            [p.contract]: Number(price).toFixed(6)
-          }))
-        }else{
-          setTokenPrices(prev => ({
-            ...prev,
-            [p.contract]: "0.000000"
-          }))
-        }
+        setTokenPrices(prev => ({
+          ...prev,
+          [p.contract]: price
+            ? Number(price).toFixed(6)
+            : "0.000000"
+        }))
 
       }catch{
         setTokenNames(prev => ({
@@ -150,14 +142,12 @@ try {
 const fetchPump = async () => {
 
 try {
-
   const res = await fetch("/api/pump-detection")
   const data = await res.json()
 
   if (data.success) {
     setPumpTokens(data.data)
   }
-
 } catch (err) {
   console.error("Pump detection fetch failed", err)
 }
@@ -181,12 +171,26 @@ return () => clearInterval(interval)
 /* SHARE */
 const handleShare = (post: Post) => {
 
+  const safePostUrl =
+    post.content && post.content.startsWith("http")
+      ? post.content
+      : ""
+
+  const appUrl = MINIAPP_URL.startsWith("http")
+    ? MINIAPP_URL
+    : `https://${MINIAPP_URL}`
+
   const text = encodeURIComponent(
     `🚀 Trending on Base Post Booster!\n\n` +
     `🔥 Boosts: ${post.boost_count}\n\n` +
-    `👀 Check this post:\n${post.content}\n\n` +
+
+    (safePostUrl
+      ? `👀 Check this post:\n${safePostUrl}\n\n`
+      : "") +
+
     `📜 Contract:\n${post.contract}\n\n` +
-    `⚡ Boost your own post:\n${MINIAPP_URL}`
+
+    `⚡ Open Booster:\n${appUrl}`
   )
 
   window.open(`https://warpcast.com/~/compose?text=${text}`, "_blank")
@@ -253,17 +257,13 @@ boxShadow: isTop
   </p>
 )}
 
-{/* 🔥 TOKEN HEADER */}
+{/* TOKEN HEADER */}
 <div style={{display:"flex",alignItems:"center",gap:10}}>
 
 {tokenImages[post.contract] ? (
   <img
     src={tokenImages[post.contract]}
-    style={{
-      width:30,
-      height:30,
-      borderRadius:"50%"
-    }}
+    style={{width:30,height:30,borderRadius:"50%"}}
   />
 ) : (
   <div style={{
@@ -276,20 +276,16 @@ boxShadow: isTop
 
 <div>
 <p style={{color:"#22c55e",fontWeight:"bold"}}>
-{tokenNames[post.contract]}
+{tokenNames[post.contract] || "Loading token..."}
 </p>
 
-<p style={{
-  fontSize:12,
-  color:"#9ca3af"
-}}>
-💰 ${tokenPrices[post.contract]}
+<p style={{fontSize:12,color:"#9ca3af"}}>
+💰 ${tokenPrices[post.contract] || "0.000000"}
 </p>
 </div>
 
 </div>
 
-{/* POST LINK */}
 <a
 href={post.content !== "No post link" ? post.content : "#"}
 target="_blank"
@@ -303,7 +299,6 @@ textDecoration:"underline"
 {post.content}
 </a>
 
-{/* CONTRACT */}
 <a
 href={`https://dexscreener.com/base/${post.contract}`}
 target="_blank"
