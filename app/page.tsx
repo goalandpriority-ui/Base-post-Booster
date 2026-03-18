@@ -330,7 +330,7 @@ style={card}
 <MenuItem href="/referrals" label="💰 Referral Earnings" />
 <MenuItem href="/referral-leaderboard" label="👑 Referral Leaderboard" />
 <MenuItem href="/wars" label="⚔️ Token Wars" />
-
+<MenuItem href="/profile" label="👤 Creator Profile" />
 </motion.div>
 
 )}
