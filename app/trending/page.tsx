@@ -27,6 +27,7 @@ export default function TrendingPage() {
 
 const [posts, setPosts] = useState<Post[]>([])
 const [pumpTokens, setPumpTokens] = useState<PumpToken[]>([])
+const [tokenNames, setTokenNames] = useState<Record<string,string>>({})
 const [loading, setLoading] = useState(true)
 const [newIds, setNewIds] = useState<string[]>([])
 const [expandedChart, setExpandedChart] = useState<string | null>(null)
@@ -38,9 +39,7 @@ const fetchPosts = async () => {
 try {
 
   const res = await fetch("/api/trending")
-
   const raw = await res.json()
-
   const data = raw.posts || []
 
   const mapped: Post[] = data.map((p: any) => ({
@@ -56,6 +55,20 @@ try {
     (a, b) => b.boost_count - a.boost_count
   )
 
+  // 🔥 TOKEN NAME FETCH (NEW)
+  sorted.forEach(async (p)=>{
+    if(p.contract && !tokenNames[p.contract]){
+      try{
+        const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${p.contract}`)
+        const data = await res.json()
+        const name = data?.pairs?.[0]?.baseToken?.name
+        if(name){
+          setTokenNames(prev => ({...prev,[p.contract]:name}))
+        }
+      }catch{}
+    }
+  })
+
   const currentIds = sorted.map((p) => p.id)
 
   const newlyAdded = currentIds.filter(
@@ -63,25 +76,18 @@ try {
   )
 
   if (previousIds.current.length > 0 && newlyAdded.length > 0) {
-
     setNewIds(newlyAdded)
-
     setTimeout(() => setNewIds([]), 3000)
-
   }
 
   previousIds.current = currentIds
 
   setPosts(sorted)
-
   setLoading(false)
 
 } catch (err) {
-
   console.error(err)
-
   setLoading(false)
-
 }
 
 }
@@ -91,7 +97,6 @@ const fetchPump = async () => {
 try {
 
   const res = await fetch("/api/pump-detection")
-
   const data = await res.json()
 
   if (data.success) {
@@ -99,9 +104,7 @@ try {
   }
 
 } catch (err) {
-
   console.error("Pump detection fetch failed", err)
-
 }
 
 }
@@ -112,29 +115,26 @@ fetchPosts()
 fetchPump()
 
 const interval = setInterval(() => {
-
   fetchPosts()
   fetchPump()
-
 }, 5000)
 
 return () => clearInterval(interval)
 
 }, [])
 
-/* ✅ UPDATED SHARE (FIXED NAME + LINK) */
+/* SHARE */
 const handleShare = (post: Post) => {
 
   const text = encodeURIComponent(
     `🚀 Trending on Base Post Booster!\n\n` +
     `🔥 Boosts: ${post.boost_count}\n\n` +
     `👀 Check this post:\n${post.content}\n\n` +
+    `📜 Contract:\n${post.contract}\n\n` +
     `⚡ Boost your own post:\n${MINIAPP_URL}`
   )
 
-  const url = `https://warpcast.com/~/compose?text=${text}`
-
-  window.open(url, "_blank")
+  window.open(`https://warpcast.com/~/compose?text=${text}`, "_blank")
 }
 
 if (loading) {
@@ -232,7 +232,12 @@ boxShadow: isNew ? "0 0 25px rgba(34,197,94,0.6)" : "none"
 }}
 >
 
-{/* ✅ CLICKABLE POST LINK */}
+{/* 🔥 TOKEN NAME */}
+<p style={{color:"#22c55e",fontWeight:"bold"}}>
+{tokenNames[post.contract] || "Loading token..."}
+</p>
+
+{/* POST LINK */}
 <a
 href={post.content !== "No post link" ? post.content : "#"}
 target="_blank"
@@ -246,6 +251,35 @@ textDecoration:"underline"
 >
 {post.content}
 </a>
+
+{/* CONTRACT CLICKABLE */}
+<a
+href={`https://dexscreener.com/base/${post.contract}`}
+target="_blank"
+style={{
+fontSize:12,
+color:"#9ca3af",
+display:"block",
+marginTop:5
+}}
+>
+📜 {post.contract}
+</a>
+
+<button
+onClick={()=>navigator.clipboard.writeText(post.contract)}
+style={{
+marginTop:5,
+fontSize:12,
+padding:"4px 8px",
+borderRadius:6,
+background:"#334155",
+color:"white",
+border:"none"
+}}
+>
+Copy Contract
+</button>
 
 <div style={{ display:"flex", justifyContent:"space-between" }}>
 
@@ -326,7 +360,7 @@ border:"none"
 
 }
 
-/* ---------------- STYLES ---------------- */
+/* STYLES SAME */
 
 const mainStyle: React.CSSProperties = {
 minHeight:"100vh",
