@@ -5,20 +5,20 @@ import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 
 type Post = {
-id: string
-content: string
-contract: string
-boost_count: number
+  id: string
+  content: string
+  contract: string
+  boost_count: number
 }
 
 type PumpToken = {
-contract: string
-boosts: number
-wallets: number
-posts: number
-whale: boolean
-score: number
-status: string
+  contract: string
+  boosts: number
+  wallets: number
+  posts: number
+  whale: boolean
+  score: number
+  status: string
 }
 
 const MINIAPP_URL = "https://base-post-booster.vercel.app"
@@ -120,31 +120,19 @@ return () => clearInterval(interval)
 
 }, [])
 
-const handleShare = async (post: Post) => {
+/* ✅ UPDATED SHARE (FARCASTER DIRECT) */
+const handleShare = (post: Post) => {
 
-const shareUrl = `${MINIAPP_URL}/trending`
+  const text = encodeURIComponent(
+    `🚀 Trending on Base Booster!\n\n` +
+    `🔥 Boosts: ${post.boost_count}\n\n` +
+    `👀 Check this post:\n${post.content}\n\n` +
+    `⚡ Boost your own post:\n${MINIAPP_URL}`
+  )
 
-const shareText = `${post.content}
+  const url = `https://warpcast.com/~/compose?text=${text}`
 
-Check leaderboard:
-${shareUrl}`
-
-if (navigator.share) {
-
-  await navigator.share({
-    title: "Trending Boosted Post",
-    text: post.content,
-    url: shareUrl,
-  })
-
-} else {
-
-  await navigator.clipboard.writeText(shareText)
-
-  alert("Miniapp link copied!")
-
-}
-
+  window.open(url, "_blank")
 }
 
 if (loading) {
@@ -242,9 +230,20 @@ boxShadow: isNew ? "0 0 25px rgba(34,197,94,0.6)" : "none"
 }}
 >
 
-<p style={{ fontWeight:"bold", wordBreak:"break-all" }}>
+{/* ✅ CLICKABLE POST LINK */}
+<a
+href={post.content}
+target="_blank"
+rel="noopener noreferrer"
+style={{
+fontWeight:"bold",
+wordBreak:"break-all",
+color:"#60a5fa",
+textDecoration:"underline"
+}}
+>
 {post.content}
-</p>
+</a>
 
 <div style={{ display:"flex", justifyContent:"space-between" }}>
 
@@ -400,4 +399,4 @@ height:400,
 borderRadius:12,
 overflow:"hidden",
 background:"black"
-  }
+}
