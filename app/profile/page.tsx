@@ -57,6 +57,42 @@ style={linkStyleDark}
 <p>⚡ Web3 Growth Tools</p>
 </div>
 
+{/* 💰 TIP SECTION */}
+
+<div style={tipBox}>
+
+<p style={{marginBottom:10,fontWeight:"bold"}}>
+💰 Support My Work
+</p>
+
+<p style={{fontSize:12,opacity:0.7,marginBottom:15}}>
+Send a tip on Base 🚀
+</p>
+
+<p style={walletText}>
+0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2
+</p>
+
+<button
+onClick={()=>{
+navigator.clipboard.writeText("0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2")
+}}
+style={copyBtn}
+>
+Copy Address
+</button>
+
+<a
+href="https://basescan.org/address/0xffF8b3F8D8b1F06EDE51fc331022B045495cEEA2"
+target="_blank"
+rel="noopener noreferrer"
+style={tipBtn}
+>
+⚡ Send Tip
+</a>
+
+</div>
+
 {/* BACK */}
 
 <div style={{marginTop:40}}>
@@ -141,8 +177,49 @@ maxWidth:400,
 marginInline:"auto"
 }
 
+/* 💰 TIP STYLES */
+
+const tipBox: React.CSSProperties = {
+marginTop:30,
+padding:20,
+background:"rgba(255,255,255,0.05)",
+borderRadius:12,
+maxWidth:400,
+marginInline:"auto",
+textAlign:"center"
+}
+
+const walletText: React.CSSProperties = {
+fontSize:12,
+wordBreak:"break-all",
+marginBottom:10,
+opacity:0.8
+}
+
+const copyBtn: React.CSSProperties = {
+padding:"6px 10px",
+borderRadius:6,
+background:"#334155",
+color:"white",
+border:"none",
+marginBottom:10,
+cursor:"pointer"
+}
+
+const tipBtn: React.CSSProperties = {
+display:"block",
+marginTop:10,
+padding:"10px",
+borderRadius:10,
+background:"linear-gradient(90deg,#22c55e,#4ade80)",
+color:"black",
+fontWeight:"bold",
+textDecoration:"none",
+boxShadow:"0 0 15px rgba(34,197,94,0.6)"
+}
+
 const backBtn: React.CSSProperties = {
 color:"#22c55e",
 fontWeight:"bold",
 fontSize:16
-  }
+}
