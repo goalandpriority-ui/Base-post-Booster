@@ -33,6 +33,7 @@ const [newIds, setNewIds] = useState<string[]>([])
 const [expandedChart, setExpandedChart] = useState<string | null>(null)
 
 const previousIds = useRef<string[]>([])
+const fetchingContracts = useRef<Set<string>>(new Set())
 
 const fetchPosts = async () => {
 
@@ -55,17 +56,40 @@ try {
     (a, b) => b.boost_count - a.boost_count
   )
 
-  // 🔥 TOKEN NAME FETCH (NEW)
+  // 🔥 SAFE TOKEN FETCH (NO SPAM + FALLBACK READY)
   sorted.forEach(async (p)=>{
-    if(p.contract && !tokenNames[p.contract]){
+    if(
+      p.contract &&
+      !tokenNames[p.contract] &&
+      !fetchingContracts.current.has(p.contract)
+    ){
+      fetchingContracts.current.add(p.contract)
+
       try{
         const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${p.contract}`)
         const data = await res.json()
-        const name = data?.pairs?.[0]?.baseToken?.name
+
+        const name =
+          data?.pairs?.[0]?.baseToken?.name ||
+          data?.pairs?.[0]?.baseToken?.symbol
+
         if(name){
           setTokenNames(prev => ({...prev,[p.contract]:name}))
+        }else{
+          setTokenNames(prev => ({
+            ...prev,
+            [p.contract]:
+              p.contract.slice(0,6) + "..." + p.contract.slice(-4)
+          }))
         }
-      }catch{}
+
+      }catch{
+        setTokenNames(prev => ({
+          ...prev,
+          [p.contract]:
+            p.contract.slice(0,6) + "..." + p.contract.slice(-4)
+        }))
+      }
     }
   })
 
@@ -232,9 +256,11 @@ boxShadow: isNew ? "0 0 25px rgba(34,197,94,0.6)" : "none"
 }}
 >
 
-{/* 🔥 TOKEN NAME */}
+{/* 🔥 TOKEN NAME FIXED */}
 <p style={{color:"#22c55e",fontWeight:"bold"}}>
-{tokenNames[post.contract] || "Loading token..."}
+{tokenNames[post.contract] || (post.contract
+  ? post.contract.slice(0,6)+"..."+post.contract.slice(-4)
+  : "Unknown Token")}
 </p>
 
 {/* POST LINK */}
@@ -360,7 +386,7 @@ border:"none"
 
 }
 
-/* STYLES SAME */
+/* STYLES */
 
 const mainStyle: React.CSSProperties = {
 minHeight:"100vh",
