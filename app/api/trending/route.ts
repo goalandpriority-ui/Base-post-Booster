@@ -34,8 +34,14 @@ export async function GET() {
           whales: 0,
           totalAmount: 0,
           score: 0,
-          lastBoost: boost.createdAt
+          lastBoost: boost.createdAt,
+          postUrl: boost.postUrl // ✅ ADD THIS
         }
+      }
+
+      // ✅ ALWAYS UPDATE LATEST VALID POST LINK
+      if (boost.postUrl && boost.postUrl.startsWith("http")) {
+        contractMap[key].postUrl = boost.postUrl
       }
 
       const hoursOld =
@@ -78,15 +84,15 @@ export async function GET() {
     ---------------------------------------- */
 
     const posts = ranked.map((token: any) => ({
-      postUrl: token.contract, // temporary mapping
+      postUrl: token.postUrl || null, // ✅ FIXED
       contract: token.contract,
       boosts: token.boosts
     }))
 
     return NextResponse.json({
       success: true,
-      tokens: ranked,   // keep original
-      posts: posts      // 🔥 ADD THIS (IMPORTANT)
+      tokens: ranked,
+      posts: posts
     })
 
   } catch (err) {
@@ -99,4 +105,4 @@ export async function GET() {
     )
 
   }
-}
+                                  }
