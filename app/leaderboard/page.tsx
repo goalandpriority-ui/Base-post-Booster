@@ -19,27 +19,20 @@ export default function LeaderboardPage() {
     try {
 
       const res = await fetch("/api/leaderboard")
-
       const raw = await res.json()
 
       const data: User[] = raw.map((u: any) => ({
         wallet: u.wallet,
-        _count: {
-          wallet: u.totalBoosts
-        },
-        _sum: {
-          amount: u.totalSpent
-        }
+        _count: { wallet: u.totalBoosts },
+        _sum: { amount: u.totalSpent }
       }))
 
       setUsers(data)
       setLoading(false)
 
     } catch (err) {
-
       console.error(err)
       setLoading(false)
-
     }
 
   }
@@ -47,31 +40,24 @@ export default function LeaderboardPage() {
   useEffect(() => {
 
     loadLeaderboard()
-
     const interval = setInterval(loadLeaderboard, 10000)
-
     return () => clearInterval(interval)
 
   }, [])
 
   const getRankIcon = (rank: number) => {
-
-    if (rank === 0) return "🥇"
+    if (rank === 0) return "👑"
     if (rank === 1) return "🥈"
     if (rank === 2) return "🥉"
-
     return `#${rank + 1}`
-
   }
 
   if (loading) {
-
     return (
       <main style={loadingStyle}>
         Loading leaderboard...
       </main>
     )
-
   }
 
   return (
@@ -85,6 +71,8 @@ export default function LeaderboardPage() {
       {users.map((user, i) => {
 
         const isTop = i === 0
+        const eth = Number(user._sum.amount)
+        const usd = (eth * 3000).toFixed(2) // approx ETH price
 
         return (
 
@@ -93,13 +81,15 @@ export default function LeaderboardPage() {
             style={{
               ...card,
               border: isTop
-                ? "2px solid #22c55e"
+                ? "2px solid gold"
                 : "1px solid rgba(255,255,255,0.1)",
               boxShadow: isTop
-                ? "0 0 25px rgba(34,197,94,0.6)"
+                ? "0 0 40px gold"
                 : "none"
             }}
           >
+
+            {isTop && <p style={{color:"gold"}}>👑 TOP BOOSTER</p>}
 
             <h3 style={rankStyle}>
               {getRankIcon(i)}
@@ -111,12 +101,20 @@ export default function LeaderboardPage() {
             </p>
 
             <p style={{ marginTop: 10 }}>
-              Boosts: {user._count.wallet}
+              🚀 Boosts: {user._count.wallet}
             </p>
 
             <p style={ethStyle}>
-              ETH Spent: {Number(user._sum.amount).toFixed(6)}
+              Ξ {eth.toFixed(6)} (~${usd})
             </p>
+
+            {/* 🔥 PROGRESS BAR */}
+            <div style={progressBg}>
+              <div style={{
+                ...progressFill,
+                width: `${Math.min(user._count.wallet * 10, 100)}%`
+              }} />
+            </div>
 
           </div>
 
@@ -125,11 +123,9 @@ export default function LeaderboardPage() {
       })}
 
       <div style={{ marginTop: 40 }}>
-
         <Link href="/" style={backBtn}>
           ← Back
         </Link>
-
       </div>
 
     </main>
@@ -138,9 +134,9 @@ export default function LeaderboardPage() {
 
 }
 
-/* ---------------- STYLES ---------------- */
+/* STYLES */
 
-const mainStyle: React.CSSProperties = {
+const mainStyle = {
   minHeight:"100vh",
   background:"#0f172a",
   padding:30,
@@ -148,7 +144,7 @@ const mainStyle: React.CSSProperties = {
   color:"white"
 }
 
-const loadingStyle: React.CSSProperties = {
+const loadingStyle = {
   minHeight:"100vh",
   background:"#0f172a",
   display:"flex",
@@ -157,7 +153,7 @@ const loadingStyle: React.CSSProperties = {
   color:"white"
 }
 
-const titleStyle: React.CSSProperties = {
+const titleStyle = {
   fontSize:32,
   fontWeight:"bold",
   marginBottom:30,
@@ -166,7 +162,7 @@ const titleStyle: React.CSSProperties = {
   color:"transparent"
 }
 
-const card: React.CSSProperties = {
+const card = {
   background:"rgba(255,255,255,0.05)",
   backdropFilter:"blur(10px)",
   padding:20,
@@ -174,23 +170,29 @@ const card: React.CSSProperties = {
   marginBottom:15
 }
 
-const rankStyle: React.CSSProperties = {
-  fontSize:22,
-  marginBottom:10
-}
+const rankStyle = { fontSize:22 }
 
-const walletStyle: React.CSSProperties = {
-  fontWeight:"bold",
-  fontSize:16
-}
+const walletStyle = { fontWeight:"bold", fontSize:16 }
 
-const ethStyle: React.CSSProperties = {
+const ethStyle = {
   fontWeight:"bold",
   color:"#22c55e",
   marginTop:5
 }
 
-const backBtn: React.CSSProperties = {
+const progressBg = {
+  height:6,
+  background:"#1e293b",
+  borderRadius:10,
+  marginTop:10
+}
+
+const progressFill = {
+  height:"100%",
+  background:"linear-gradient(90deg,#22c55e,#4ade80)"
+}
+
+const backBtn = {
   fontWeight:"bold",
   fontSize:18,
   color:"#22c55e"
