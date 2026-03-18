@@ -58,7 +58,7 @@ try {
     (a, b) => b.boost_count - a.boost_count
   )
 
-  // 🔥 TOKEN FULL DATA FETCH
+  // 🔥 TOKEN FETCH (STABLE VERSION)
   sorted.forEach(async (p)=>{
     if(
       p.contract &&
@@ -77,29 +77,35 @@ try {
           pair?.baseToken?.symbol
 
         const image =
-          pair?.info?.imageUrl
+          pair?.info?.imageUrl ||
+          pair?.baseToken?.logoURI
 
         const price =
           pair?.priceUsd
 
-        if(name){
-          setTokenNames(prev => ({...prev,[p.contract]:name}))
-        }else{
-          setTokenNames(prev => ({
-            ...prev,
-            [p.contract]:
-              p.contract.slice(0,6)+"..."+p.contract.slice(-4)
-          }))
-        }
+        setTokenNames(prev => ({
+          ...prev,
+          [p.contract]: name
+            ? name
+            : p.contract.slice(0,6)+"..."+p.contract.slice(-4)
+        }))
 
         if(image){
-          setTokenImages(prev => ({...prev,[p.contract]:image}))
+          setTokenImages(prev => ({
+            ...prev,
+            [p.contract]: image
+          }))
         }
 
         if(price){
           setTokenPrices(prev => ({
             ...prev,
             [p.contract]: Number(price).toFixed(6)
+          }))
+        }else{
+          setTokenPrices(prev => ({
+            ...prev,
+            [p.contract]: "0.000000"
           }))
         }
 
@@ -108,6 +114,11 @@ try {
           ...prev,
           [p.contract]:
             p.contract.slice(0,6)+"..."+p.contract.slice(-4)
+        }))
+
+        setTokenPrices(prev => ({
+          ...prev,
+          [p.contract]: "0.000000"
         }))
       }
     }
@@ -203,8 +214,6 @@ return (
 </Link>
 </div>
 
-{/* POSTS */}
-
 <motion.div layout style={{ display:"flex", flexDirection:"column", gap:20 }}>
 
 <AnimatePresence>
@@ -238,7 +247,6 @@ boxShadow: isTop
 }}
 >
 
-{/* 👑 TOP BADGE */}
 {isTop && (
   <p style={{color:"gold",fontWeight:"bold"}}>
     👑 #1 TRENDING
@@ -248,27 +256,35 @@ boxShadow: isTop
 {/* 🔥 TOKEN HEADER */}
 <div style={{display:"flex",alignItems:"center",gap:10}}>
 
-{tokenImages[post.contract] && (
+{tokenImages[post.contract] ? (
   <img
     src={tokenImages[post.contract]}
-    style={{width:30,height:30,borderRadius:"50%"}}
+    style={{
+      width:30,
+      height:30,
+      borderRadius:"50%"
+    }}
   />
+) : (
+  <div style={{
+    width:30,
+    height:30,
+    borderRadius:"50%",
+    background:"#1e293b"
+  }} />
 )}
 
 <div>
 <p style={{color:"#22c55e",fontWeight:"bold"}}>
-{tokenNames[post.contract] || (
-  post.contract
-    ? post.contract.slice(0,6)+"..."+post.contract.slice(-4)
-    : "Unknown Token"
-)}
+{tokenNames[post.contract]}
 </p>
 
-{tokenPrices[post.contract] && (
-  <p style={{fontSize:12,color:"#9ca3af"}}>
-    💰 ${tokenPrices[post.contract]}
-  </p>
-)}
+<p style={{
+  fontSize:12,
+  color:"#9ca3af"
+}}>
+💰 ${tokenPrices[post.contract]}
+</p>
 </div>
 
 </div>
