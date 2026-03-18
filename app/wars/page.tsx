@@ -91,7 +91,6 @@ boxShadow: isTop ? "0 0 40px gold" : "none"
 </b>
 </p>
 
-{/* 🔥 PROGRESS BAR */}
 <div style={progressBg}>
   <div style={{
     ...progressFill,
@@ -131,7 +130,7 @@ Boost this coin
 
 /* STYLES */
 
-const mainStyle = {
+const mainStyle: React.CSSProperties = {
 minHeight:"100vh",
 background:"#0f172a",
 padding:20,
@@ -140,7 +139,7 @@ margin:"0 auto",
 color:"white"
 }
 
-const titleStyle = {
+const titleStyle: React.CSSProperties = {
 fontSize:30,
 textAlign:"center",
 fontWeight:"bold",
@@ -150,7 +149,7 @@ WebkitBackgroundClip:"text",
 color:"transparent"
 }
 
-const card = {
+const card: React.CSSProperties = {
 background:"rgba(255,255,255,0.05)",
 backdropFilter:"blur(10px)",
 padding:15,
@@ -158,25 +157,25 @@ borderRadius:16,
 marginBottom:15
 }
 
-const progressBg = {
+const progressBg: React.CSSProperties = {
 height:6,
 background:"#1e293b",
 borderRadius:10,
 marginTop:10
 }
 
-const progressFill = {
+const progressFill: React.CSSProperties = {
 height:"100%",
 background:"linear-gradient(90deg,#22c55e,#4ade80)"
 }
 
-const contractText = {
+const contractText: React.CSSProperties = {
 fontSize:12,
 wordBreak:"break-all",
 opacity:0.7
 }
 
-const boostBtn = {
+const boostBtn: React.CSSProperties = {
 display:"inline-block",
 marginTop:10,
 background:"linear-gradient(90deg,#22c55e,#4ade80)",
@@ -188,7 +187,7 @@ fontWeight:"bold",
 boxShadow:"0 0 15px rgba(34,197,94,0.6)"
 }
 
-const backBtn = {
+const backBtn: React.CSSProperties = {
 color:"#22c55e",
 fontWeight:"bold"
 }
