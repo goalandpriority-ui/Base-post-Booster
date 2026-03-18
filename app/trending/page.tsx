@@ -44,8 +44,10 @@ try {
   const data = raw.posts || []
 
   const mapped: Post[] = data.map((p: any) => ({
-    id: p.postUrl,
-    content: p.postUrl,
+    id: p.postUrl || p.contract,
+    content: p.postUrl && p.postUrl.startsWith("http")
+      ? p.postUrl
+      : "No post link",
     contract: p.contract || "",
     boost_count: p.boosts || 0
   }))
@@ -120,11 +122,11 @@ return () => clearInterval(interval)
 
 }, [])
 
-/* ✅ UPDATED SHARE (FARCASTER DIRECT) */
+/* ✅ UPDATED SHARE (FIXED NAME + LINK) */
 const handleShare = (post: Post) => {
 
   const text = encodeURIComponent(
-    `🚀 Trending on Base Booster!\n\n` +
+    `🚀 Trending on Base Post Booster!\n\n` +
     `🔥 Boosts: ${post.boost_count}\n\n` +
     `👀 Check this post:\n${post.content}\n\n` +
     `⚡ Boost your own post:\n${MINIAPP_URL}`
@@ -232,7 +234,7 @@ boxShadow: isNew ? "0 0 25px rgba(34,197,94,0.6)" : "none"
 
 {/* ✅ CLICKABLE POST LINK */}
 <a
-href={post.content}
+href={post.content !== "No post link" ? post.content : "#"}
 target="_blank"
 rel="noopener noreferrer"
 style={{
