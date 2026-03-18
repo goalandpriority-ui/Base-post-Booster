@@ -28,6 +28,8 @@ export default function TrendingPage() {
 const [posts, setPosts] = useState<Post[]>([])
 const [pumpTokens, setPumpTokens] = useState<PumpToken[]>([])
 const [tokenNames, setTokenNames] = useState<Record<string,string>>({})
+const [tokenImages, setTokenImages] = useState<Record<string,string>>({})
+const [tokenPrices, setTokenPrices] = useState<Record<string,string>>({})
 const [loading, setLoading] = useState(true)
 const [newIds, setNewIds] = useState<string[]>([])
 const [expandedChart, setExpandedChart] = useState<string | null>(null)
@@ -56,11 +58,10 @@ try {
     (a, b) => b.boost_count - a.boost_count
   )
 
-  // 🔥 SAFE TOKEN FETCH (NO SPAM + FALLBACK READY)
+  // 🔥 TOKEN FULL DATA FETCH
   sorted.forEach(async (p)=>{
     if(
       p.contract &&
-      !tokenNames[p.contract] &&
       !fetchingContracts.current.has(p.contract)
     ){
       fetchingContracts.current.add(p.contract)
@@ -69,9 +70,17 @@ try {
         const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${p.contract}`)
         const data = await res.json()
 
+        const pair = data?.pairs?.[0]
+
         const name =
-          data?.pairs?.[0]?.baseToken?.name ||
-          data?.pairs?.[0]?.baseToken?.symbol
+          pair?.baseToken?.name ||
+          pair?.baseToken?.symbol
+
+        const image =
+          pair?.info?.imageUrl
+
+        const price =
+          pair?.priceUsd
 
         if(name){
           setTokenNames(prev => ({...prev,[p.contract]:name}))
@@ -79,7 +88,18 @@ try {
           setTokenNames(prev => ({
             ...prev,
             [p.contract]:
-              p.contract.slice(0,6) + "..." + p.contract.slice(-4)
+              p.contract.slice(0,6)+"..."+p.contract.slice(-4)
+          }))
+        }
+
+        if(image){
+          setTokenImages(prev => ({...prev,[p.contract]:image}))
+        }
+
+        if(price){
+          setTokenPrices(prev => ({
+            ...prev,
+            [p.contract]: Number(price).toFixed(6)
           }))
         }
 
@@ -87,7 +107,7 @@ try {
         setTokenNames(prev => ({
           ...prev,
           [p.contract]:
-            p.contract.slice(0,6) + "..." + p.contract.slice(-4)
+            p.contract.slice(0,6)+"..."+p.contract.slice(-4)
         }))
       }
     }
@@ -162,13 +182,11 @@ const handleShare = (post: Post) => {
 }
 
 if (loading) {
-
 return (
   <div style={loadingStyle}>
     Loading trending posts...
   </div>
 )
-
 }
 
 return (
@@ -185,61 +203,17 @@ return (
 </Link>
 </div>
 
-{/* PUMP SECTION */}
-
-{pumpTokens.length > 0 && (
-
-<div style={glassCard}>
-
-<h2 style={{ marginBottom: 20 }}>
-🚀 Auto Pump Detection
-</h2>
-
-{pumpTokens.slice(0,5).map((token,index)=>{
-
-let badge = ""
-
-if(token.status==="trending") badge="🚀 TRENDING"
-else if(token.status==="hot") badge="🔥 HOT"
-else if(token.status==="pumping") badge="📈 PUMPING"
-else badge="NORMAL"
-
-return(
-
-<div key={index} style={pumpItem}>
-
-<p style={{ fontWeight:"bold", color:"#22c55e" }}>
-{badge}
-</p>
-
-<p style={contractText}>
-{token.contract || "unknown"}
-</p>
-
-<p style={{ fontSize:13 }}>
-Boosts: {token.boosts} | Wallets: {token.wallets}
-</p>
-
-</div>
-
-)
-
-})}
-
-</div>
-
-)}
-
 {/* POSTS */}
 
 <motion.div layout style={{ display:"flex", flexDirection:"column", gap:20 }}>
 
 <AnimatePresence>
 
-{posts.map((post) => {
+{posts.map((post, index) => {
 
 const isNew = newIds.includes(post.id)
 const isExpanded = expandedChart === post.id
+const isTop = index === 0
 
 return (
 
@@ -251,23 +225,58 @@ animate={{ opacity:1, y:0 }}
 transition={{ type:"spring", stiffness:400, damping:30 }}
 style={{
 ...glassCard,
-border: isNew ? "2px solid #22c55e" : "1px solid rgba(255,255,255,0.1)",
-boxShadow: isNew ? "0 0 25px rgba(34,197,94,0.6)" : "none"
+border: isTop
+  ? "2px solid gold"
+  : isNew
+    ? "2px solid #22c55e"
+    : "1px solid rgba(255,255,255,0.1)",
+boxShadow: isTop
+  ? "0 0 40px gold"
+  : isNew
+    ? "0 0 25px rgba(34,197,94,0.6)"
+    : "none"
 }}
 >
 
-{/* 🔥 TOKEN NAME FIXED */}
+{/* 👑 TOP BADGE */}
+{isTop && (
+  <p style={{color:"gold",fontWeight:"bold"}}>
+    👑 #1 TRENDING
+  </p>
+)}
+
+{/* 🔥 TOKEN HEADER */}
+<div style={{display:"flex",alignItems:"center",gap:10}}>
+
+{tokenImages[post.contract] && (
+  <img
+    src={tokenImages[post.contract]}
+    style={{width:30,height:30,borderRadius:"50%"}}
+  />
+)}
+
+<div>
 <p style={{color:"#22c55e",fontWeight:"bold"}}>
-{tokenNames[post.contract] || (post.contract
-  ? post.contract.slice(0,6)+"..."+post.contract.slice(-4)
-  : "Unknown Token")}
+{tokenNames[post.contract] || (
+  post.contract
+    ? post.contract.slice(0,6)+"..."+post.contract.slice(-4)
+    : "Unknown Token"
+)}
 </p>
+
+{tokenPrices[post.contract] && (
+  <p style={{fontSize:12,color:"#9ca3af"}}>
+    💰 ${tokenPrices[post.contract]}
+  </p>
+)}
+</div>
+
+</div>
 
 {/* POST LINK */}
 <a
 href={post.content !== "No post link" ? post.content : "#"}
 target="_blank"
-rel="noopener noreferrer"
 style={{
 fontWeight:"bold",
 wordBreak:"break-all",
@@ -278,16 +287,11 @@ textDecoration:"underline"
 {post.content}
 </a>
 
-{/* CONTRACT CLICKABLE */}
+{/* CONTRACT */}
 <a
 href={`https://dexscreener.com/base/${post.contract}`}
 target="_blank"
-style={{
-fontSize:12,
-color:"#9ca3af",
-display:"block",
-marginTop:5
-}}
+style={{fontSize:12,color:"#9ca3af"}}
 >
 📜 {post.contract}
 </a>
@@ -296,7 +300,6 @@ marginTop:5
 onClick={()=>navigator.clipboard.writeText(post.contract)}
 style={{
 marginTop:5,
-fontSize:12,
 padding:"4px 8px",
 borderRadius:6,
 background:"#334155",
@@ -310,25 +313,10 @@ Copy Contract
 <div style={{ display:"flex", justifyContent:"space-between" }}>
 
 <div>
-
-<p style={{ fontSize:12 }}>
-Boosts
-</p>
-
-<motion.p
-key={post.boost_count}
-initial={{ scale:1.4 }}
-animate={{ scale:1 }}
-transition={{ duration:0.3 }}
-style={{
-fontSize:22,
-fontWeight:"bold",
-color:"#22c55e"
-}}
->
+<p>Boosts</p>
+<p style={{fontSize:22,color:"#22c55e"}}>
 {post.boost_count}
-</motion.p>
-
+</p>
 </div>
 
 <div style={{ display:"flex", gap:10 }}>
@@ -354,20 +342,12 @@ Share
 </div>
 
 {isExpanded && (
-
 <div style={chartContainer}>
-
 <iframe
 src={`https://dexscreener.com/base/${post.contract}?embed=1&theme=dark`}
-style={{
-width:"100%",
-height:"100%",
-border:"none"
-}}
+style={{width:"100%",height:"100%",border:"none"}}
 />
-
 </div>
-
 )}
 
 </motion.div>
@@ -426,23 +406,11 @@ borderRadius:16,
 marginBottom:20
 }
 
-const pumpItem: React.CSSProperties = {
-padding:10,
-borderBottom:"1px solid rgba(255,255,255,0.1)"
-}
-
-const contractText: React.CSSProperties = {
-fontSize:12,
-wordBreak:"break-all"
-}
-
 const chartBtn: React.CSSProperties = {
 padding:"6px 12px",
 borderRadius:8,
 background:"#fbbf24",
-border:"none",
-fontWeight:"bold",
-cursor:"pointer"
+border:"none"
 }
 
 const shareBtn: React.CSSProperties = {
@@ -450,9 +418,7 @@ padding:"6px 12px",
 borderRadius:8,
 background:"#6366f1",
 color:"white",
-border:"none",
-fontWeight:"bold",
-cursor:"pointer"
+border:"none"
 }
 
 const chartContainer: React.CSSProperties = {
