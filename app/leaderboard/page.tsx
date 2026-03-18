@@ -15,9 +15,7 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true)
 
   const loadLeaderboard = async () => {
-
     try {
-
       const res = await fetch("/api/leaderboard")
       const raw = await res.json()
 
@@ -34,15 +32,12 @@ export default function LeaderboardPage() {
       console.error(err)
       setLoading(false)
     }
-
   }
 
   useEffect(() => {
-
     loadLeaderboard()
     const interval = setInterval(loadLeaderboard, 10000)
     return () => clearInterval(interval)
-
   }, [])
 
   const getRankIcon = (rank: number) => {
@@ -61,7 +56,6 @@ export default function LeaderboardPage() {
   }
 
   return (
-
     <main style={mainStyle}>
 
       <h1 style={titleStyle}>
@@ -72,7 +66,7 @@ export default function LeaderboardPage() {
 
         const isTop = i === 0
         const eth = Number(user._sum.amount)
-        const usd = (eth * 3000).toFixed(2) // approx ETH price
+        const usd = (eth * 3000).toFixed(2)
 
         return (
 
@@ -80,12 +74,8 @@ export default function LeaderboardPage() {
             key={user.wallet}
             style={{
               ...card,
-              border: isTop
-                ? "2px solid gold"
-                : "1px solid rgba(255,255,255,0.1)",
-              boxShadow: isTop
-                ? "0 0 40px gold"
-                : "none"
+              border: isTop ? "2px solid gold" : "1px solid rgba(255,255,255,0.1)",
+              boxShadow: isTop ? "0 0 40px gold" : "none"
             }}
           >
 
@@ -108,7 +98,6 @@ export default function LeaderboardPage() {
               Ξ {eth.toFixed(6)} (~${usd})
             </p>
 
-            {/* 🔥 PROGRESS BAR */}
             <div style={progressBg}>
               <div style={{
                 ...progressFill,
@@ -119,7 +108,6 @@ export default function LeaderboardPage() {
           </div>
 
         )
-
       })}
 
       <div style={{ marginTop: 40 }}>
@@ -129,14 +117,12 @@ export default function LeaderboardPage() {
       </div>
 
     </main>
-
   )
-
 }
 
 /* STYLES */
 
-const mainStyle = {
+const mainStyle: React.CSSProperties = {
   minHeight:"100vh",
   background:"#0f172a",
   padding:30,
@@ -144,7 +130,7 @@ const mainStyle = {
   color:"white"
 }
 
-const loadingStyle = {
+const loadingStyle: React.CSSProperties = {
   minHeight:"100vh",
   background:"#0f172a",
   display:"flex",
@@ -153,7 +139,7 @@ const loadingStyle = {
   color:"white"
 }
 
-const titleStyle = {
+const titleStyle: React.CSSProperties = {
   fontSize:32,
   fontWeight:"bold",
   marginBottom:30,
@@ -162,7 +148,7 @@ const titleStyle = {
   color:"transparent"
 }
 
-const card = {
+const card: React.CSSProperties = {
   background:"rgba(255,255,255,0.05)",
   backdropFilter:"blur(10px)",
   padding:20,
@@ -170,30 +156,35 @@ const card = {
   marginBottom:15
 }
 
-const rankStyle = { fontSize:22 }
+const rankStyle: React.CSSProperties = {
+  fontSize:22
+}
 
-const walletStyle = { fontWeight:"bold", fontSize:16 }
+const walletStyle: React.CSSProperties = {
+  fontWeight:"bold",
+  fontSize:16
+}
 
-const ethStyle = {
+const ethStyle: React.CSSProperties = {
   fontWeight:"bold",
   color:"#22c55e",
   marginTop:5
 }
 
-const progressBg = {
+const progressBg: React.CSSProperties = {
   height:6,
   background:"#1e293b",
   borderRadius:10,
   marginTop:10
 }
 
-const progressFill = {
+const progressFill: React.CSSProperties = {
   height:"100%",
   background:"linear-gradient(90deg,#22c55e,#4ade80)"
 }
 
-const backBtn = {
+const backBtn: React.CSSProperties = {
   fontWeight:"bold",
   fontSize:18,
   color:"#22c55e"
-}
+    }
