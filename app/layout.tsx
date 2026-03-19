@@ -52,11 +52,8 @@ export default function RootLayout({
       <body>
 
         <Providers>
-
           <ClientInit />
-
           {children}
-
         </Providers>
 
       </body>
