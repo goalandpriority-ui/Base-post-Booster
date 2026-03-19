@@ -176,9 +176,11 @@ const handleShare = (post: Post) => {
       ? post.content
       : ""
 
-  const appUrl = MINIAPP_URL.startsWith("http")
-    ? MINIAPP_URL
-    : `https://${MINIAPP_URL}`
+  // 🔥 FORCE HTTPS ALWAYS (MAIN FIX)
+  const appUrl =
+    MINIAPP_URL.startsWith("http")
+      ? MINIAPP_URL
+      : `https://${MINIAPP_URL}`
 
   const text = encodeURIComponent(
     `🚀 Trending on Base Post Booster!\n\n` +
