@@ -35,14 +35,33 @@ export default function RootLayout({
     <html lang="en">
       <head>
 
+        {/* ✅ KEEP YOUR MINIAPP CONFIG (NO CHANGE) */}
         <meta
           name="fc:miniapp"
           content={JSON.stringify(embedConfig)}
         />
 
+        {/* ✅ FIXED FRAME METADATA (IMPORTANT) */}
+        <meta property="fc:frame" content="vNext" />
         <meta
-          name="fc:frame"
-          content={JSON.stringify(embedConfig)}
+          property="fc:frame:image"
+          content="https://base-post-booster.vercel.app/og.png"
+        />
+        <meta
+          property="fc:frame:button:1"
+          content="Open App 🚀"
+        />
+        <meta
+          property="fc:frame:button:1:action"
+          content="link"
+        />
+        <meta
+          property="fc:frame:button:1:target"
+          content="https://base-post-booster.vercel.app"
+        />
+        <meta
+          property="fc:frame:post_url"
+          content="https://base-post-booster.vercel.app/api/frame"
         />
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
