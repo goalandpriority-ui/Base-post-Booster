@@ -79,7 +79,16 @@ export default function LeaderboardPage() {
             }}
           >
 
-            {isTop && <p style={{color:"gold"}}>👑 TOP BOOSTER</p>}
+            {/* 👑 TOP USER BADGE */}
+            {isTop && (
+              <p style={{
+                color:"gold",
+                fontWeight:"bold",
+                marginBottom:5
+              }}>
+                👑 TOP BOOSTER
+              </p>
+            )}
 
             <h3 style={rankStyle}>
               {getRankIcon(i)}
@@ -91,19 +100,39 @@ export default function LeaderboardPage() {
             </p>
 
             <p style={{ marginTop: 10 }}>
-              🚀 Boosts: {user._count.wallet}
+              🚀 Boosts: <b>{user._count.wallet}</b>
             </p>
 
             <p style={ethStyle}>
               Ξ {eth.toFixed(6)} (~${usd})
             </p>
 
+            {/* 📊 PROGRESS BAR */}
             <div style={progressBg}>
               <div style={{
                 ...progressFill,
                 width: `${Math.min(user._count.wallet * 10, 100)}%`
               }} />
             </div>
+
+            {/* 🚀 SHARE BUTTON (VIRAL FEATURE) */}
+            <button
+              onClick={() => {
+
+                const text = encodeURIComponent(
+                  `🏆 I'm a Top Booster on Base!\n\n` +
+                  `🚀 Boosts: ${user._count.wallet}\n` +
+                  `💰 ETH Spent: ${eth.toFixed(6)}\n\n` +
+                  `Can you beat me? 😏👇\n` +
+                  `https://base-post-booster.vercel.app`
+                )
+
+                window.open(`https://warpcast.com/~/compose?text=${text}`)
+              }}
+              style={shareBtn}
+            >
+              Share 🚀
+            </button>
 
           </div>
 
@@ -120,7 +149,7 @@ export default function LeaderboardPage() {
   )
 }
 
-/* STYLES */
+/* ---------------- STYLES ---------------- */
 
 const mainStyle: React.CSSProperties = {
   minHeight:"100vh",
@@ -183,8 +212,19 @@ const progressFill: React.CSSProperties = {
   background:"linear-gradient(90deg,#22c55e,#4ade80)"
 }
 
+const shareBtn: React.CSSProperties = {
+  marginTop:12,
+  padding:"8px 14px",
+  borderRadius:10,
+  background:"linear-gradient(90deg,#6366f1,#22c55e)",
+  color:"white",
+  border:"none",
+  fontWeight:"bold",
+  cursor:"pointer"
+}
+
 const backBtn: React.CSSProperties = {
   fontWeight:"bold",
   fontSize:18,
   color:"#22c55e"
-    }
+}
