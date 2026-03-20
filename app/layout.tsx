@@ -1,84 +1,107 @@
-import "./globals.css"
-import type { ReactNode } from "react"
-import type { Metadata } from "next"
-import ClientInit from "./ClientInit"
-import Providers from "./providers"
+"use client"
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://base-post-booster.vercel.app"),
-  title: "Base Post Booster",
-  description: "Boost your Base posts instantly 🚀",
-}
+import { useEffect } from "react"
+import { sdk } from "@farcaster/miniapp-sdk"
 
-export default function RootLayout({
-  children,
-}: {
-  children: ReactNode
-}) {
+export default function ClientInit() {
 
-  const embedConfig = {
-    version: "1",
-    imageUrl: "https://base-post-booster.vercel.app/og.png",
-    button: {
-      title: "Open App 🚀",
-      action: {
-        type: "launch_frame",
-        name: "Base Post Booster",
-        splashImageUrl:
-          "https://base-post-booster.vercel.app/og.png",
-        splashBackgroundColor: "#000000",
-      },
-    },
-  }
+  useEffect(() => {
 
-  return (
-    <html lang="en">
-      <head>
+    const init = async () => {
 
-        <meta
-          name="fc:miniapp"
-          content={JSON.stringify(embedConfig).replace(/"/g, '&quot;')}
-        />
+      try {
 
-        <meta property="fc:frame" content="vNext" />
+        // ✅ Farcaster Miniapp ready
+        await sdk.actions.ready()
 
-        <meta
-          property="fc:frame:image"
-          content="https://base-post-booster.vercel.app/og.png"
-        />
+        // -------------------------------
+        // 🚀 ADD MINI APP PROMPT LOGIC
+        // -------------------------------
 
-        <meta
-          property="fc:frame:button:1"
-          content="Open App 🚀"
-        />
+        const alreadyAdded = localStorage.getItem("miniapp_added")
 
-        <meta
-          property="fc:frame:button:1:action"
-          content="link"
-        />
+        if (!alreadyAdded) {
 
-        <meta
-          property="fc:frame:button:1:target"
-          content="https://base-post-booster.vercel.app"
-        />
+          setTimeout(async () => {
 
-        <meta
-          property="fc:frame:post_url"
-          content="https://base-post-booster.vercel.app/api/frame"
-        />
+            const confirmAdd = confirm(
+              "🚀 Add Base Post Booster?\n\n" +
+              "Get:\n" +
+              "🔥 Boost alerts\n" +
+              "📈 Trending updates\n" +
+              "🏆 Leaderboard access"
+            )
 
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+            if (confirmAdd) {
 
-      </head>
+              localStorage.setItem("miniapp_added", "true")
 
-      <body>
+              console.log("User accepted mini app")
 
-        <Providers>
-          <ClientInit />
-          {children}
-        </Providers>
+              // 🔥 REAL FARCASTER ADD FLOW
+              try {
 
-      </body>
-    </html>
-  )
+                const context = await sdk.context
+
+                if (!context?.client?.added) {
+
+                  await sdk.actions.addMiniApp()
+
+                }
+
+              } catch (e) {
+
+                console.log("Add miniapp failed:", e)
+
+              }
+
+            } else {
+
+              console.log("User declined mini app")
+
+            }
+
+          }, 1500)
+
+        }
+
+        // -------------------------------
+        // 🔥 AUTO CHECK
+        // -------------------------------
+
+        try {
+
+          const context = await sdk.context
+
+          if (!context?.client?.added) {
+
+            console.log("Miniapp not added yet")
+
+          } else {
+
+            console.log("Miniapp already added ✅")
+
+          }
+
+        } catch (e) {
+
+          console.log("Context fetch failed:", e)
+
+        }
+
+        console.log("Miniapp initialized successfully 🚀")
+
+      } catch (error) {
+
+        console.error("Miniapp init failed:", error)
+
+      }
+
+    }
+
+    init()
+
+  }, [])
+
+  return null
 }
