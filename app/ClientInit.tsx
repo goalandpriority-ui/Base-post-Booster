@@ -58,15 +58,16 @@ export default function ClientInit() {
               }
 
               // -------------------------------
-              // 🔔 NOTIFICATION PERMISSION
+              // 🔔 NOTIFICATION PERMISSION (REMOVED INVALID SDK CALL)
               // -------------------------------
               try {
 
-                await sdk.actions.requestNotifications()
+                // ❌ sdk.actions.requestNotifications() not supported
+                console.log("Notification system handled via backend (Neynar)")
 
               } catch (e) {
 
-                console.log("Notification permission failed:", e)
+                console.log("Notification placeholder:", e)
 
               }
 
