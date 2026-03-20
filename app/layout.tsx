@@ -1,107 +1,58 @@
-"use client"
+import "./globals.css"
+import type { ReactNode } from "react"
+import type { Metadata } from "next"
+import ClientInit from "./ClientInit"
+import Providers from "./providers"
 
-import { useEffect } from "react"
-import { sdk } from "@farcaster/miniapp-sdk"
+export const metadata: Metadata = {
+  metadataBase: new URL("https://base-post-booster.vercel.app"),
+  title: "Base Post Booster",
+  description: "Boost your Base posts instantly 🚀",
+}
 
-export default function ClientInit() {
+export default function RootLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
 
-  useEffect(() => {
+  const embedConfig = {
+    version: "1",
+    imageUrl: "https://base-post-booster.vercel.app/og.png",
+    button: {
+      title: "Open App 🚀",
+      action: {
+        type: "launch_frame",
+        name: "Base Post Booster",
+        splashImageUrl:
+          "https://base-post-booster.vercel.app/og.png",
+        splashBackgroundColor: "#000000",
+      },
+    },
+  }
 
-    const init = async () => {
+  return (
+    <html lang="en">
+      <head>
 
-      try {
+        {/* ✅ ONLY MINIAPP META (NO FRAME META) */}
+        <meta
+          name="fc:miniapp"
+          content={JSON.stringify(embedConfig)}
+        />
 
-        // ✅ Farcaster Miniapp ready
-        await sdk.actions.ready()
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        // -------------------------------
-        // 🚀 ADD MINI APP PROMPT LOGIC
-        // -------------------------------
+      </head>
 
-        const alreadyAdded = localStorage.getItem("miniapp_added")
+      <body>
 
-        if (!alreadyAdded) {
+        <Providers>
+          <ClientInit />
+          {children}
+        </Providers>
 
-          setTimeout(async () => {
-
-            const confirmAdd = confirm(
-              "🚀 Add Base Post Booster?\n\n" +
-              "Get:\n" +
-              "🔥 Boost alerts\n" +
-              "📈 Trending updates\n" +
-              "🏆 Leaderboard access"
-            )
-
-            if (confirmAdd) {
-
-              localStorage.setItem("miniapp_added", "true")
-
-              console.log("User accepted mini app")
-
-              // 🔥 REAL FARCASTER ADD FLOW
-              try {
-
-                const context = await sdk.context
-
-                if (!context?.client?.added) {
-
-                  await sdk.actions.addMiniApp()
-
-                }
-
-              } catch (e) {
-
-                console.log("Add miniapp failed:", e)
-
-              }
-
-            } else {
-
-              console.log("User declined mini app")
-
-            }
-
-          }, 1500)
-
-        }
-
-        // -------------------------------
-        // 🔥 AUTO CHECK
-        // -------------------------------
-
-        try {
-
-          const context = await sdk.context
-
-          if (!context?.client?.added) {
-
-            console.log("Miniapp not added yet")
-
-          } else {
-
-            console.log("Miniapp already added ✅")
-
-          }
-
-        } catch (e) {
-
-          console.log("Context fetch failed:", e)
-
-        }
-
-        console.log("Miniapp initialized successfully 🚀")
-
-      } catch (error) {
-
-        console.error("Miniapp init failed:", error)
-
-      }
-
-    }
-
-    init()
-
-  }, [])
-
-  return null
+      </body>
+    </html>
+  )
 }
