@@ -16,6 +16,9 @@ function getHtml(message: string) {
       <meta property="fc:frame" content="vNext" />
       <meta property="fc:frame:image" content="https://base-post-booster.vercel.app/og.png" />
 
+      <!-- 🔥 INPUT (IMPORTANT FOR POST BUTTON) -->
+      <meta property="fc:frame:input:text" content="Enter post link or contract..." />
+
       <!-- BUTTONS -->
       <meta property="fc:frame:button:1" content="🚀 Boost" />
       <meta property="fc:frame:button:1:action" content="post" />
@@ -24,10 +27,11 @@ function getHtml(message: string) {
       <meta property="fc:frame:button:2:action" content="link" />
       <meta property="fc:frame:button:2:target" content="https://base-post-booster.vercel.app" />
 
+      <!-- REQUIRED -->
       <meta property="fc:frame:post_url" content="https://base-post-booster.vercel.app/api/frame" />
 
     </head>
-    <body style="background:black;color:white;display:flex;justify-content:center;align-items:center;height:100vh;">
+    <body style="background:black;color:white;display:flex;justify-content:center;align-items:center;height:100vh;font-size:20px;">
       <div>${message}</div>
     </body>
   </html>
@@ -36,7 +40,7 @@ function getHtml(message: string) {
 
 export async function GET() {
   return new NextResponse(getHtml("Frame Loaded 🚀"), {
-    headers: { "Content-Type": "text/html" },
+    headers: { "Content-Type": "text/html; charset=utf-8" },
   });
 }
 
@@ -48,22 +52,23 @@ export async function POST(req: NextRequest) {
 
     const buttonIndex = body?.untrustedData?.buttonIndex
     const fid = body?.untrustedData?.fid
+    const input = body?.untrustedData?.inputText
 
-    console.log("User:", fid, "Clicked:", buttonIndex)
+    console.log("User:", fid, "Clicked:", buttonIndex, "Input:", input)
 
     if (buttonIndex === 1) {
 
       // 🚀 BOOST CLICKED
       return new NextResponse(
         getHtml("🚀 Boost Triggered! Opening App..."),
-        { headers: { "Content-Type": "text/html" } }
+        { headers: { "Content-Type": "text/html; charset=utf-8" } }
       )
 
     }
 
     return new NextResponse(
       getHtml("Unknown Action"),
-      { headers: { "Content-Type": "text/html" } }
+      { headers: { "Content-Type": "text/html; charset=utf-8" } }
     )
 
   } catch (err) {
@@ -72,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     return new NextResponse(
       getHtml("Error processing frame"),
-      { headers: { "Content-Type": "text/html" } }
+      { headers: { "Content-Type": "text/html; charset=utf-8" } }
     )
   }
 }
