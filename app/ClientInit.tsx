@@ -15,7 +15,7 @@ export default function ClientInit() {
         await sdk.actions.ready()
 
         // -------------------------------
-        // 🚀 ADD MINI APP PROMPT LOGIC (YOUR EXISTING)
+        // 🚀 ADD MINI APP PROMPT LOGIC
         // -------------------------------
 
         const alreadyAdded = localStorage.getItem("miniapp_added")
@@ -38,9 +38,7 @@ export default function ClientInit() {
 
               console.log("User accepted mini app")
 
-              // -------------------------------
               // 🔥 REAL FARCASTER ADD FLOW
-              // -------------------------------
               try {
 
                 const context = await sdk.context
@@ -57,20 +55,6 @@ export default function ClientInit() {
 
               }
 
-              // -------------------------------
-              // 🔔 NOTIFICATION PERMISSION (REMOVED INVALID SDK CALL)
-              // -------------------------------
-              try {
-
-                // ❌ sdk.actions.requestNotifications() not supported
-                console.log("Notification system handled via backend (Neynar)")
-
-              } catch (e) {
-
-                console.log("Notification placeholder:", e)
-
-              }
-
             } else {
 
               console.log("User declined mini app")
@@ -82,7 +66,7 @@ export default function ClientInit() {
         }
 
         // -------------------------------
-        // 🔥 AUTO CHECK (NO POPUP FLOW)
+        // 🔥 AUTO CHECK
         // -------------------------------
 
         try {
@@ -104,15 +88,6 @@ export default function ClientInit() {
           console.log("Context fetch failed:", e)
 
         }
-
-        // -------------------------------
-        // 🔔 FUTURE NOTIFICATION HOOK
-        // -------------------------------
-
-        // Placeholder for:
-        // - boost alerts
-        // - leaderboard alerts
-        // - webhook trigger → Neynar → push
 
         console.log("Miniapp initialized successfully 🚀")
 
