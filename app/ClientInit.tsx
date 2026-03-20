@@ -15,7 +15,7 @@ export default function ClientInit() {
         await sdk.actions.ready()
 
         // -------------------------------
-        // 🚀 ADD MINI APP PROMPT LOGIC
+        // 🚀 ADD MINI APP PROMPT LOGIC (YOUR EXISTING)
         // -------------------------------
 
         const alreadyAdded = localStorage.getItem("miniapp_added")
@@ -38,9 +38,37 @@ export default function ClientInit() {
 
               console.log("User accepted mini app")
 
-              // 🔥 FUTURE (optional):
-              // You can later trigger Farcaster add flow if SDK supports
-              // await sdk.actions.addMiniApp()
+              // -------------------------------
+              // 🔥 REAL FARCASTER ADD FLOW
+              // -------------------------------
+              try {
+
+                const context = await sdk.context
+
+                if (!context?.client?.added) {
+
+                  await sdk.actions.addMiniApp()
+
+                }
+
+              } catch (e) {
+
+                console.log("Add miniapp failed:", e)
+
+              }
+
+              // -------------------------------
+              // 🔔 NOTIFICATION PERMISSION
+              // -------------------------------
+              try {
+
+                await sdk.actions.requestNotifications()
+
+              } catch (e) {
+
+                console.log("Notification permission failed:", e)
+
+              }
 
             } else {
 
@@ -53,13 +81,37 @@ export default function ClientInit() {
         }
 
         // -------------------------------
+        // 🔥 AUTO CHECK (NO POPUP FLOW)
+        // -------------------------------
+
+        try {
+
+          const context = await sdk.context
+
+          if (!context?.client?.added) {
+
+            console.log("Miniapp not added yet")
+
+          } else {
+
+            console.log("Miniapp already added ✅")
+
+          }
+
+        } catch (e) {
+
+          console.log("Context fetch failed:", e)
+
+        }
+
+        // -------------------------------
         // 🔔 FUTURE NOTIFICATION HOOK
         // -------------------------------
 
-        // Placeholder for future:
-        // - boost notifications
-        // - user-specific alerts
-        // - websocket / polling
+        // Placeholder for:
+        // - boost alerts
+        // - leaderboard alerts
+        // - webhook trigger → Neynar → push
 
         console.log("Miniapp initialized successfully 🚀")
 
