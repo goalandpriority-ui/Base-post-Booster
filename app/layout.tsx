@@ -1,3 +1,5 @@
+"use client"
+
 import "./globals.css"
 import type { ReactNode } from "react"
 import type { Metadata } from "next"
@@ -35,30 +37,36 @@ export default function RootLayout({
     <html lang="en">
       <head>
 
-        {/* ✅ KEEP YOUR MINIAPP CONFIG (NO CHANGE) */}
+        {/* 🔥 FIXED MINIAPP METADATA (ENCODED) */}
         <meta
           name="fc:miniapp"
-          content={JSON.stringify(embedConfig)}
+          content={JSON.stringify(embedConfig).replace(/"/g, '&quot;')}
         />
 
-        {/* ✅ FIXED FRAME METADATA (IMPORTANT) */}
+        {/* 🔥 CLEAN FRAME METADATA (NO CONFLICT) */}
         <meta property="fc:frame" content="vNext" />
+
         <meta
           property="fc:frame:image"
           content="https://base-post-booster.vercel.app/og.png"
         />
+
         <meta
           property="fc:frame:button:1"
           content="Open App 🚀"
         />
+
         <meta
           property="fc:frame:button:1:action"
           content="link"
         />
+
         <meta
           property="fc:frame:button:1:target"
           content="https://base-post-booster.vercel.app"
         />
+
+        {/* 🔥 VERY IMPORTANT (KEEP SAME DOMAIN) */}
         <meta
           property="fc:frame:post_url"
           content="https://base-post-booster.vercel.app/api/frame"
